@@ -1,0 +1,11 @@
+{
+  "name": "lux-site",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "live-server --open=Lux.html --port=5173"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}

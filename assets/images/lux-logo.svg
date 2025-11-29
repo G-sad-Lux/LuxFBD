@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="140" height="80" viewBox="0 0 140 80" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="luxGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4c6ef5" />
+      <stop offset="100%" stop-color="#364fc7" />
+    </linearGradient>
+  </defs>
+  <rect x="0.5" y="0.5" width="139" height="79" rx="12" ry="12" fill="#ffffff" stroke="#dce1f4" />
+  <g fill="url(#luxGradient)" transform="translate(40 18)">
+    <path d="M30 0l8 8-8 8-8-8z" opacity="0.9" />
+    <path d="M30 14l8 8-8 8-8-8z" opacity="0.9" />
+    <path d="M16 14l8 8-8 8-8-8z" opacity="0.65" />
+    <path d="M44 14l8 8-8 8-8-8z" opacity="0.65" />
+  </g>
+  <text x="70" y="62" text-anchor="middle" font-family="'Space Grotesk', 'Segoe UI', sans-serif" font-size="16" fill="#475569" letter-spacing="1">
+    UNIVERSIDAD LUX
+  </text>
+</svg>
