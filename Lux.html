@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -467,7 +468,7 @@
             pointer-events: none;
         }
 
-        .course-card > * {
+        .course-card>* {
             position: relative;
             z-index: 1;
         }
@@ -608,8 +609,163 @@
                 gap: 0.75rem;
             }
         }
+
+        /* Chatbot Widget */
+        .chat-widget-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(76, 110, 245, 0.4);
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            font-size: 1.5rem;
+            z-index: 1000;
+            transition: transform 0.2s ease;
+        }
+
+        .chat-widget-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .chat-window {
+            position: fixed;
+            bottom: 6rem;
+            right: 2rem;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            overflow: hidden;
+            transform-origin: bottom right;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            opacity: 0;
+            transform: scale(0.9);
+            pointer-events: none;
+        }
+
+        .chat-window.open {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: all;
+        }
+
+        .chat-header {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h3 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .chat-close {
+            background: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            background: #f8fafc;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .message.bot {
+            background: white;
+            border: 1px solid #e2e8f0;
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+        }
+
+        .message.user {
+            background: var(--primary);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        .chat-input-area {
+            padding: 1rem;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 0.6rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .chat-send {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            width: 40px;
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+        }
+
+        .chat-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .chat-option-btn {
+            background: white;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 0.4rem 0.8rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chat-option-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
     </style>
 </head>
+
 <body>
     <header>
         <div class="app-header">
@@ -625,7 +781,7 @@
                     <li><a href="#login" class="nav-link" data-route="login">Inicio</a></li>
                     <li><a href="#mis-cursos" class="nav-link" data-route="tablero">Tablero</a></li>
                     <li><a href="#mis-cursos" class="nav-link" data-route="mis-cursos">Mis cursos</a></li>
-                    <li><a href="#biblioteca" class="nav-link" data-route="biblioteca">Biblioteca</a></li>
+
                 </ul>
             </nav>
             <div class="header-actions">
@@ -656,7 +812,8 @@
                     </label>
                     <label>
                         Contraseña
-                        <input type="password" name="password" value="Unilux25" autocomplete="current-password" required>
+                        <input type="password" name="password" value="Unilux25" autocomplete="current-password"
+                            required>
                     </label>
                     <div class="login-actions">
                         <button type="submit" class="btn btn-primary">Iniciar sesión</button>
@@ -668,7 +825,8 @@
                     <div class="login-guest">
                         <div>
                             <strong>Visitante</strong>
-                            <p style="margin: 0; color: var(--muted); font-size: 0.9rem;">Explora contenido limitado sin credenciales.</p>
+                            <p style="margin: 0; color: var(--muted); font-size: 0.9rem;">Explora contenido limitado sin
+                                credenciales.</p>
                         </div>
                         <button type="button">Entrar como invitado</button>
                     </div>
@@ -793,43 +951,32 @@
                 </div>
             </section>
 
-            <section id="biblioteca" class="contact">
-                <div>
-                    <h2>Biblioteca digital</h2>
-                    <p>Consulta el catálogo, solicita préstamos y obtén acceso a recursos especializados en un mismo lugar.</p>
-                    <ul>
-                        <li>Catálogo general y tesis</li>
-                        <li>Revistas científicas y bases de datos</li>
-                        <li>Soporte bibliotecario 24/7</li>
-                    </ul>
-                </div>
-                <form>
-                    <label>
-                        Búsqueda rápida
-                        <input type="text" name="titulo" placeholder="Título, autor o palabra clave" required>
-                    </label>
-                    <label>
-                        Tipo de recurso
-                        <select name="tipo" required>
-                            <option>E-book</option>
-                            <option>Artículo</option>
-                            <option>Tesis</option>
-                            <option>Video</option>
-                        </select>
-                    </label>
-                    <label>
-                        Mensaje
-                        <textarea name="mensaje" placeholder="Describe la consulta o solicitud" required></textarea>
-                    </label>
-                    <button type="submit" class="btn btn-primary">Enviar solicitud</button>
-                </form>
-            </section>
+
         </div>
     </main>
 
     <footer>
         © <span id="year"></span> Lux Studio. Todos los derechos reservados.
     </footer>
+
+    <!-- Chatbot Widget -->
+    <button id="chat-trigger" class="chat-widget-btn" aria-label="Abrir chat de soporte">
+        💬
+    </button>
+
+    <div id="chat-window" class="chat-window">
+        <div class="chat-header">
+            <h3>Soporte Lux</h3>
+            <button id="chat-close" class="chat-close">×</button>
+        </div>
+        <div id="chat-messages" class="chat-messages">
+            <!-- Messages will appear here -->
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Escribe un mensaje..." disabled>
+            <button id="chat-send" class="chat-send" disabled>➤</button>
+        </div>
+    </div>
 
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
@@ -894,7 +1041,158 @@
             });
         }
 
+        // Chatbot Logic
+        const chatTrigger = document.getElementById('chat-trigger');
+        const chatWindow = document.getElementById('chat-window');
+        const chatClose = document.getElementById('chat-close');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const chatSend = document.getElementById('chat-send');
+
+        let chatState = {
+            step: 'INIT', // INIT, TITLE, CATEGORY, DETAILS, PRIORITY, DONE
+            ticket: {}
+        };
+
+        function toggleChat() {
+            const isOpen = chatWindow.classList.contains('open');
+            if (isOpen) {
+                chatWindow.classList.remove('open');
+            } else {
+                chatWindow.classList.add('open');
+                if (chatMessages.children.length === 0) {
+                    initChat();
+                }
+            }
+        }
+
+        chatTrigger.addEventListener('click', toggleChat);
+        chatClose.addEventListener('click', toggleChat);
+
+        function addMessage(text, sender, options = []) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${sender}`;
+            msgDiv.textContent = text;
+            chatMessages.appendChild(msgDiv);
+
+            if (options.length > 0) {
+                const optionsDiv = document.createElement('div');
+                optionsDiv.className = 'chat-options';
+                options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = 'chat-option-btn';
+                    btn.textContent = opt.label;
+                    btn.onclick = () => handleInput(opt.value);
+                    optionsDiv.appendChild(btn);
+                });
+                chatMessages.appendChild(optionsDiv);
+            }
+
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function initChat() {
+            chatState.step = 'GREETING';
+            addMessage('¡Hola! Soy el asistente virtual de Lux. ¿En qué puedo ayudarte hoy?', 'bot', [
+                { label: 'Reportar un problema', value: 'report' },
+                { label: 'Consultar estado de ticket', value: 'status' }
+            ]);
+        }
+
+        function handleInput(text) {
+            if (!text) return;
+
+            // Add user message
+            addMessage(text, 'user');
+            chatInput.value = '';
+
+            // Process state
+            setTimeout(() => {
+                processChatStep(text);
+            }, 500);
+        }
+
+        function processChatStep(input) {
+            switch (chatState.step) {
+                case 'GREETING':
+                    if (input === 'report') {
+                        chatState.step = 'TITLE';
+                        addMessage('Entendido. Para comenzar, por favor escribe un título breve para tu incidencia.', 'bot');
+                        enableInput(true);
+                    } else if (input === 'status') {
+                        addMessage('Esta funcionalidad estará disponible pronto.', 'bot');
+                        resetChat();
+                    }
+                    break;
+
+                case 'TITLE':
+                    chatState.ticket.title = input;
+                    chatState.step = 'CATEGORY';
+                    enableInput(false);
+                    addMessage('Gracias. ¿A qué categoría pertenece el problema?', 'bot', [
+                        { label: 'Falla de plataforma', value: 'plataforma' },
+                        { label: 'Error de calificación', value: 'calificacion' },
+                        { label: 'Problema de acceso', value: 'acceso' },
+                        { label: 'Otro', value: 'otro' }
+                    ]);
+                    break;
+
+                case 'CATEGORY':
+                    chatState.ticket.category = input;
+                    chatState.step = 'DETAILS';
+                    addMessage('Por favor describe los detalles del problema.', 'bot');
+                    enableInput(true);
+                    break;
+
+                case 'DETAILS':
+                    chatState.ticket.details = input;
+                    chatState.step = 'PRIORITY';
+                    enableInput(false);
+                    addMessage('¿Qué nivel de prioridad consideras que tiene?', 'bot', [
+                        { label: 'Baja', value: 'baja' },
+                        { label: 'Media', value: 'media' },
+                        { label: 'Alta', value: 'alta' }
+                    ]);
+                    break;
+
+                case 'PRIORITY':
+                    chatState.ticket.priority = input;
+                    chatState.step = 'DONE';
+                    finishTicket();
+                    break;
+            }
+        }
+
+        function enableInput(enable) {
+            chatInput.disabled = !enable;
+            chatSend.disabled = !enable;
+            if (enable) chatInput.focus();
+        }
+
+        function finishTicket() {
+            const ticketId = 'TKT-' + Math.floor(Math.random() * 10000);
+            console.log('Ticket Created:', { ...chatState.ticket, id: ticketId });
+            addMessage(`¡Listo! Tu ticket ha sido creado con el ID ${ticketId}. Un agente lo revisará pronto.`, 'bot');
+            addMessage('¿Necesitas algo más?', 'bot', [
+                { label: 'Crear otro ticket', value: 'report' },
+                { label: 'Salir', value: 'exit' }
+            ]);
+            chatState.step = 'GREETING'; // Reset for next loop if needed
+        }
+
+        function resetChat() {
+            setTimeout(() => {
+                initChat();
+            }, 2000);
+        }
+
+        chatSend.addEventListener('click', () => handleInput(chatInput.value));
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleInput(chatInput.value);
+        });
+
         setActiveNav('login');
     </script>
 </body>
+
 </html>
