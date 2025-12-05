@@ -978,6 +978,9 @@
         </div>
     </div>
 
+    <!-- Supabase Integration -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
 
@@ -988,6 +991,11 @@
         const navLinks = document.querySelectorAll('.nav-link');
         const VALID_USER = '017497';
         const VALID_PASSWORD = 'Unilux25';
+
+        // Initialize Supabase
+        const supabase = window.supabaseConfig
+            ? window.supabase.createClient(window.supabaseConfig.url, window.supabaseConfig.key)
+            : null;
 
         const STUDENT_PROFILE = {
             nombre: 'Ana Torres',
@@ -1169,15 +1177,42 @@
             if (enable) chatInput.focus();
         }
 
-        function finishTicket() {
-            const ticketId = 'TKT-' + Math.floor(Math.random() * 10000);
-            console.log('Ticket Created:', { ...chatState.ticket, id: ticketId });
-            addMessage(`¡Listo! Tu ticket ha sido creado con el ID ${ticketId}. Un agente lo revisará pronto.`, 'bot');
+        async function finishTicket() {
+            addMessage('Procesando tu solicitud...', 'bot');
+
+            try {
+                if (!supabase) throw new Error('Supabase no configurado');
+
+                const { data, error } = await supabase
+                    .from('tickets')
+                    .insert([
+                        {
+                            title: chatState.ticket.title,
+                            category: chatState.ticket.category,
+                            details: chatState.ticket.details,
+                            priority: chatState.ticket.priority,
+                            user_id: VALID_USER, // Usando ID de usuario hardcodeado por ahora
+                            status: 'open'
+                        }
+                    ])
+                    .select();
+
+                if (error) throw error;
+
+                const ticketId = data[0].id;
+                console.log('Ticket Created:', data[0]);
+                addMessage(`¡Listo! Tu ticket ha sido creado en la base de datos con el ID #${ticketId}. Un agente lo revisará pronto.`, 'bot');
+            } catch (err) {
+                console.error('Error creating ticket:', err);
+                const localId = 'ERR-' + Math.floor(Math.random() * 1000);
+                addMessage(`Hubo un error conectando con la base de datos. Referencia local: ${localId}. Por favor verifica tu conexión.`, 'bot');
+            }
+
             addMessage('¿Necesitas algo más?', 'bot', [
                 { label: 'Crear otro ticket', value: 'report' },
                 { label: 'Salir', value: 'exit' }
             ]);
-            chatState.step = 'GREETING'; // Reset for next loop if needed
+            chatState.step = 'GREETING';
         }
 
         function resetChat() {
