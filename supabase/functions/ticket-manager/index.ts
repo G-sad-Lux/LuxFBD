@@ -189,9 +189,15 @@ async function getTicketDetails(req: Request, url: URL, supabase: any, user: any
 
     if (tErr) throw tErr
 
+    // Fetch History (Using Service Role to ensure visibility)
     let historyData = []
     try {
-        const { data: hist } = await supabase
+        const supabaseAdmin = createClient(
+            Deno.env.get('SUPABASE_URL') ?? '',
+            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+        )
+
+        const { data: hist } = await supabaseAdmin
             .from('historial')
             .select(`*, autor:autor_id(nombre, apellido)`)
             .eq('ticket_id', ticketId)
@@ -210,10 +216,6 @@ async function getTicketDetails(req: Request, url: URL, supabase: any, user: any
         if (att) attachments = att
     } catch (e) { console.warn('Attachment fetch error:', e) }
 
-    return new Response(JSON.stringify({ ticket, history: historyData, attachments }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-    })
     return new Response(JSON.stringify({ ticket, history: historyData, attachments }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
