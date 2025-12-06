@@ -713,6 +713,8 @@
             padding: 30px;
             position: relative;
             box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+            color: #efefef;
+            /* Better default text color */
         }
 
         .detail-grid {
@@ -723,15 +725,19 @@
         }
 
         .detail-item label {
-            color: #888;
+            color: #aaa;
+            /* Lighter grey for labels */
             font-size: 0.9em;
             display: block;
             margin-bottom: 5px;
+            font-weight: 500;
         }
 
         .detail-item span {
             font-size: 1.1em;
-            color: white;
+            color: #fff;
+            /* White for values */
+            font-weight: 600;
         }
 
         .timeline {
@@ -762,10 +768,17 @@
         }
 
         .timeline-content {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            /* Slightly lighter background */
+            padding: 15px;
             border-radius: 8px;
             margin-top: 5px;
+            border: 1px solid #333;
+            color: #ddd;
+        }
+
+        .timeline-content strong {
+            color: var(--gold);
         }
 
         .chat-widget-btn[hidden] {
@@ -1137,7 +1150,6 @@
                             </tr>
                         </thead>
                         <tbody id="ticket-list-body">
-                            <!-- Loaded via JS -->
                         </tbody>
                     </table>
                 </div>
@@ -1151,8 +1163,6 @@
                     </div>
                 </div>
             </section>
-
-
         </div>
     </main>
 
@@ -1182,6 +1192,16 @@
         </div>
     </div>
 
+    <!-- Image Viewer Modal (Lightbox) -->
+    <div id="image-viewer-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10000; align-items:center; justify-content:center; flex-direction:column;">
+        <button onclick="closeImageViewer()"
+            style="position:absolute; top:20px; right:30px; background:none; border:none; color:white; font-size:40px; cursor:pointer;">×</button>
+        <img id="image-viewer-img" src=""
+            style="max-width:90%; max-height:85%; border-radius:8px; box-shadow:0 0 20px rgba(0,0,0,0.5);">
+        <p style="color:#aaa; margin-top:10px;">Clic fuera de la imagen para cerrar</p>
+    </div>
+
     <!-- Supabase Integration -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
@@ -1193,14 +1213,6 @@
         const loginSection = document.getElementById('login');
         const studentDashboard = document.getElementById('student-dashboard');
         const navLinks = document.querySelectorAll('.nav-link');
-
-        const VALID_USER = '017497';
-        const VALID_PASSWORD = 'Unilux25';
-
-        const STUDENT_PROFILE = {
-            nombre: 'Ana Torres',
-            rol: 'estudiante',
-        };
 
         // Initialize Supabase (Safe Mode)
         let supabase = null;
@@ -1218,13 +1230,8 @@
         // --- Edge Function Integration: Catalog Service ---
         async function loadCatalogs() {
             try {
-                // Invocamos la Edge Function 'catalog-service'
-                // Nota: Usamos fetch directo para controlar URL, ya que invoke usa POST por defecto y ruta base
                 const { data: { session } } = await supabase.auth.getSession();
                 const token = session?.access_token;
-
-                // Url base de funciones (hardcoded o config)
-                // Usamos la URL del proyecto si está en window.supabaseConfig o la construimos
                 const projectRef = 'nsrduorngzyoiwpbkgku';
                 const funcUrl = `https://${projectRef}.supabase.co/functions/v1/catalog-service`;
 
@@ -1240,7 +1247,6 @@
                 if (data.categorias) {
                     CATEGORY_MAP = {}; // Reset
                     data.categorias.forEach(c => {
-                        // Normalize name to key (e.g. "Sitio Web" -> "sitio_web")
                         const key = c.nombre.toLowerCase().replace(/\s+/g, '_').replace(/[^\w]/g, '');
                         CATEGORY_MAP[key] = c.catalogo_id;
                     });
@@ -1253,16 +1259,12 @@
                     });
                 }
 
-                // Handle Areas
                 if (data.areas && data.areas.length > 0) {
-                    // Try to find 'Soporte TI' or similar
                     const soporte = data.areas.find(a => a.nombre.toLowerCase().includes('soporte'));
                     if (soporte) {
                         DEFAULT_AREA_ID = soporte.catalogo_id;
-                        console.log('Area detected (Soporte):', soporte.nombre, DEFAULT_AREA_ID);
                     } else {
-                        DEFAULT_AREA_ID = data.areas[0].catalogo_id; // Use first available
-                        console.log('Area fallback to first available:', data.areas[0].nombre, DEFAULT_AREA_ID);
+                        DEFAULT_AREA_ID = data.areas[0].catalogo_id;
                     }
                 }
 
@@ -1273,9 +1275,7 @@
             }
         }
 
-        // Cargar catálogos al inicio
         loadCatalogs();
-
 
         function setActiveNav(route) {
             navLinks.forEach((link) => {
@@ -1285,19 +1285,27 @@
         }
 
         function showStudentView() {
-            if (loginSection) {
-                loginSection.classList.add('hidden');
-            }
-
+            if (loginSection) loginSection.classList.add('hidden');
             if (studentDashboard) {
                 studentDashboard.removeAttribute('hidden');
                 studentDashboard.scrollIntoView({ behavior: 'smooth' });
             }
-
-            // Show chat widget
             if (chatTrigger) chatTrigger.removeAttribute('hidden');
-
             setActiveNav('mis-cursos');
+        }
+
+        function showAdminView() {
+            if (loginSection) loginSection.classList.add('hidden');
+            if (studentDashboard) {
+                studentDashboard.removeAttribute('hidden');
+                document.querySelectorAll('.view-section').forEach(el => el.style.display = 'none');
+                document.getElementById('support-view').style.display = 'block';
+                document.getElementById('mis-cursos').style.display = 'none';
+            }
+            if (chatTrigger) chatTrigger.setAttribute('hidden', '');
+
+            setActiveNav('soporte-luxia');
+            loadTickets(); // Load all tickets
         }
 
         if (loginForm) {
@@ -1308,7 +1316,6 @@
                 const password = formData.get('password');
 
                 try {
-                    // --- SUPABASE AUTH INTEGRATION ---
                     const { data, error } = await supabase.auth.signInWithPassword({
                         email: email,
                         password: password
@@ -1316,22 +1323,33 @@
 
                     if (error) throw error;
 
-                    // Success
                     loginAlert.textContent = 'Acceso concedido.';
                     loginAlert.className = 'login-alert success';
                     loginAlert.hidden = false;
 
-                    // Update User Context
-                    // Assuming data.user contains valid user info
                     chatState.user = {
                         id: data.user.id,
                         email: data.user.email
                     };
 
-                    // Proceed to Dashboard
-                    showStudentView();
+                    const { data: profile } = await supabase
+                        .from('usuario')
+                        .select('tipo_usuario, nombre, apellido, usuario_id')
+                        .eq('auth_uid', data.user.id)
+                        .single();
 
-                    console.log('User Logged In:', data.user);
+                    chatState.user.role = profile ? profile.tipo_usuario : 'estudiante';
+                    chatState.user.profileId = profile ? profile.usuario_id : null;
+                    chatState.user.fullName = profile ? `${profile.nombre} ${profile.apellido}` : 'Usuario';
+
+                    if (chatState.user.role === 'Administrativo' || chatState.user.role === 'Administrador' || chatState.user.role === 'Soporte') {
+                        console.log('Admin login detected');
+                        showAdminView();
+                    } else {
+                        showStudentView();
+                    }
+
+                    console.log('User Logged In:', data.user, profile);
 
                 } catch (err) {
                     console.error('Login Error:', err.message);
@@ -1356,12 +1374,10 @@
         let chatState = {
             step: 'INIT',
             ticket: {},
-            history: [] // To track prev steps logic if needed, but simple mapping works too
+            history: []
         };
 
-        // Initialize Maps (Will be populated by Edge Function)
         let CATEGORY_MAP = {};
-        // Fallback static maps in case service fails or loads slow
         const STATIC_CATEGORY_MAP = {
             'finanzas': 33, 'sitio_web': 34, 'servo_web': 35, 'materias': 36, 'bloqueos': 37
         };
@@ -1371,12 +1387,7 @@
             'baja': 8, 'media': 7, 'alta': 6
         };
 
-        // Area ID Handling (Dynamic)
-        let DEFAULT_AREA_ID = 38; // Fallback hardcoded if service fails
-
-        // Fallback User ID
-        const FALLBACK_USER_ID = 16;
-
+        let DEFAULT_AREA_ID = 38;
         const STEPS_FLOW = ['GREETING', 'TITLE', 'CATEGORY', 'DETAILS', 'ATTACHMENTS', 'PRIORITY', 'NOTIFY', 'DONE'];
 
         function toggleChat() {
@@ -1393,7 +1404,6 @@
 
         chatTrigger.addEventListener('click', toggleChat);
         chatClose.addEventListener('click', toggleChat);
-
         chatBack.addEventListener('click', goBack);
 
         function goBack() {
@@ -1406,7 +1416,6 @@
         }
 
         function updateUIForStep(step) {
-            // Show/Hide Back Button
             if (step === 'GREETING' || step === 'DONE') {
                 chatBack.style.display = 'none';
             } else {
@@ -1443,14 +1452,11 @@
 
         function showStepPrompt(step) {
             updateUIForStep(step);
-
-            // Clear inputs just in case
             chatInput.value = '';
 
             switch (step) {
                 case 'GREETING':
                     enableInput(false);
-                    // Reset ticket
                     chatState.ticket = {};
                     addMessage('¡Hola! Soy Lux-IA. ¿En qué puedo ayudarte hoy?', 'bot', [
                         { label: 'Reportar un problema', value: 'report' },
@@ -1498,16 +1504,12 @@
                         { label: 'Ninguno', value: 'none' }
                     ]);
                     break;
-                case 'DONE':
-                    // This is handled by finishTicket mainly
-                    break;
             }
         }
 
         function handleInput(text, isFile = false) {
             if (!text && !isFile) return;
 
-            // Validations
             if (chatState.step === 'TITLE' && text.length < 5) {
                 addMessage('El título es muy corto (mínimo 5 letras).', 'bot');
                 return;
@@ -1517,7 +1519,6 @@
                 return;
             }
 
-            // Add user message
             if (isFile) {
                 addMessage(`📎 Archivo adjunto: ${text}`, 'user');
             } else {
@@ -1525,7 +1526,6 @@
                 chatInput.value = '';
             }
 
-            // Process state
             setTimeout(() => {
                 const nextStep = getNextStep(chatState.step, text, isFile);
                 if (nextStep) {
@@ -1533,10 +1533,8 @@
                     if (nextStep === 'DONE') {
                         finishTicket();
                     } else if (nextStep === 'ATTACH_ACTION') {
-                        // Interactive intermediate step for file
                         chatFile.click();
                         addMessage('Selecciona tu archivo...', 'bot');
-                        // Stay in ATTACHMENTS technically but waiting for file
                         chatState.step = 'ATTACHMENTS';
                     } else if (nextStep === 'STATUS_CHECK') {
                         addMessage('Esta funcionalidad estará disponible pronto.', 'bot');
@@ -1570,7 +1568,7 @@
                         chatState.ticket.evidence = input;
                         return 'PRIORITY';
                     }
-                    return 'PRIORITY'; // Fallback
+                    return 'PRIORITY';
                 case 'PRIORITY':
                     chatState.ticket.priority = input;
                     return 'NOTIFY';
@@ -1591,59 +1589,50 @@
 
         async function finishTicket() {
             addMessage('Procesando tu solicitud...', 'bot');
-            updateUIForStep('DONE'); // Hide back button
+            updateUIForStep('DONE');
 
             try {
                 if (!supabase) throw new Error('Supabase no configurado');
 
-                // Prepare payload with correct DB columns (Spanish)
-                // Note: DB uses 'categoria_id' and 'prioridad_id' in ticket table, mapping to 'catalogo' IDs.
-                const catId = CATEGORY_MAP[chatState.ticket.category] || 37; // Default to 'Bloqueos' if missing
-                const prioId = PRIORITY_MAP[chatState.ticket.priority] || 8; // Default to 'Baja'
+                const { data: { session } } = await supabase.auth.getSession();
+                const token = session?.access_token;
+                const projectRef = 'nsrduorngzyoiwpbkgku';
+                const funcUrl = `https://${projectRef}.supabase.co/functions/v1/ticket-manager/create`;
 
-                const payload = {
+                const load = {
                     titulo: chatState.ticket.title,
-                    categoria_id: catId,
+                    categoria_id: CATEGORY_MAP[chatState.ticket.category] || 37,
                     detalles: chatState.ticket.details,
-                    prioridad_id: prioId,
-                    reportador_id: (chatState.user && chatState.user.id) ? undefined : FALLBACK_USER_ID, // If auth, let DB handle or pass auth_uid? Assuming DB expects integer ID from 'usuario' table, we need to map Auth UID to Usuario ID. 
-                    // WAIT: 'reportador_id' is bigint/int in 'ticket', likely referencing 'usuario(usuario_id)'.
-                    // Our chatState.user.id is UUID. We can't put UUID into bigint column.
-                    // We must fetch the numeric ID for the logged in user or use FALLBACK.
-                    // For now, let's use the fetched numeric ID if we can, or FALLBACK.
-                    // But we don't have the numeric ID in chatState.user yet (only UUID).
-                    // Let's stick to FALLBACK_USER_ID for reliability until we fetch numeric ID on login.
-                    reportador_id: FALLBACK_USER_ID,
-                    estado_id: 1, // 'Abierto'
-                    area_notificada_id: DEFAULT_AREA_ID // Dynamic from Catalog Service
+                    prioridad_id: PRIORITY_MAP[chatState.ticket.priority] || 8,
+                    area_notificada_id: DEFAULT_AREA_ID,
+                    adjunto: chatState.ticket.attachment || null
                 };
 
-                // Temporary log for debug
-                console.log('Sending payload:', payload);
+                const resp = await fetch(funcUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(load)
+                });
 
-                const { data, error } = await supabase
-                    .from('ticket') // Singular table name
-                    .insert([payload])
-                    .select();
+                if (!resp.ok) {
+                    const errData = await resp.json().catch(() => ({}));
+                    throw new Error(errData.error || 'Error al crear ticket en servidor');
+                }
 
-                if (error) throw error;
+                const data = await resp.json();
+                const ticketId = data.ticket_id;
 
-                const ticketId = data[0].ticket_id; // Correct ID column name
-                console.log('Ticket Created:', data[0]);
-
-                // Enhanced Feedback
                 addMessage(`✅ ¡Ticket creado con éxito!`, 'bot');
                 addMessage(`ID de seguimiento: #${ticketId}`, 'bot');
                 addMessage(`Hemos notificado a soporte y recibirás una actualización pronto.`, 'bot');
 
             } catch (err) {
                 console.error('Error creating ticket:', err);
-                const localId = 'ERR-' + Math.floor(Math.random() * 1000);
-
-                // Enhanced Error Feedback
-                addMessage(`❌ No pudimos conectar con el servidor.`, 'bot');
-                addMessage(`Detalle: ${err.message || 'Error desconocido'}`, 'bot');
-                addMessage(`Tu reporte ha sido guardado localmente con referencia: ${localId}. Intenta reportarlo nuevamente más tarde.`, 'bot');
+                addMessage(`❌ Error al conectar.`, 'bot');
+                addMessage(`Detalle: ${err.message}`, 'bot');
             }
 
             addMessage('¿Necesitas algo más?', 'bot', [
@@ -1651,9 +1640,8 @@
                 { label: 'Salir', value: 'exit' }
             ]);
 
-            // Wait for user to pick, if 'report' -> GREETING/TITLE
             setTimeout(() => {
-                chatState.step = 'GREETING'; // Reset state for next interaction
+                chatState.step = 'GREETING';
             }, 1000);
         }
 
@@ -1668,11 +1656,42 @@
             if (e.key === 'Enter') handleInput(chatInput.value);
         });
 
-        // File attachment logic
         chatAttach.addEventListener('click', () => chatFile.click());
-        chatFile.addEventListener('change', (e) => {
+        chatFile.addEventListener('change', async (e) => {
             if (e.target.files.length > 0) {
-                handleInput(e.target.files[0].name, true);
+                const file = e.target.files[0];
+                addMessage(`Subiendo ${file.name}...`, 'bot');
+
+                try {
+                    if (!supabase) throw new Error('Supabase no disponible');
+
+                    const userId = chatState.user ? chatState.user.id : 'anon';
+                    const cleanName = file.name.replace(/[^\w.-]/g, '');
+                    const filePath = `${userId}/${Date.now()}_${cleanName}`;
+
+                    const { data, error } = await supabase.storage
+                        .from('tickets')
+                        .upload(filePath, file);
+
+                    if (error) throw error;
+
+                    const { data: { publicUrl } } = supabase.storage
+                        .from('tickets')
+                        .getPublicUrl(filePath);
+
+                    chatState.ticket.attachment = {
+                        nombre_archivo: file.name,
+                        ruta_archivo_url: publicUrl,
+                        size_bytes: file.size,
+                        mime_type: file.type
+                    };
+
+                    handleInput(`📎 Archivo adjuntado: ${file.name}`, true);
+
+                } catch (err) {
+                    console.error('Upload error:', err);
+                    addMessage('Error al subir archivo. Intenta de nuevo.', 'bot');
+                }
             }
         });
 
@@ -1723,97 +1742,196 @@
                     const date = new Date(t.fecha_creacion).toLocaleDateString();
                     // Optional safety check on related objects
                     const statusName = t.estado ? t.estado.nombre : 'Desconocido';
-                    const statusClass = statusName === 'Abierto' ? 'status-open' : 'status-closed';
-                    const prioName = t.prioridad ? t.prioridad.nombre : 'Normal';
-                    const assigned = t.asignado ? `${t.asignado.nombre} ${t.asignado.apellido}` : 'Sin asignar';
+                    const prioName = t.prioridad ? t.prioridad.nombre : '-';
+                    // Show "Pendiente" if not assigned
+                    const assignedName = t.asignado ? `${t.asignado.nombre} ${t.asignado.apellido}` : 'Pendiente';
+                    const statusClass = statusName === 'Abierto' ? 'status-open' : (statusName === 'Cerrado' ? 'status-closed' : 'status-badge');
 
                     row.innerHTML = `
                         <td>#${t.ticket_id}</td>
                         <td>${t.titulo}</td>
                         <td><span class="status-badge ${statusClass}">${statusName}</span></td>
                         <td>${prioName}</td>
-                        <td>${assigned}</td>
+                        <td>${assignedName}</td>
                         <td>${date}</td>
                     `;
                     row.onclick = () => openTicketDetail(t.ticket_id);
                     tbody.appendChild(row);
                 });
-            } catch (e) {
-                console.error(e);
+
+            } catch (error) {
+                console.error(error);
                 tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red">Error al cargar tickets (o faltan tablas relacionadas).</td></tr>';
             }
         }
 
-        async function openTicketDetail(id) {
+        let STAFF_LIST = [];
+        async function loadStaffList() {
+            if (STAFF_LIST.length > 0) return;
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                const projectRef = 'nsrduorngzyoiwpbkgku';
+                const resp = await fetch(`https://${projectRef}.supabase.co/functions/v1/ticket-manager/staff`, {
+                    headers: { 'Authorization': `Bearer ${session?.access_token}` }
+                });
+                if (resp.ok) STAFF_LIST = await resp.json();
+            } catch (e) { console.error('Failed to load staff list', e); }
+        }
+
+        async function openTicketDetail(ticketId) {
             const modal = document.getElementById('ticket-detail-modal');
             const content = document.getElementById('ticket-detail-content');
+            content.innerHTML = '<p style="color:white;">Cargando detalles...</p>';
             modal.classList.add('open');
-            content.innerHTML = '<p style="text-align:center">Cargando detalles...</p>';
+
+            // Load staff list in background only if admin/support
+            if (chatState.user.role !== 'estudiante') {
+                await loadStaffList();
+            }
 
             try {
                 const { data: { session } } = await supabase.auth.getSession();
-                const token = session?.access_token;
                 const projectRef = 'nsrduorngzyoiwpbkgku';
-
-                const resp = await fetch(`https://${projectRef}.supabase.co/functions/v1/ticket-manager/details?id=${id}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                const resp = await fetch(`https://${projectRef}.supabase.co/functions/v1/ticket-manager/details?id=${ticketId}`, {
+                    headers: { 'Authorization': `Bearer ${session?.access_token}` }
                 });
 
                 if (!resp.ok) throw new Error('Error loading details');
-                const { ticket, history } = await resp.json();
+                const data = await resp.json();
+                const ticket = data.ticket;
+                const history = data.history || [];
+                const attachments = data.attachments || [];
 
-                const createdBy = ticket.reportador ? `${ticket.reportador.nombre} ${ticket.reportador.apellido} (${ticket.reportador.tipo_usuario})` : 'Desconocido';
-                const assignedTo = ticket.asignado ? `${ticket.asignado.nombre} ${ticket.asignado.apellido}` : 'Sin Asignar';
-                const eta = ticket.eta_estimada ? new Date(ticket.eta_estimada).toLocaleString() : 'Pendiente';
-                const area = ticket.area ? ticket.area.nombre : 'General';
-                const statusName = ticket.estado ? ticket.estado.nombre : 'Desconocido';
-                const prioName = ticket.prioridad ? ticket.prioridad.nombre : 'Normal';
+                const statusName = ticket.estado ? ticket.estado.nombre : 'Unknown';
+                const prioName = ticket.prioridad ? ticket.prioridad.nombre : 'Unknown';
+                const areaName = ticket.area ? ticket.area.nombre : 'General';
+                const reporterName = ticket.reportador ? `${ticket.reportador.nombre} ${ticket.reportador.apellido} (${ticket.reportador.tipo_usuario})` : 'Unknown';
+                const assignedName = ticket.asignado ? `${ticket.asignado.nombre} ${ticket.asignado.apellido}` : 'Sin Asignar';
 
-                let historyHtml = '';
-                if (history && history.length > 0) {
-                    historyHtml = history.map(h => `
-                        <div class="timeline-item">
-                            <div class="timeline-date">${new Date(h.fecha_cambio).toLocaleString()}</div>
-                            <div class="timeline-content">
-                                <strong>${h.autor?.nombre || 'Sistema'}:</strong> ${h.cambio} <br/>
-                                <small>${h.valor_anterior || ''} ➔ ${h.valor_nuevo || ''}</small>
+                // Build Actions
+                let actionHTML = '';
+                const canManage = ['Administrativo', 'Maestro', 'Soporte', 'Administrador'].includes(chatState.user.role);
+
+                if (canManage) {
+                    // Dropdown for Assignment
+                    let staffOptions = '<option value="">-- Sin Asignar --</option>';
+                    STAFF_LIST.forEach(s => {
+                        const selected = (ticket.maestro_notificado_id === s.usuario_id) ? 'selected' : '';
+                        staffOptions += `<option value="${s.usuario_id}" ${selected}>${s.nombre} ${s.apellido} (${s.tipo_usuario})</option>`;
+                    });
+
+                    actionHTML = `
+                        <div style="margin-bottom: 20px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
+                            <label style="color: var(--gold); display:block; margin-bottom:5px;">Asignar Ticket a:</label>
+                            <div style="display:flex; gap:10px;">
+                                <select id="assign-select" style="flex:1; padding:8px; border-radius:4px; border:1px solid #444; background:#222; color:white;">
+                                    ${staffOptions}
+                                </select>
+                                <button onclick="assignTicketFromSelect(${ticket.ticket_id})" style="background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">Actualizar</button>
                             </div>
                         </div>
-                    `).join('');
-                } else {
-                    historyHtml = '<p style="color:#888; padding-left:20px;">No hay historial de cambios.</p>';
+                    `;
+                }
+
+                // Render Attachments
+                let attHTML = '';
+                if (attachments.length > 0) {
+                    attHTML = '<div class="detail-item" style="grid-column: 1 / -1; margin-top: 10px;"><label>Evidencias Adjuntas</label><div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:5px;">';
+                    attachments.forEach(att => {
+                        if (att.mime_type && att.mime_type.startsWith('image/')) {
+                            // Use onclick to open lightbox instead of new tab
+                            attHTML += `<div onclick="openImageViewer('${att.ruta_archivo_url}')" style="cursor:pointer; position:relative; group:hover;"><img src="${att.ruta_archivo_url}" style="width:100px; height:100px; object-fit:cover; border-radius:8px; border:1px solid #555; transition:transform 0.2s;"><div style="position:absolute; inset:0; background:rgba(0,0,0,0.3); display:flex; align-items:center; justify-content:center; opacity:0; hover:opacity:1; color:white; border-radius:8px;">🔍</div></div>`;
+                        } else {
+                            attHTML += `<a href="${att.ruta_archivo_url}" target="_blank" style="color: var(--gold); text-decoration: underline;">📄 ${att.nombre_archivo}</a>`;
+                        }
+                    });
+                    attHTML += '</div></div>';
                 }
 
                 content.innerHTML = `
                     <h2 style="color:var(--gold); border-bottom:1px solid #333; padding-bottom:10px; margin-top:0;">
                         Ticket #${ticket.ticket_id}: ${ticket.titulo}
                     </h2>
+                    
+                    ${actionHTML}
+
                     <div class="detail-grid">
                         <div class="detail-item"><label>Estado</label><span>${statusName}</span></div>
                         <div class="detail-item"><label>Prioridad</label><span>${prioName}</span></div>
-                        <div class="detail-item"><label>Área</label><span>${area}</span></div>
-                        <div class="detail-item"><label>Estimado (ETA)</label><span>${eta}</span></div>
-                        <div class="detail-item"><label>Creado Por</label><span>${createdBy}</span></div>
-                        <div class="detail-item"><label>Asignado A</label><span>${assignedTo}</span></div>
+                        <div class="detail-item"><label>Área</label><span>${areaName}</span></div>
+                        <div class="detail-item"><label>Estimado (ETA)</label><span>Pendiente</span></div>
+                        <div class="detail-item"><label>Creado Por</label><span>${reporterName}</span></div>
+                        <div class="detail-item"><label>Asignado A</label><span>${assignedName}</span></div>
+                        
+                        <div class="detail-item" style="grid-column: 1 / -1;">
+                            <label>Detalles del Problema</label>
+                            <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:8px; color:#ddd;">
+                                ${ticket.detalles}
+                            </div>
+                        </div>
+                        ${attHTML}
                     </div>
-                    <div class="detail-item">
-                        <label>Detalles del Problema</label>
-                        <p style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">${ticket.detalles}</p>
-                    </div>
-                    
-                    <h3 style="margin-top:30px; color:var(--gold)">Historial de Cambios</h3>
+
+                    <h3 style="color:var(--primary);">Historial de Cambios</h3>
                     <div class="timeline">
-                        ${historyHtml}
+                        ${history.map(h => `
+                            <div class="timeline-item">
+                                <div class="timeline-date">${new Date(h.fecha_cambio).toLocaleString()}</div>
+                                <div class="timeline-content">
+                                    <strong>${h.autor ? h.autor.nombre : 'Sistema'}:</strong> ${h.cambio || h.campo_modificado}
+                                    ${h.valor_nuevo && h.valor_nuevo !== '-' ? `<br>➔ ${h.valor_nuevo}` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
                     </div>
                 `;
-            } catch (e) {
-                content.innerHTML = '<p style="color:red; text-align:center">Error al cargar detalles.</p>';
-                console.error(e);
+
+            } catch (err) {
+                console.error(err);
+                content.innerHTML = '<p style="color:red">Error al cargar detalles del ticket.</p>';
             }
         }
 
         function closeTicketModal() {
             document.getElementById('ticket-detail-modal').classList.remove('open');
+        }
+
+        async function assignTicketFromSelect(ticketId) {
+            const select = document.getElementById('assign-select');
+            const newAssigneeId = select.value;
+
+            if (!newAssigneeId) {
+                alert('Por favor selecciona un usuario.');
+                return;
+            }
+
+            if (!confirm('¿Confirmas reasignar este ticket?')) return;
+
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                const projectRef = 'nsrduorngzyoiwpbkgku';
+                const funcUrl = `https://${projectRef}.supabase.co/functions/v1/ticket-manager/update`;
+
+                const resp = await fetch(funcUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${session?.access_token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        ticket_id: ticketId,
+                        maestro_notificado_id: newAssigneeId
+                    })
+                });
+
+                if (!resp.ok) throw new Error('Error al asignar');
+
+                alert('✅ Ticket actualizado.');
+                openTicketDetail(ticketId);
+
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
         }
 
         // Hook up navigation
@@ -1824,6 +1942,25 @@
                     showSupportView();
                 }
             });
+        });
+
+        // --- Image Viewer Logic ---
+        function openImageViewer(url) {
+            const modal = document.getElementById('image-viewer-modal');
+            const img = document.getElementById('image-viewer-img');
+            img.src = url;
+            modal.style.display = 'flex';
+        }
+
+        function closeImageViewer() {
+            const modal = document.getElementById('image-viewer-modal');
+            modal.style.display = 'none';
+            document.getElementById('image-viewer-img').src = '';
+        }
+
+        // Close on background click
+        document.getElementById('image-viewer-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'image-viewer-modal') closeImageViewer();
         });
     </script>
 </body>
