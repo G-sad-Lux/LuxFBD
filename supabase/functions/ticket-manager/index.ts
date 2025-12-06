@@ -5,6 +5,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE',
 }
 
 serve(async (req) => {
@@ -213,6 +214,10 @@ async function getTicketDetails(req: Request, url: URL, supabase: any, user: any
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
     })
+    return new Response(JSON.stringify({ ticket, history: historyData, attachments }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+    })
 }
 
 async function updateTicket(req: Request, supabase: any, user: any) {
@@ -221,7 +226,6 @@ async function updateTicket(req: Request, supabase: any, user: any) {
     if (!ticket_id) throw new Error('Missing ticket ID')
 
     // 1. Check Permissions
-    // Only 'Administrativo' or 'Maestro' can assign/update tickets
     const { data: profile } = await supabase
         .from('usuario')
         .select('usuario_id, tipo_usuario, nombre, apellido')
@@ -254,9 +258,13 @@ async function updateTicket(req: Request, supabase: any, user: any) {
 
     if (error) throw error
 
-    // 4. Log History
-    // 4. Log History with Custom Message
+    // 4. Log History (Using Service Role to bypass RLS)
     try {
+        const supabaseAdmin = createClient(
+            Deno.env.get('SUPABASE_URL') ?? '',
+            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+        )
+
         let historyMsg = 'Actualización administrativa'
         let newValue = '-'
 
@@ -271,15 +279,13 @@ async function updateTicket(req: Request, supabase: any, user: any) {
             const targetName = targetUser ? `${targetUser.nombre} ${targetUser.apellido}` : `ID ${maestro_notificado_id}`
             const actorName = `${profile.nombre} ${profile.apellido}`
 
-            // Format: "[UsuarioAsignado] Reasigno la tarea a [Usuario Reasignado]"
-            // "Ana Gonzalez" Reasigno la tarea a "Alberto Teacher"
             historyMsg = `[${actorName}] Reasignó la tarea a [${targetName}]`
             newValue = targetName
         } else if (estado_id) {
             newValue = `Estado ${estado_id}`
         }
 
-        await supabase.from('historial').insert({
+        const { error: histError } = await supabaseAdmin.from('historial').insert({
             ticket_id,
             autor_id: profile.usuario_id,
             campo_modificado: 'Asignación/Estado',
@@ -287,7 +293,10 @@ async function updateTicket(req: Request, supabase: any, user: any) {
             valor_nuevo: newValue,
             cambio: historyMsg
         })
-    } catch (e) { console.warn('History log failed', e) }
+
+        if (histError) console.error('History Service Role Insert Error:', histError)
+
+    } catch (e) { console.warn('History log failed critical:', e) }
 
     return new Response(JSON.stringify(data), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
