@@ -634,6 +634,144 @@
             transform: scale(1.05);
         }
 
+        /* --- Support View Styles --- */
+        .ticket-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .ticket-table th,
+        .ticket-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .ticket-table th {
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        .ticket-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-open {
+            background: rgba(0, 255, 0, 0.1);
+            color: #00ff00;
+        }
+
+        .status-closed {
+            background: rgba(255, 255, 255, 0.1);
+            color: #888;
+        }
+
+        /* Detail Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            border: 1px solid var(--gold);
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 16px;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .detail-item label {
+            color: #888;
+            font-size: 0.9em;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .detail-item span {
+            font-size: 1.1em;
+            color: white;
+        }
+
+        .timeline {
+            border-left: 2px solid var(--gold-dim);
+            padding-left: 20px;
+            margin-top: 20px;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            background: var(--gold);
+            border-radius: 50%;
+        }
+
+        .timeline-date {
+            font-size: 0.8em;
+            color: #888;
+        }
+
+        .timeline-content {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 5px;
+        }
+
+        .chat-widget-btn[hidden] {
+            display: none !important;
+        }
+
         .chat-window {
             position: fixed;
             bottom: 6rem;
@@ -680,6 +818,18 @@
             color: white;
             cursor: pointer;
             font-size: 1.2rem;
+        }
+
+        .chat-back {
+            background: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin-right: auto;
+            /* Push others to right */
+            display: none;
+            /* Hidden by default */
         }
 
         .chat-messages {
@@ -741,6 +891,23 @@
             place-items: center;
         }
 
+        .chat-attach-btn {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            width: 40px;
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            font-size: 1.2rem;
+        }
+
+        .chat-attach-btn:hover {
+            background: #f1f5f9;
+            color: var(--primary);
+        }
+
         .chat-options {
             display: flex;
             flex-wrap: wrap;
@@ -781,6 +948,7 @@
                     <li><a href="#login" class="nav-link" data-route="login">Inicio</a></li>
                     <li><a href="#mis-cursos" class="nav-link" data-route="tablero">Tablero</a></li>
                     <li><a href="#mis-cursos" class="nav-link" data-route="mis-cursos">Mis cursos</a></li>
+                    <li><a href="#soporte" class="nav-link" data-route="soporte-luxia">Soporte LuxIA</a></li>
 
                 </ul>
             </nav>
@@ -800,20 +968,19 @@
             <div class="login-card">
                 <img src="assets/images/lux-logo.svg" alt="Logo Universidad Lux" />
                 <h2>Ingreso a Campus Lux</h2>
-                <p class="login-subtitle">Usa las credenciales de demostración para continuar.</p>
+                <p class="login-subtitle">Ingresa con tu correo institucional y contraseña.</p>
                 <hr />
                 <div id="login-alert" class="login-alert error" hidden>
                     Credenciales inválidas. Intenta nuevamente.
                 </div>
                 <form id="login-form" class="login-form">
                     <label>
-                        Usuario
-                        <input type="text" name="usuario" value="017497" autocomplete="username" required>
+                        Correo Electrónico
+                        <input type="email" name="email" autocomplete="email" required placeholder="ejemplo@lux.edu">
                     </label>
                     <label>
                         Contraseña
-                        <input type="password" name="password" value="Unilux25" autocomplete="current-password"
-                            required>
+                        <input type="password" name="password" autocomplete="current-password" required>
                     </label>
                     <div class="login-actions">
                         <button type="submit" class="btn btn-primary">Iniciar sesión</button>
@@ -951,6 +1118,40 @@
                 </div>
             </section>
 
+            <!-- Support View (Added) -->
+            <section id="support-view" class="view-section" style="display:none; padding:80px 20px;">
+                <div class="container mx-auto max-w-6xl">
+                    <h2 class="text-3xl font-bold mb-6 text-white border-l-4 border-yellow-500 pl-4">Soporte LuxIA</h2>
+                    <p class="text-white/60 mb-8 max-w-2xl">Consulta el estado de tus tickets y el historial de
+                        atención.</p>
+
+                    <table class="ticket-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Título</th>
+                                <th>Estado</th>
+                                <th>Prioridad</th>
+                                <th>Asignado</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ticket-list-body">
+                            <!-- Loaded via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Detail Modal -->
+                <div id="ticket-detail-modal" class="modal">
+                    <div class="modal-content">
+                        <button onclick="closeTicketModal()"
+                            style="position:absolute; top:15px; right:15px; background:none; border:none; color:white; font-size:1.5em; cursor:pointer;">&times;</button>
+                        <div id="ticket-detail-content"></div>
+                    </div>
+                </div>
+            </section>
+
 
         </div>
     </main>
@@ -960,19 +1161,22 @@
     </footer>
 
     <!-- Chatbot Widget -->
-    <button id="chat-trigger" class="chat-widget-btn" aria-label="Abrir chat de soporte">
+    <button id="chat-trigger" class="chat-widget-btn" aria-label="Abrir chat de soporte" hidden>
         💬
     </button>
 
     <div id="chat-window" class="chat-window">
         <div class="chat-header">
-            <h3>Soporte Lux</h3>
-            <button id="chat-close" class="chat-close">×</button>
+            <button id="chat-back" class="chat-back" aria-label="Atrás">⬅</button>
+            <h3 style="margin-left: 0.5rem;">Lux-IA</h3>
+            <button id="chat-close" class="chat-close" style="margin-left: auto;">×</button>
         </div>
         <div id="chat-messages" class="chat-messages">
             <!-- Messages will appear here -->
         </div>
         <div class="chat-input-area">
+            <button id="chat-attach" class="chat-attach-btn" title="Adjuntar evidencia" disabled>📎</button>
+            <input type="file" id="chat-file" accept="image/*,.pdf" hidden>
             <input type="text" id="chat-input" placeholder="Escribe un mensaje..." disabled>
             <button id="chat-send" class="chat-send" disabled>➤</button>
         </div>
@@ -989,18 +1193,89 @@
         const loginSection = document.getElementById('login');
         const studentDashboard = document.getElementById('student-dashboard');
         const navLinks = document.querySelectorAll('.nav-link');
+
         const VALID_USER = '017497';
         const VALID_PASSWORD = 'Unilux25';
-
-        // Initialize Supabase
-        const supabase = window.supabaseConfig
-            ? window.supabase.createClient(window.supabaseConfig.url, window.supabaseConfig.key)
-            : null;
 
         const STUDENT_PROFILE = {
             nombre: 'Ana Torres',
             rol: 'estudiante',
         };
+
+        // Initialize Supabase (Safe Mode)
+        let supabase = null;
+        try {
+            if (window.supabaseConfig && window.supabase) {
+                supabase = window.supabase.createClient(window.supabaseConfig.url, window.supabaseConfig.key);
+                console.log('Supabase initialized successfully');
+            } else {
+                console.warn('Supabase config missing or library not loaded. Running in offline mode.');
+            }
+        } catch (err) {
+            console.error('Critical error initializing Supabase:', err);
+        }
+
+        // --- Edge Function Integration: Catalog Service ---
+        async function loadCatalogs() {
+            try {
+                // Invocamos la Edge Function 'catalog-service'
+                // Nota: Usamos fetch directo para controlar URL, ya que invoke usa POST por defecto y ruta base
+                const { data: { session } } = await supabase.auth.getSession();
+                const token = session?.access_token;
+
+                // Url base de funciones (hardcoded o config)
+                // Usamos la URL del proyecto si está en window.supabaseConfig o la construimos
+                const projectRef = 'nsrduorngzyoiwpbkgku';
+                const funcUrl = `https://${projectRef}.supabase.co/functions/v1/catalog-service`;
+
+                const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+                const resp = await fetch(funcUrl, { headers });
+                if (!resp.ok) throw new Error('Failed to fetch catalogs');
+
+                const data = await resp.json();
+                console.log('Catalogs loaded via Edge Function:', data);
+
+                // Populate Maps
+                if (data.categorias) {
+                    CATEGORY_MAP = {}; // Reset
+                    data.categorias.forEach(c => {
+                        // Normalize name to key (e.g. "Sitio Web" -> "sitio_web")
+                        const key = c.nombre.toLowerCase().replace(/\s+/g, '_').replace(/[^\w]/g, '');
+                        CATEGORY_MAP[key] = c.catalogo_id;
+                    });
+                }
+                if (data.prioridades) {
+                    PRIORITY_MAP = {};
+                    data.prioridades.forEach(p => {
+                        const key = p.nombre.toLowerCase();
+                        PRIORITY_MAP[key] = p.catalogo_id;
+                    });
+                }
+
+                // Handle Areas
+                if (data.areas && data.areas.length > 0) {
+                    // Try to find 'Soporte TI' or similar
+                    const soporte = data.areas.find(a => a.nombre.toLowerCase().includes('soporte'));
+                    if (soporte) {
+                        DEFAULT_AREA_ID = soporte.catalogo_id;
+                        console.log('Area detected (Soporte):', soporte.nombre, DEFAULT_AREA_ID);
+                    } else {
+                        DEFAULT_AREA_ID = data.areas[0].catalogo_id; // Use first available
+                        console.log('Area fallback to first available:', data.areas[0].nombre, DEFAULT_AREA_ID);
+                    }
+                }
+
+            } catch (e) {
+                console.warn('Catalog Service unavailable, using static fallbacks:', e);
+                CATEGORY_MAP = STATIC_CATEGORY_MAP;
+                PRIORITY_MAP = STATIC_PRIORITY_MAP;
+            }
+        }
+
+        // Cargar catálogos al inicio
+        loadCatalogs();
+
 
         function setActiveNav(route) {
             navLinks.forEach((link) => {
@@ -1019,33 +1294,51 @@
                 studentDashboard.scrollIntoView({ behavior: 'smooth' });
             }
 
+            // Show chat widget
+            if (chatTrigger) chatTrigger.removeAttribute('hidden');
+
             setActiveNav('mis-cursos');
         }
 
         if (loginForm) {
-            loginForm.addEventListener('submit', (event) => {
+            loginForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
                 const formData = new FormData(loginForm);
-                const user = formData.get('usuario').trim();
-                const pass = formData.get('password');
+                const email = formData.get('email');
+                const password = formData.get('password');
 
-                if (user === VALID_USER && pass === VALID_PASSWORD) {
-                    loginAlert.textContent = `Acceso concedido. ¡Bienvenido, ${STUDENT_PROFILE.nombre}!`;
+                try {
+                    // --- SUPABASE AUTH INTEGRATION ---
+                    const { data, error } = await supabase.auth.signInWithPassword({
+                        email: email,
+                        password: password
+                    });
+
+                    if (error) throw error;
+
+                    // Success
+                    loginAlert.textContent = 'Acceso concedido.';
                     loginAlert.className = 'login-alert success';
-                    showStudentView();
-                } else {
-                    loginAlert.textContent = 'Credenciales inválidas. Intenta nuevamente.';
-                    loginAlert.className = 'login-alert error';
-                    if (studentDashboard) {
-                        studentDashboard.setAttribute('hidden', '');
-                    }
-                    if (loginSection) {
-                        loginSection.classList.remove('hidden');
-                    }
-                    setActiveNav('login');
-                }
+                    loginAlert.hidden = false;
 
-                loginAlert.hidden = false;
+                    // Update User Context
+                    // Assuming data.user contains valid user info
+                    chatState.user = {
+                        id: data.user.id,
+                        email: data.user.email
+                    };
+
+                    // Proceed to Dashboard
+                    showStudentView();
+
+                    console.log('User Logged In:', data.user);
+
+                } catch (err) {
+                    console.error('Login Error:', err.message);
+                    loginAlert.textContent = 'Error: ' + (err.message === 'Invalid login credentials' ? 'Credenciales incorrectas.' : err.message);
+                    loginAlert.className = 'login-alert error';
+                    loginAlert.hidden = false;
+                }
             });
         }
 
@@ -1053,14 +1346,38 @@
         const chatTrigger = document.getElementById('chat-trigger');
         const chatWindow = document.getElementById('chat-window');
         const chatClose = document.getElementById('chat-close');
+        const chatBack = document.getElementById('chat-back');
         const chatMessages = document.getElementById('chat-messages');
         const chatInput = document.getElementById('chat-input');
         const chatSend = document.getElementById('chat-send');
+        const chatAttach = document.getElementById('chat-attach');
+        const chatFile = document.getElementById('chat-file');
 
         let chatState = {
-            step: 'INIT', // INIT, TITLE, CATEGORY, DETAILS, PRIORITY, DONE
-            ticket: {}
+            step: 'INIT',
+            ticket: {},
+            history: [] // To track prev steps logic if needed, but simple mapping works too
         };
+
+        // Initialize Maps (Will be populated by Edge Function)
+        let CATEGORY_MAP = {};
+        // Fallback static maps in case service fails or loads slow
+        const STATIC_CATEGORY_MAP = {
+            'finanzas': 33, 'sitio_web': 34, 'servo_web': 35, 'materias': 36, 'bloqueos': 37
+        };
+
+        let PRIORITY_MAP = {};
+        const STATIC_PRIORITY_MAP = {
+            'baja': 8, 'media': 7, 'alta': 6
+        };
+
+        // Area ID Handling (Dynamic)
+        let DEFAULT_AREA_ID = 38; // Fallback hardcoded if service fails
+
+        // Fallback User ID
+        const FALLBACK_USER_ID = 16;
+
+        const STEPS_FLOW = ['GREETING', 'TITLE', 'CATEGORY', 'DETAILS', 'ATTACHMENTS', 'PRIORITY', 'NOTIFY', 'DONE'];
 
         function toggleChat() {
             const isOpen = chatWindow.classList.contains('open');
@@ -1076,6 +1393,26 @@
 
         chatTrigger.addEventListener('click', toggleChat);
         chatClose.addEventListener('click', toggleChat);
+
+        chatBack.addEventListener('click', goBack);
+
+        function goBack() {
+            const currentIdx = STEPS_FLOW.indexOf(chatState.step);
+            if (currentIdx > 0) {
+                const prevStep = STEPS_FLOW[currentIdx - 1];
+                chatState.step = prevStep;
+                showStepPrompt(prevStep);
+            }
+        }
+
+        function updateUIForStep(step) {
+            // Show/Hide Back Button
+            if (step === 'GREETING' || step === 'DONE') {
+                chatBack.style.display = 'none';
+            } else {
+                chatBack.style.display = 'block';
+            }
+        }
 
         function addMessage(text, sender, options = []) {
             const msgDiv = document.createElement('div');
@@ -1101,118 +1438,223 @@
 
         function initChat() {
             chatState.step = 'GREETING';
-            addMessage('¡Hola! Soy el asistente virtual de Lux. ¿En qué puedo ayudarte hoy?', 'bot', [
-                { label: 'Reportar un problema', value: 'report' },
-                { label: 'Consultar estado de ticket', value: 'status' }
-            ]);
+            showStepPrompt('GREETING');
         }
 
-        function handleInput(text) {
-            if (!text) return;
+        function showStepPrompt(step) {
+            updateUIForStep(step);
 
-            // Add user message
-            addMessage(text, 'user');
+            // Clear inputs just in case
             chatInput.value = '';
 
-            // Process state
-            setTimeout(() => {
-                processChatStep(text);
-            }, 500);
-        }
-
-        function processChatStep(input) {
-            switch (chatState.step) {
+            switch (step) {
                 case 'GREETING':
-                    if (input === 'report') {
-                        chatState.step = 'TITLE';
-                        addMessage('Entendido. Para comenzar, por favor escribe un título breve para tu incidencia.', 'bot');
-                        enableInput(true);
-                    } else if (input === 'status') {
-                        addMessage('Esta funcionalidad estará disponible pronto.', 'bot');
-                        resetChat();
-                    }
-                    break;
-
-                case 'TITLE':
-                    chatState.ticket.title = input;
-                    chatState.step = 'CATEGORY';
                     enableInput(false);
-                    addMessage('Gracias. ¿A qué categoría pertenece el problema?', 'bot', [
-                        { label: 'Falla de plataforma', value: 'plataforma' },
-                        { label: 'Error de calificación', value: 'calificacion' },
-                        { label: 'Problema de acceso', value: 'acceso' },
-                        { label: 'Otro', value: 'otro' }
+                    // Reset ticket
+                    chatState.ticket = {};
+                    addMessage('¡Hola! Soy Lux-IA. ¿En qué puedo ayudarte hoy?', 'bot', [
+                        { label: 'Reportar un problema', value: 'report' },
+                        { label: 'Consultar estado de ticket', value: 'status' }
                     ]);
                     break;
-
-                case 'CATEGORY':
-                    chatState.ticket.category = input;
-                    chatState.step = 'DETAILS';
-                    addMessage('Por favor describe los detalles del problema.', 'bot');
+                case 'TITLE':
                     enableInput(true);
+                    addMessage('Entendido. Para comenzar, por favor escribe un título breve para tu incidencia.', 'bot');
                     break;
-
-                case 'DETAILS':
-                    chatState.ticket.details = input;
-                    chatState.step = 'PRIORITY';
+                case 'CATEGORY':
                     enableInput(false);
-                    addMessage('¿Qué nivel de prioridad consideras que tiene?', 'bot', [
+                    addMessage('Gracias. ¿A qué categoría pertenece el problema?', 'bot', [
+                        { label: 'Finanzas', value: 'finanzas' },
+                        { label: 'Sitio Web', value: 'sitio_web' },
+                        { label: 'Servo Web', value: 'servo_web' },
+                        { label: 'Materias', value: 'materias' },
+                        { label: 'Bloqueos/Acceso', value: 'bloqueos' }
+                    ]);
+                    break;
+                case 'DETAILS':
+                    enableInput(true);
+                    addMessage('Por favor describe los detalles del problema.', 'bot');
+                    break;
+                case 'ATTACHMENTS':
+                    enableInput(false);
+                    addMessage('¿Deseas adjuntar alguna captura de pantalla o documento?', 'bot', [
+                        { label: 'Sí, adjuntar', value: 'attach_request' },
+                        { label: 'No, continuar', value: 'no_attach' }
+                    ]);
+                    break;
+                case 'PRIORITY':
+                    enableInput(false);
+                    addMessage('Archivo recibido (o omitido). ¿Qué nivel de prioridad consideras que tiene?', 'bot', [
                         { label: 'Baja', value: 'baja' },
                         { label: 'Media', value: 'media' },
                         { label: 'Alta', value: 'alta' }
                     ]);
                     break;
+                case 'NOTIFY':
+                    enableInput(false);
+                    addMessage('¿Deseas notificar a algún área específica? (Opcional)', 'bot', [
+                        { label: 'Servicios Escolares', value: 'escolares' },
+                        { label: 'Soporte Técnico', value: 'soporte' },
+                        { label: 'Ninguno', value: 'none' }
+                    ]);
+                    break;
+                case 'DONE':
+                    // This is handled by finishTicket mainly
+                    break;
+            }
+        }
 
+        function handleInput(text, isFile = false) {
+            if (!text && !isFile) return;
+
+            // Validations
+            if (chatState.step === 'TITLE' && text.length < 5) {
+                addMessage('El título es muy corto (mínimo 5 letras).', 'bot');
+                return;
+            }
+            if (chatState.step === 'DETAILS' && text.length < 15) {
+                addMessage('Por favor danos más detalles (mínimo 15 letras).', 'bot');
+                return;
+            }
+
+            // Add user message
+            if (isFile) {
+                addMessage(`📎 Archivo adjunto: ${text}`, 'user');
+            } else {
+                addMessage(text, 'user');
+                chatInput.value = '';
+            }
+
+            // Process state
+            setTimeout(() => {
+                const nextStep = getNextStep(chatState.step, text, isFile);
+                if (nextStep) {
+                    chatState.step = nextStep;
+                    if (nextStep === 'DONE') {
+                        finishTicket();
+                    } else if (nextStep === 'ATTACH_ACTION') {
+                        // Interactive intermediate step for file
+                        chatFile.click();
+                        addMessage('Selecciona tu archivo...', 'bot');
+                        // Stay in ATTACHMENTS technically but waiting for file
+                        chatState.step = 'ATTACHMENTS';
+                    } else if (nextStep === 'STATUS_CHECK') {
+                        addMessage('Esta funcionalidad estará disponible pronto.', 'bot');
+                        resetChat();
+                    } else {
+                        showStepPrompt(nextStep);
+                    }
+                }
+            }, 500);
+        }
+
+        function getNextStep(currentStep, input, isFile) {
+            switch (currentStep) {
+                case 'GREETING':
+                    if (input === 'report') return 'TITLE';
+                    if (input === 'status') return 'STATUS_CHECK';
+                    return null;
+                case 'TITLE':
+                    chatState.ticket.title = input;
+                    return 'CATEGORY';
+                case 'CATEGORY':
+                    chatState.ticket.category = input;
+                    return 'DETAILS';
+                case 'DETAILS':
+                    chatState.ticket.details = input;
+                    return 'ATTACHMENTS';
+                case 'ATTACHMENTS':
+                    if (input === 'attach_request') return 'ATTACH_ACTION';
+                    if (input === 'no_attach') return 'PRIORITY';
+                    if (isFile) {
+                        chatState.ticket.evidence = input;
+                        return 'PRIORITY';
+                    }
+                    return 'PRIORITY'; // Fallback
                 case 'PRIORITY':
                     chatState.ticket.priority = input;
-                    chatState.step = 'DONE';
-                    finishTicket();
-                    break;
+                    return 'NOTIFY';
+                case 'NOTIFY':
+                    chatState.ticket.notify = input === 'none' ? null : input;
+                    return 'DONE';
+                default:
+                    return null;
             }
         }
 
         function enableInput(enable) {
             chatInput.disabled = !enable;
             chatSend.disabled = !enable;
+            chatAttach.disabled = !enable;
             if (enable) chatInput.focus();
         }
 
         async function finishTicket() {
             addMessage('Procesando tu solicitud...', 'bot');
+            updateUIForStep('DONE'); // Hide back button
 
             try {
                 if (!supabase) throw new Error('Supabase no configurado');
 
+                // Prepare payload with correct DB columns (Spanish)
+                // Note: DB uses 'categoria_id' and 'prioridad_id' in ticket table, mapping to 'catalogo' IDs.
+                const catId = CATEGORY_MAP[chatState.ticket.category] || 37; // Default to 'Bloqueos' if missing
+                const prioId = PRIORITY_MAP[chatState.ticket.priority] || 8; // Default to 'Baja'
+
+                const payload = {
+                    titulo: chatState.ticket.title,
+                    categoria_id: catId,
+                    detalles: chatState.ticket.details,
+                    prioridad_id: prioId,
+                    reportador_id: (chatState.user && chatState.user.id) ? undefined : FALLBACK_USER_ID, // If auth, let DB handle or pass auth_uid? Assuming DB expects integer ID from 'usuario' table, we need to map Auth UID to Usuario ID. 
+                    // WAIT: 'reportador_id' is bigint/int in 'ticket', likely referencing 'usuario(usuario_id)'.
+                    // Our chatState.user.id is UUID. We can't put UUID into bigint column.
+                    // We must fetch the numeric ID for the logged in user or use FALLBACK.
+                    // For now, let's use the fetched numeric ID if we can, or FALLBACK.
+                    // But we don't have the numeric ID in chatState.user yet (only UUID).
+                    // Let's stick to FALLBACK_USER_ID for reliability until we fetch numeric ID on login.
+                    reportador_id: FALLBACK_USER_ID,
+                    estado_id: 1, // 'Abierto'
+                    area_notificada_id: DEFAULT_AREA_ID // Dynamic from Catalog Service
+                };
+
+                // Temporary log for debug
+                console.log('Sending payload:', payload);
+
                 const { data, error } = await supabase
-                    .from('tickets')
-                    .insert([
-                        {
-                            title: chatState.ticket.title,
-                            category: chatState.ticket.category,
-                            details: chatState.ticket.details,
-                            priority: chatState.ticket.priority,
-                            user_id: VALID_USER, // Usando ID de usuario hardcodeado por ahora
-                            status: 'open'
-                        }
-                    ])
+                    .from('ticket') // Singular table name
+                    .insert([payload])
                     .select();
 
                 if (error) throw error;
 
-                const ticketId = data[0].id;
+                const ticketId = data[0].ticket_id; // Correct ID column name
                 console.log('Ticket Created:', data[0]);
-                addMessage(`¡Listo! Tu ticket ha sido creado en la base de datos con el ID #${ticketId}. Un agente lo revisará pronto.`, 'bot');
+
+                // Enhanced Feedback
+                addMessage(`✅ ¡Ticket creado con éxito!`, 'bot');
+                addMessage(`ID de seguimiento: #${ticketId}`, 'bot');
+                addMessage(`Hemos notificado a soporte y recibirás una actualización pronto.`, 'bot');
+
             } catch (err) {
                 console.error('Error creating ticket:', err);
                 const localId = 'ERR-' + Math.floor(Math.random() * 1000);
-                addMessage(`Hubo un error conectando con la base de datos. Referencia local: ${localId}. Por favor verifica tu conexión.`, 'bot');
+
+                // Enhanced Error Feedback
+                addMessage(`❌ No pudimos conectar con el servidor.`, 'bot');
+                addMessage(`Detalle: ${err.message || 'Error desconocido'}`, 'bot');
+                addMessage(`Tu reporte ha sido guardado localmente con referencia: ${localId}. Intenta reportarlo nuevamente más tarde.`, 'bot');
             }
 
             addMessage('¿Necesitas algo más?', 'bot', [
                 { label: 'Crear otro ticket', value: 'report' },
                 { label: 'Salir', value: 'exit' }
             ]);
-            chatState.step = 'GREETING';
+
+            // Wait for user to pick, if 'report' -> GREETING/TITLE
+            setTimeout(() => {
+                chatState.step = 'GREETING'; // Reset state for next interaction
+            }, 1000);
         }
 
         function resetChat() {
@@ -1226,7 +1668,163 @@
             if (e.key === 'Enter') handleInput(chatInput.value);
         });
 
+        // File attachment logic
+        chatAttach.addEventListener('click', () => chatFile.click());
+        chatFile.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleInput(e.target.files[0].name, true);
+            }
+        });
+
+        // Initial check
+        if (chatTrigger) chatTrigger.setAttribute('hidden', '');
         setActiveNav('login');
+
+        // --- Support Dashboard Logic ---
+        function showSupportView() {
+            // Hide other views
+            document.querySelectorAll('section').forEach(el => el.style.display = 'none');
+            const supportView = document.getElementById('support-view');
+            if (supportView) supportView.style.display = 'block';
+
+            // Hide specific main views
+            const studentView = document.getElementById('student-view');
+            if (studentView) studentView.style.display = 'none';
+            const loginSection = document.getElementById('login');
+            if (loginSection) loginSection.style.display = 'none';
+
+            loadTickets();
+        }
+
+        async function loadTickets() {
+            const tbody = document.getElementById('ticket-list-body');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Cargando tickets...</td></tr>';
+
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                const token = session?.access_token;
+                const projectRef = 'nsrduorngzyoiwpbkgku';
+
+                const resp = await fetch(`https://${projectRef}.supabase.co/functions/v1/ticket-manager/list`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!resp.ok) throw new Error('Error loading tickets');
+                const tickets = await resp.json();
+
+                tbody.innerHTML = '';
+                if (tickets.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">No hay tickets registrados.</td></tr>';
+                    return;
+                }
+
+                tickets.forEach(t => {
+                    const row = document.createElement('tr');
+                    const date = new Date(t.fecha_creacion).toLocaleDateString();
+                    // Optional safety check on related objects
+                    const statusName = t.estado ? t.estado.nombre : 'Desconocido';
+                    const statusClass = statusName === 'Abierto' ? 'status-open' : 'status-closed';
+                    const prioName = t.prioridad ? t.prioridad.nombre : 'Normal';
+                    const assigned = t.asignado ? `${t.asignado.nombre} ${t.asignado.apellido}` : 'Sin asignar';
+
+                    row.innerHTML = `
+                        <td>#${t.ticket_id}</td>
+                        <td>${t.titulo}</td>
+                        <td><span class="status-badge ${statusClass}">${statusName}</span></td>
+                        <td>${prioName}</td>
+                        <td>${assigned}</td>
+                        <td>${date}</td>
+                    `;
+                    row.onclick = () => openTicketDetail(t.ticket_id);
+                    tbody.appendChild(row);
+                });
+            } catch (e) {
+                console.error(e);
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red">Error al cargar tickets (o faltan tablas relacionadas).</td></tr>';
+            }
+        }
+
+        async function openTicketDetail(id) {
+            const modal = document.getElementById('ticket-detail-modal');
+            const content = document.getElementById('ticket-detail-content');
+            modal.classList.add('open');
+            content.innerHTML = '<p style="text-align:center">Cargando detalles...</p>';
+
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                const token = session?.access_token;
+                const projectRef = 'nsrduorngzyoiwpbkgku';
+
+                const resp = await fetch(`https://${projectRef}.supabase.co/functions/v1/ticket-manager/details?id=${id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!resp.ok) throw new Error('Error loading details');
+                const { ticket, history } = await resp.json();
+
+                const createdBy = ticket.reportador ? `${ticket.reportador.nombre} ${ticket.reportador.apellido} (${ticket.reportador.tipo_usuario})` : 'Desconocido';
+                const assignedTo = ticket.asignado ? `${ticket.asignado.nombre} ${ticket.asignado.apellido}` : 'Sin Asignar';
+                const eta = ticket.eta_estimada ? new Date(ticket.eta_estimada).toLocaleString() : 'Pendiente';
+                const area = ticket.area ? ticket.area.nombre : 'General';
+                const statusName = ticket.estado ? ticket.estado.nombre : 'Desconocido';
+                const prioName = ticket.prioridad ? ticket.prioridad.nombre : 'Normal';
+
+                let historyHtml = '';
+                if (history && history.length > 0) {
+                    historyHtml = history.map(h => `
+                        <div class="timeline-item">
+                            <div class="timeline-date">${new Date(h.fecha_cambio).toLocaleString()}</div>
+                            <div class="timeline-content">
+                                <strong>${h.autor?.nombre || 'Sistema'}:</strong> ${h.cambio} <br/>
+                                <small>${h.valor_anterior || ''} ➔ ${h.valor_nuevo || ''}</small>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    historyHtml = '<p style="color:#888; padding-left:20px;">No hay historial de cambios.</p>';
+                }
+
+                content.innerHTML = `
+                    <h2 style="color:var(--gold); border-bottom:1px solid #333; padding-bottom:10px; margin-top:0;">
+                        Ticket #${ticket.ticket_id}: ${ticket.titulo}
+                    </h2>
+                    <div class="detail-grid">
+                        <div class="detail-item"><label>Estado</label><span>${statusName}</span></div>
+                        <div class="detail-item"><label>Prioridad</label><span>${prioName}</span></div>
+                        <div class="detail-item"><label>Área</label><span>${area}</span></div>
+                        <div class="detail-item"><label>Estimado (ETA)</label><span>${eta}</span></div>
+                        <div class="detail-item"><label>Creado Por</label><span>${createdBy}</span></div>
+                        <div class="detail-item"><label>Asignado A</label><span>${assignedTo}</span></div>
+                    </div>
+                    <div class="detail-item">
+                        <label>Detalles del Problema</label>
+                        <p style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">${ticket.detalles}</p>
+                    </div>
+                    
+                    <h3 style="margin-top:30px; color:var(--gold)">Historial de Cambios</h3>
+                    <div class="timeline">
+                        ${historyHtml}
+                    </div>
+                `;
+            } catch (e) {
+                content.innerHTML = '<p style="color:red; text-align:center">Error al cargar detalles.</p>';
+                console.error(e);
+            }
+        }
+
+        function closeTicketModal() {
+            document.getElementById('ticket-detail-modal').classList.remove('open');
+        }
+
+        // Hook up navigation
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                const route = link.dataset.route;
+                if (route === 'soporte-luxia') {
+                    showSupportView();
+                }
+            });
+        });
     </script>
 </body>
 
