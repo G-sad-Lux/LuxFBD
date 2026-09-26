@@ -5,6 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Portal de Atención al Estudiante | Universidad Lux</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b1f4d'/%3E%3Cpath d='M10 7h4v14h8v4H10z' fill='%23fff'/%3E%3C/svg%3E">
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://aftrxnerszxjfjxegjuk.supabase.co; connect-src 'self' https://aftrxnerszxjfjxegjuk.supabase.co wss://aftrxnerszxjfjxegjuk.supabase.co ws://127.0.0.1:5173 ws://localhost:5173; object-src 'none'; base-uri 'self'; form-action 'self'">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -42,6 +43,10 @@
         .acc-ventajas strong { font-size: 14px; }
         .acc-ventajas span { font-size: 12px; color: var(--v2-navy-ink); }
         .acc-ventajas .v2-ico { color: var(--v2-accent-soft); }
+        /* Entre 900 y 1279 el panel es angosto: el globo y la mascota
+           (posicionados absolutos, calibrados a 1440) chocarían con el
+           texto y el QR; se ocultan y el panel queda limpio. */
+        @media (max-width: 1279px) { .acc-globo, .acc-mascota { display: none; } }
         @media (max-width: 900px) {
             .acc-header { padding: 0 16px; gap: 14px; }
             .acc-header nav { display: none; }
@@ -49,8 +54,14 @@
             .acc-main { grid-template-columns: 1fr; padding: 20px 16px; gap: 20px; }
             .acc-card { padding: 24px 20px; }
             .acc-card h1 { font-size: 26px; }
+            /* 16px/50px: evita el zoom automático de iOS al enfocar */
+            .acc-card .v2-box { height: 50px; }
+            .acc-card .v2-box input { font-size: 16px; }
             /* En el celular no tiene sentido escanear el QR desde el mismo equipo */
-            .acc-qr, .acc-globo, .acc-mascota { display: none; }
+            .acc-qr { display: none; }
+        }
+        @media (max-width: 560px) {
+            .acc-beneficios { grid-template-columns: 1fr; gap: 8px; }
         }
 
         /* ---- Cascarón Mis Tickets (pantalla 03) ---- */
@@ -84,7 +95,32 @@
             .tk-card .accion { grid-column: 1 / -1; }
         }
 
-        /* ---- Panel de detalle (380px) ---- */
+        /* ---- Responsivo del cascarón ---- */
+        @media (max-width: 760px) {
+            .mt-main { padding: 16px; }
+            .mt-contadores { grid-template-columns: 1fr; gap: 10px; }
+            .mt-contadores .v2-kpi { padding: 10px 14px; }
+        }
+        @media (max-width: 620px) {
+            .v2-header .titulo, .v2-header .divisor { display: none; }
+            .v2-header > img { width: 140px; }
+            #chip-sub { display: none; }
+            #btn-salir .txt { display: none; } /* queda el icono con aria-label */
+            #btn-salir { padding: 0 10px; }
+        }
+        @media (max-width: 480px) {
+            .v2-chip-usuario .quien { display: none; } /* queda el avatar con iniciales */
+        }
+
+        /* ---- Panel de detalle (380px) con pestañas Ticket / Lumix (03d) ---- */
+        .panel-tabs { flex-shrink: 0; min-height: 60px; display: flex; align-items: center; padding: 10px 14px; background: #eef2f8; border-bottom: 1px solid var(--v2-border); }
+        .panel-tabs .v2-seg { flex: 1; background: transparent; padding: 0; gap: 6px; }
+        .panel-tabs .v2-seg button { flex: 1; background: transparent; height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 0; }
+        .panel-tabs .v2-seg button.on { background: #fff; color: var(--v2-heading); box-shadow: 0 1px 3px rgba(14, 26, 51, .12); }
+        .panel-tabs .v2-seg button img { width: 22px; height: 22px; border-radius: 50%; background: #ddf1f6; flex-shrink: 0; }
+        .panel-tabs .v2-seg button span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .panel-hoja { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+        #panel-lumix .lumix-msgs { background: #f7f9fc; }
         .mt-panel { width: 380px; flex-shrink: 0; background: var(--v2-card); border-left: 1px solid var(--v2-border); display: flex; flex-direction: column; min-height: 0; position: sticky; top: 0; align-self: flex-start; height: 100vh; }
         .mt-panel .cabeza { padding: 20px 22px 14px; border-bottom: 1px solid #e4e9f1; display: flex; flex-direction: column; gap: 8px; }
         .mt-panel .cabeza h2 { margin: 0; font-size: 22px; font-weight: 800; color: var(--v2-heading); }
@@ -130,17 +166,17 @@
                     <h1 id="acc-titulo">Portal de Atención al Estudiante</h1>
                     <p class="sub">Registra, consulta y da seguimiento a tus solicitudes.</p>
                 </div>
-                <!-- D2: alta administrada; la pestaña "Crear cuenta" queda oculta -->
-                <div role="tablist" aria-label="Acceso" class="v2-seg clara">
-                    <button role="tab" class="on" aria-selected="true" style="flex:1;">Iniciar sesión</button>
-                </div>
+                <!-- D2: alta administrada. Sin pestañas: con "Crear cuenta" oculta,
+                     una pestaña única solo duplicaba al botón "Ingresar". -->
                 <div id="auth-error" class="v2-auth-error" role="alert">
                     <span data-ico="ui.alerta" data-tam="media" style="margin-top:1px;"></span>
                     <span>Credenciales incorrectas. Verifica tu correo y contraseña.</span>
                 </div>
                 <form id="auth-form" style="display:flex; flex-direction:column; gap:18px;">
                     <div class="v2-field">
-                        <label class="v2-lbl" for="l-usr">Matrícula o correo institucional</label>
+                        <!-- "Matrícula o correo" hasta que D5 (identificación por matrícula)
+                             se resuelva: hoy el acceso es con el correo institucional. -->
+                        <label class="v2-lbl" for="l-usr">Correo institucional</label>
                         <div class="v2-box"><span data-ico="ui.persona"></span><input id="l-usr" type="text" placeholder="a012345@universidadlux.edu.mx" autocomplete="username" required></div>
                     </div>
                     <div class="v2-field">
@@ -185,7 +221,7 @@
     <div id="shell" class="v2-shell" hidden style="flex-direction:column; min-height:100vh;">
         <header class="v2-header" style="gap:20px;">
             <img src="assets/logo-lux.png" alt="Universidad Lux" style="width:176px; height:auto;">
-            <div style="width:1px; height:36px; background:var(--v2-border);" class="solo-ancha"></div>
+            <div class="divisor" style="width:1px; height:36px; background:var(--v2-border);"></div>
             <div class="titulo">
                 <strong>Portal de Atención al Estudiante</strong>
                 <span>Tu espacio de soporte, siempre contigo</span>
@@ -196,7 +232,7 @@
                     <span class="v2-ava navy" id="chip-ava"></span>
                     <div class="quien"><strong id="chip-nombre"></strong><span id="chip-sub"></span></div>
                 </div>
-                <button id="btn-salir" class="v2-btn secundario" style="min-height:40px;"><span data-ico="ui.salir" data-tam="media"></span>Cerrar sesión</button>
+                <button id="btn-salir" class="v2-btn secundario" style="min-height:40px;"><span data-ico="ui.salir" data-tam="media"></span><span class="txt">Cerrar sesión</span></button>
             </div>
         </header>
         <div class="mt-zona">
@@ -211,8 +247,8 @@
                     <img src="assets/lumix.png" alt="">
                     <div class="caja">
                         <strong>¿Necesitas ayuda?</strong>
-                        <a class="v2-btn" href="lumix.html" style="min-height:42px;">Hablar con Lumix</a>
-                        <small>Disponible desde tu celular</small>
+                        <a class="v2-btn" href="lumix.html" id="card-lumix" style="min-height:42px;">Hablar con Lumix</a>
+                        <small>También desde tu celular</small>
                     </div>
                 </div>
                 <div class="abajo" style="margin-top:18px;">
@@ -224,7 +260,18 @@
             <main class="mt-main" id="vista">
                 <div class="v2-card"><p class="v2-nota" style="margin:0;">Cargando…</p></div>
             </main>
-            <aside class="mt-panel" id="panel" aria-label="Detalle del ticket seleccionado"></aside>
+            <aside class="mt-panel" id="panel" aria-label="Detalle del ticket y Lumix">
+                <!-- 03d: control segmentado Ticket / Hablar con Lumix -->
+                <div class="panel-tabs">
+                    <div role="tablist" aria-label="Panel" class="v2-seg">
+                        <button role="tab" id="tab-ticket" aria-selected="true" class="on"><span data-ico="ui.ticket" data-tam="media"></span><span id="tab-ticket-txt">Detalle</span></button>
+                        <button role="tab" id="tab-lumix" aria-selected="false"><img src="assets/lumix-avatar.png" alt=""><span>Hablar con Lumix</span></button>
+                    </div>
+                    <button type="button" class="v2-ib cerrar-panel" id="p-cerrar-tabs" aria-label="Cerrar panel" style="margin-left:8px;"><span data-ico="ui.cerrar" data-tam="media"></span></button>
+                </div>
+                <div id="panel-ticket" class="panel-hoja"></div>
+                <div id="panel-lumix" class="panel-hoja" hidden></div>
+            </aside>
         </div>
     </div>
 
@@ -247,13 +294,15 @@
     <script src="../config.js"></script>
     <script src="iconos.js"></script>
     <script src="shared.js"></script>
+    <script src="lumix-chat.js"></script>
     <script>
         (async function () {
             if (!LuxV2.requireV2()) return;
 
             const esc = LuxV2.esc;
             const $ = (id) => document.getElementById(id);
-            const vista = $('vista'), panel = $('panel');
+            const vista = $('vista'), panel = $('panel'), hojaTicket = $('panel-ticket');
+            const esMovil = () => window.matchMedia('(max-width: 1100px)').matches;
             const { badgeEstado, fmtFecha, fmtFechaCorta, fmtAct, slaDe, nombreDe, iniciales,
                 iconoCategoria, fmtBytes, svgIcono, canalDe } = LuxV2.ui;
 
@@ -266,8 +315,39 @@
                 filtro: { q: '', estado: '', categoria: '', desde: '', hasta: '' },
                 sel: null,          // ticket seleccionado (panel derecho)
                 detalle: null,      // cache del /details del seleccionado
+                panelTab: 'ticket', // pestaña del panel: 'ticket' | 'lumix' (03d)
             };
             let cargarNotifs = () => { };
+            let chat = null; // instancia embebida de Lumix (se monta al primer uso)
+
+            // ---------- Pestañas del panel (03d) + Lumix embebido ----------
+            function setPanelTab(tab) {
+                state.panelTab = tab;
+                $('tab-ticket').classList.toggle('on', tab === 'ticket');
+                $('tab-ticket').setAttribute('aria-selected', tab === 'ticket');
+                $('tab-lumix').classList.toggle('on', tab === 'lumix');
+                $('tab-lumix').setAttribute('aria-selected', tab === 'lumix');
+                hojaTicket.hidden = tab !== 'ticket';
+                $('panel-lumix').hidden = tab !== 'lumix';
+            }
+            function montarChat() {
+                if (chat) return;
+                chat = LuxLumixChat.montar({
+                    raiz: $('panel-lumix'), perfil: state.perfil, catalogs: state.catalogs, modo: 'embebido',
+                    // "Ver en mi lista" / tarjetas de consulta: selecciona el ticket
+                    alVerTicket: (id) => { if (id) { location.hash = 'ticket=' + id; } else { setPanelTab('ticket'); } },
+                    // El ticket nuevo aparece en la lista izquierda sin recargar
+                    alCrear: async () => { try { await cargarDatos(); renderLista(); cargarNotifs(); } catch (_) { } },
+                });
+            }
+            // En PC abre la pestaña embebida; en celular, la pantalla completa.
+            function abrirLumix() {
+                if (esMovil()) { window.location.href = 'lumix.html'; return; }
+                if (/^#(ayuda|perfil)/.test(location.hash)) location.hash = '';
+                panel.hidden = false;
+                montarChat();
+                setPanelTab('lumix');
+            }
 
             // El reporte de tickets es SIEMPRE con el asistente (formato chatbot):
             // ver v2/lumix.html. Decision de producto 2026-09-26; no reintroducir formularios.
@@ -315,7 +395,7 @@
                     '<div class="mt-top">' +
                     '<div><h1>Mis Tickets</h1><p>Consulta y da seguimiento a tus solicitudes.</p></div>' +
                     '<div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">' +
-                    '<a class="v2-btn" href="lumix.html" style="min-height:46px; font-size:15px;">' + svgIcono('ui.mas', 'media') + 'Reportar nuevo problema</a>' +
+                    '<button type="button" class="v2-btn" data-lumix style="min-height:46px; font-size:15px;">' + svgIcono('ui.mas', 'media') + 'Reportar nuevo problema</button>' +
                     '<span style="font-size:12px; color:var(--v2-muted);">Lumix te guía paso a paso</span>' +
                     '</div></div>' +
                     '<div class="mt-contadores">' +
@@ -352,6 +432,7 @@
                     ev.stopPropagation();
                     location.hash = 'ticket=' + b.dataset.abrir;
                 }));
+                vista.querySelectorAll('[data-lumix]').forEach(b => b.addEventListener('click', abrirLumix));
             }
             function renderListaConFoco() {
                 const pos = $('f-q') ? $('f-q').selectionStart : null;
@@ -362,22 +443,24 @@
 
             // ---------- Panel de detalle (pantalla 03, derecha) ----------
             function panelVacio() {
-                panel.innerHTML =
+                $('tab-ticket-txt').textContent = 'Detalle';
+                hojaTicket.innerHTML =
                     '<div class="cuerpo" style="align-items:center; justify-content:center; text-align:center; gap:10px;">' +
                     '<img src="assets/lumix-avatar.png" alt="" style="width:72px; height:72px; border-radius:50%; background:#ddf1f6;">' +
                     '<strong style="color:var(--v2-heading);">Selecciona un ticket</strong>' +
-                    '<span class="v2-nota">Aquí verás su seguimiento, los mensajes de soporte y podrás responder.</span>' +
+                    '<span class="v2-nota">Aquí verás su seguimiento y los mensajes de soporte. Para reportar algo nuevo, abre la pestaña "Hablar con Lumix".</span>' +
                     '</div>';
             }
 
             async function renderPanel(id) {
                 panel.classList.add('abierta');
-                panel.innerHTML = '<div class="cuerpo"><p class="v2-nota">Cargando ticket #' + esc(id) + '…</p></div>';
+                $('tab-ticket-txt').textContent = 'Ticket #' + id;
+                hojaTicket.innerHTML = '<div class="cuerpo"><p class="v2-nota">Cargando ticket #' + esc(id) + '…</p></div>';
                 let data;
                 try {
                     data = await LuxV2.callFn('ticket-manager/details?id=' + encodeURIComponent(id));
                 } catch (err) {
-                    panel.innerHTML = '<div class="cuerpo"><p class="v2-feedback error">' + esc(err.message) + '</p></div>';
+                    hojaTicket.innerHTML = '<div class="cuerpo"><p class="v2-feedback error">' + esc(err.message) + '</p></div>';
                     return;
                 }
                 state.detalle = data;
@@ -428,12 +511,10 @@
                     ? '<section style="display:flex; flex-direction:column; gap:10px;"><h3>Evidencias (' + adjuntos.length + ')</h3><div class="v2-adj" id="p-adjuntos" style="grid-template-columns:repeat(2, minmax(0,1fr));"></div></section>'
                     : '';
 
-                panel.innerHTML =
+                hojaTicket.innerHTML =
                     '<div class="cabeza">' +
                     '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">' +
-                    '<h2>Ticket #' + t.ticket_id + '</h2>' +
-                    '<div style="display:flex; align-items:center; gap:6px;">' + badgeEstado(t) +
-                    '<button type="button" class="v2-ib cerrar-panel" id="p-cerrar" aria-label="Cerrar detalle">' + svgIcono('ui.cerrar', 'media') + '</button></div></div>' +
+                    '<h2>Ticket #' + t.ticket_id + '</h2>' + badgeEstado(t) + '</div>' +
                     '<span style="font-size:15px; font-weight:600;">' + esc(t.titulo) + '</span>' +
                     '<div style="display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px; margin-top:6px;">' +
                     '<div style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:var(--v2-muted); font-weight:600;">Categoría</span><span style="font-size:13px; font-weight:600;">' + esc(t.catalogo ? t.catalogo.nombre : '—') + '</span></div>' +
@@ -477,7 +558,7 @@
 
                     '<div class="pie">' +
                     (cerrado
-                        ? '<p class="v2-nota" style="margin:0;">Este ticket ya fue atendido. Si necesitas algo más, <a href="lumix.html">cuéntale a Lumix</a> y levantamos uno nuevo.</p>'
+                        ? '<p class="v2-nota" style="margin:0;">Este ticket ya fue atendido. Si necesitas algo más, <button type="button" data-lumix style="background:none; border:none; padding:0; font:inherit; color:var(--v2-primary); font-weight:700; cursor:pointer; text-decoration:underline;">cuéntale a Lumix</button> y levantamos uno nuevo.</p>'
                         : (t.estado_id === 3 && ultimoStaff
                             ? '<div class="v2-aviso-naranja"><strong style="display:flex; align-items:center; gap:6px; margin-bottom:2px;">' + svgIcono('ui.alerta', 'chica') + 'Soporte necesita tu respuesta</strong>' + esc(ultimoStaff.contenido) + '</div>'
                             : '<label for="p-texto" style="font-size:12px; font-weight:600; color:var(--v2-muted);">Mensaje para ' + esc(t.asignado ? nombreDe(t.asignado) : 'el equipo de soporte') + '</label>') +
@@ -522,18 +603,11 @@
                     adjCont.appendChild(item);
                 });
 
-                // Cerrar (móvil)
-                const btnCerrarPanel = $('p-cerrar');
-                if (btnCerrarPanel) btnCerrarPanel.addEventListener('click', () => {
-                    panel.classList.remove('abierta');
-                    state.sel = null;
-                    history.replaceState(null, '', location.pathname + location.search);
-                    renderLista();
-                    panelVacio();
-                });
+                // Abrir Lumix desde el pie de tickets cerrados
+                hojaTicket.querySelectorAll('[data-lumix]').forEach(b => b.addEventListener('click', abrirLumix));
 
                 // CSAT
-                panel.querySelectorAll('#csat button').forEach(b => b.addEventListener('click', async () => {
+                hojaTicket.querySelectorAll('#csat button').forEach(b => b.addEventListener('click', async () => {
                     try {
                         const { error } = await LuxV2.sb().rpc('calificar_ticket', {
                             p_ticket_id: t.ticket_id,
@@ -592,9 +666,10 @@
                     '<h3 class="v2-h3" style="font-size:18px;">¿Necesitas reportar un problema?</h3>' +
                     '<p class="v2-nota" style="margin:0;">Cuéntale a Lumix qué pasó: te pregunta lo necesario, adjuntas evidencia y te da tu folio con el tiempo estimado de atención. También puedes consultar el estado de tus tickets.</p>' +
                     '<div style="display:flex; gap:10px; flex-wrap:wrap;">' +
-                    '<a class="v2-btn" href="lumix.html">Hablar con Lumix</a>' +
+                    '<button type="button" class="v2-btn" data-lumix>Hablar con Lumix</button>' +
                     '<a class="v2-btn secundario" href="#">Ver mis tickets</a>' +
                     '</div></div></div>';
+                vista.querySelectorAll('[data-lumix]').forEach(b => b.addEventListener('click', abrirLumix));
             }
             function renderPerfil() {
                 const p = state.perfil;
@@ -627,17 +702,20 @@
             }
             function route() {
                 const m = location.hash.match(/ticket=(\d+)/);
-                if (location.hash === '#ayuda') { marcarNav('nav-ayuda'); panel.hidden = true; return renderAyuda(); }
-                if (location.hash === '#perfil') { marcarNav('nav-perfil'); panel.hidden = true; return renderPerfil(); }
+                if (location.hash === '#ayuda') { document.title = 'Ayuda | Portal del Estudiante'; marcarNav('nav-ayuda'); panel.hidden = true; return renderAyuda(); }
+                if (location.hash === '#perfil') { document.title = 'Mi perfil | Portal del Estudiante'; marcarNav('nav-perfil'); panel.hidden = true; return renderPerfil(); }
                 marcarNav('nav-tickets');
                 panel.hidden = false;
                 if (m) {
                     state.sel = Number(m[1]);
+                    document.title = 'Ticket #' + state.sel + ' | Portal del Estudiante';
+                    setPanelTab('ticket');
                     renderLista();
                     renderPanel(state.sel);
                 } else {
                     state.sel = null;
-                    panel.classList.remove('abierta');
+                    document.title = 'Mis Tickets | Portal del Estudiante';
+                    if (state.panelTab !== 'lumix') panel.classList.remove('abierta');
                     renderLista();
                     panelVacio();
                 }
@@ -692,6 +770,19 @@
                 window.location.href = '../index.html';
             });
             $('nav-tickets').addEventListener('click', (e) => { e.preventDefault(); location.hash = ''; });
+            // 03d: en PC estos CTA abren la pestaña embebida; en celular, lumix.html
+            $('nav-nuevo').addEventListener('click', (e) => { if (!esMovil()) { e.preventDefault(); abrirLumix(); } });
+            $('card-lumix').addEventListener('click', (e) => { if (!esMovil()) { e.preventDefault(); abrirLumix(); } });
+            $('tab-ticket').addEventListener('click', () => setPanelTab('ticket'));
+            $('tab-lumix').addEventListener('click', abrirLumix);
+            $('p-cerrar-tabs').addEventListener('click', () => {
+                panel.classList.remove('abierta');
+                state.sel = null;
+                setPanelTab('ticket');
+                history.replaceState(null, '', location.pathname + location.search);
+                renderLista();
+                panelVacio();
+            });
 
             cargarNotifs = LuxV2.montarNotificaciones({
                 bell: $('btn-notifs'), punto: $('notif-punto'), panel: $('notif-panel'),

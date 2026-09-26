@@ -5,6 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gestión de Incidencias | Universidad Lux</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b1f4d'/%3E%3Cpath d='M10 7h4v14h8v4H10z' fill='%23fff'/%3E%3C/svg%3E">
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://aftrxnerszxjfjxegjuk.supabase.co; connect-src 'self' https://aftrxnerszxjfjxegjuk.supabase.co wss://aftrxnerszxjfjxegjuk.supabase.co ws://127.0.0.1:5173 ws://localhost:5173; object-src 'none'; base-uri 'self'; form-action 'self'">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,6 +15,16 @@
     <style>
         /* Login único (decisión 2026-09-26): la vista de acceso vive en
            alumnos.html (pantalla 01, la de la mascota); esta página redirige. */
+
+        /* Laptop común (≤1350px): sin el subtítulo del header y con la búsqueda
+           más angosta, "Cerrar sesión" ya no cae a una segunda línea. */
+        @media (max-width: 1350px) {
+            .v2-header .titulo span { display: none; }
+            .v2-header .buscar { width: 240px; }
+        }
+        /* Los 6 KPI se acomodan en 2 filas antes de truncar sus etiquetas */
+        .v2-kpis { grid-template-columns: repeat(auto-fit, minmax(196px, 1fr)); }
+        .v2-kpi .l { white-space: normal; line-height: 1.25; }
 
         /* ---- Dashboard (pantalla 05) ---- */
         .panel-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
@@ -460,7 +471,7 @@
                     '<span class="asunto">' + esc(t.titulo) + '</span>' +
                     '<div class="det-franja">' +
                     '<div class="celda"><span class="mk">Estudiante</span><span class="mv">' + esc(nombreDe(rep) || '—') + '</span><span class="ms">' + esc(rep.email || rep.tipo_usuario || '') + '</span></div>' +
-                    '<div class="celda"><span class="mk">Categoría</span><span class="mv">' + esc(t.catalogo ? t.catalogo.nombre : '—') + '</span><span class="ms">Área indicada: ' + esc(areaIndicada) + '</span></div>' +
+                    '<div class="celda"><span class="mk">Categoría</span><span class="mv">' + esc(t.catalogo ? t.catalogo.nombre : '—') + '</span><span class="ms">Área indicada al crear: ' + esc(areaIndicada) + '</span></div>' +
                     '<div class="celda"><span class="mk">Creado</span><span class="mv">' + esc(fmtFecha(t.fecha_creacion)) + '</span><span class="ms">' + esc(fmtRelativo(t.fecha_creacion)) + ' · Act. ' + esc(fmtFechaCorta(t.actualizado_en)) + '</span></div>' +
                     '<div class="celda"><span class="mk">Canal</span><span class="mv">' + canal.icono + esc(canal.nombre) + '</span><span class="ms">' + (t.canal_entrada === 'portal' ? 'Portal del estudiante' : 'Asistente virtual (QR)') + '</span></div>' +
                     '<div class="celda"><span class="mk">Responsable</span><span class="mv">' + esc(t.asignado ? nombreDe(t.asignado) : 'Sin asignar') + '</span><span class="ms">' + esc(t.area ? t.area.nombre : '') + '</span></div>' +
@@ -473,7 +484,6 @@
                     '<section class="v2-card" style="display:flex; flex-direction:column; gap:10px;">' +
                     '<h2 class="v2-h3">' + svgIcono('categoria.servicios_escolares', 'media') + 'Descripción original</h2>' +
                     '<p style="margin:0; font-size:14px; line-height:1.55; white-space:pre-wrap; overflow-wrap:anywhere;">' + esc(t.detalles) + '</p>' +
-                    '<span style="margin-top:auto; font-size:12px; color:var(--v2-muted);">Área indicada por el estudiante: ' + esc(areaIndicada) + '</span>' +
                     '</section>' +
                     '<section class="v2-card" style="display:flex; flex-direction:column; gap:12px;">' +
                     '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">' +
@@ -820,6 +830,9 @@
 
             function route() {
                 const m = location.hash.match(/ticket=(\d+)/);
+                document.title = (m ? 'Ticket #' + m[1]
+                    : location.hash === '#reportes' ? 'Reportes'
+                        : location.hash === '#tickets' ? 'Tickets' : 'Panel de incidencias') + ' | Gestión de Incidencias';
                 if (m) {
                     marcarNav('nav-tickets');
                     headerTitulo('<nav aria-label="Ruta" style="display:flex; align-items:center; gap:8px; font-size:14px; color:var(--v2-muted);">' +
