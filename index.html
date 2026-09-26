@@ -1267,13 +1267,14 @@
                     CATEGORY_MAP = {}; // Reset
                     data.categorias.forEach(c => {
                         const key = c.nombre.toLowerCase().replace(/\s+/g, '_').replace(/[^\w]/g, '');
-                        CATEGORY_MAP[key] = c.catalogo_id;
+                        CATEGORY_MAP[c.codigo || key] = c.catalogo_id; // B8: codigo sembrado = valor del chat
                     });
                 }
                 if (data.prioridades) {
                     PRIORITY_MAP = {};
                     data.prioridades.forEach(p => {
-                        const key = p.nombre.toLowerCase();
+                        const CODIGO_A_CHAT = { critico: 'alta', medio: 'media', bajo: 'baja' }; // B8
+                        const key = CODIGO_A_CHAT[p.codigo] || p.codigo || p.nombre.toLowerCase();
                         PRIORITY_MAP[key] = p.catalogo_id;
                     });
                 }
