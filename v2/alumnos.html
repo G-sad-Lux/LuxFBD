@@ -449,7 +449,11 @@
                     '</section>' +
                     evid +
                     '<section style="display:flex; flex-direction:column; gap:10px;">' +
-                    '<h3>Mensajes</h3>' +
+                    '<h3>Conversación con soporte</h3>' +
+                    '<span style="font-size:12px; color:var(--v2-muted); margin-top:-6px;">' +
+                    (t.asignado
+                        ? 'Atiende: <strong>' + esc(nombreDe(t.asignado)) + '</strong>' + (t.area ? ' · ' + esc(t.area.nombre) : '')
+                        : 'Por asignar · el equipo lo revisará pronto') + '</span>' +
                     (msgs || '<p class="v2-nota" style="margin:0;">Aún no hay mensajes. Soporte te escribirá por aquí.</p>') +
                     '</section>' +
                     (t.resumen_solucion
@@ -475,9 +479,9 @@
                         ? '<p class="v2-nota" style="margin:0;">Este ticket ya fue atendido. Si necesitas algo más, <a href="lumix.html">cuéntale a Lumix</a> y levantamos uno nuevo.</p>'
                         : (t.estado_id === 3 && ultimoStaff
                             ? '<div class="v2-aviso-naranja"><strong style="display:flex; align-items:center; gap:6px; margin-bottom:2px;">' + svgIcono('ui.alerta', 'chica') + 'Soporte necesita tu respuesta</strong>' + esc(ultimoStaff.contenido) + '</div>'
-                            : '<label for="p-texto" style="font-size:12px; font-weight:600; color:var(--v2-muted);">Responder al equipo de soporte</label>') +
+                            : '<label for="p-texto" style="font-size:12px; font-weight:600; color:var(--v2-muted);">Mensaje para ' + esc(t.asignado ? nombreDe(t.asignado) : 'el equipo de soporte') + '</label>') +
                     (cerrado ? '' :
-                        '<textarea id="p-texto" class="v2-area" rows="2" maxlength="2000" placeholder="Escribe una respuesta…"></textarea>' +
+                        '<textarea id="p-texto" class="v2-area" rows="2" maxlength="2000" placeholder="Escribe a ' + esc(t.asignado ? (t.asignado.nombre || 'soporte') : 'soporte') + '…"></textarea>' +
                         '<div style="display:flex; align-items:center; gap:6px;">' +
                         '<button type="button" class="v2-ib" id="p-adjuntar" aria-label="Adjuntar archivo" style="width:40px; height:40px;">' + svgIcono('ui.clip', 'media') + '</button>' +
                         '<input type="file" id="p-archivo" accept="image/png,image/jpeg,application/pdf" hidden>' +

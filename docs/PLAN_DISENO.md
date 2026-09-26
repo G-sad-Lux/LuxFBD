@@ -1,5 +1,7 @@
 # Plan de implementación — Diseño High Fidelity (design-handoff)
 
+> **Estado: EJECUTADO el 2026-09-26** (F-D0→F-D4; commits `573388c`, `7ca5360`, `2bdf917`, `36afc37` y cierre). Durante la ejecución el equipo re-exportó `design-handoff/` con una 2ª iteración (Lumix embebido 03d, portal móvil 08-10, flujo QR demo §3.7 con su D5 abierta); ese delta quedó como backlog en [PLAN.md](PLAN.md), no aquí.
+
 **Fecha:** 26 de septiembre de 2026 · **Fuente:** [`design-handoff/`](../design-handoff/) (Claude Design, 6 pantallas de la §20 del doc + specs + tokens + iconos + assets con la mascota real).
 **Objetivo:** reestilizar la V2 para calcar las capturas, **sin tocar la v1, el interruptor, la lógica de datos ni las migraciones** (salvo los puntos backend aprobados abajo).
 **Ejecución:** en un chat nuevo — arrancar leyendo `design-handoff/README.md`, `design-handoff/specs.md` y **este plan** (las decisiones D1-D4 ya están resueltas aquí).

@@ -44,9 +44,18 @@
 - [x] Cosméticos: iconos de categoría, avatares de iniciales en burbujas, selector "N por página", % numérico en el SLA, fechas por hito en el seguimiento, card de archivo con peso/fecha.
 - [ ] **Encender la V2 por default** (`config.js v2: true`) cuando F4 esté validada — decisión de equipo antes de la demo.
 
-### 🎨 Fase de diseño High Fidelity — SIGUIENTE (ejecutar en chat nuevo)
+### 🎨 Fase de diseño High Fidelity — ✅ EJECUTADA (2026-09-26)
 
-- [ ] Implementar el restyle completo según **docs/PLAN_DISENO.md** + `design-handoff/` (README con el prompt de arranque, specs, tokens, iconos, assets con la mascota real). Fases F-D0→F-D4, ~5 días, una página a la vez con comparación contra captura. Decisiones D1-D4 ya resueltas en el plan (nace-con-prioridad · Crear cuenta oculta · SLA sin pausa · Plus Jakarta Sans). Backend aprobado: solo `resueltos_semana` en la vista KPI.
+- [x] Restyle completo F-D0→F-D4 según **docs/PLAN_DISENO.md** + `design-handoff/` (1ª exportación): F-D0 tokens/assets/iconos de trazo/Plus Jakarta Sans + migración 0018 `resueltos_semana` (B2, PGlite verde y aplicada al proyecto); F-D1 admin (acceso embebido 04 con banner genérico, dashboard 05 con 6 KPI/vistas rápidas/exportar CSV/tabla apilada/Clasificar, detalle 06 con pestañas Conversación-Bitácora, nota interna, checkbox "Solicitar información→Esperando", modal Resolver y gestión auto-aplicada); F-D2 alumnos (acceso 01 con QR+mascota y pestaña única por D2, Mis Tickets 03 con panel lateral de 380px, línea de tiempo de 5 estados, CSAT y respuesta por estado); F-D3 Lumix (restyle 02 completo + paso de resumen + consultar con "qué falta" + acceso embebido para el flujo QR); F-D4 QA contra capturas + regresión interruptor/v1. Commits `573388c` → `7ca5360` → `2bdf917` → `36afc37` → cierre.
+
+### 🎨 Diseño, 2ª iteración del handoff (re-export 2026-09-26, llegó DURANTE la implementación)
+
+*El equipo re-exportó `design-handoff/` con pantallas nuevas mientras se ejecutaba la fase anterior; nada de esto estaba en PLAN_DISENO.md. Queda como backlog:*
+
+- [ ] **Lumix embebido en Mis Tickets (PC)** (captura 03d, specs §3.3): control segmentado de 60px "Ticket #ID / Hablar con Lumix" en el panel derecho; "Reportar nuevo problema", "Nuevo reporte", la tarjeta de la barra lateral y el enlace de cerrados abren esa pestaña en vez de navegar; al crear, el ticket aparece en la lista sin recargar; botón de éxito "Ver en mi lista". (~1 d)
+- [ ] **Portal móvil <600 px** (capturas 08-10, specs §3.8): acceso con cabecera azul marino y botón "Reportar con Lumix"; Mis Tickets con chips de filtro con contador, Esperando primero con franja "{Encargado} espera tu comprobante" y barra inferior de 76px con Lumix central; detalle móvil propio con barra de avance de 5 segmentos, aviso naranja fijo y vista previa del adjunto. Hoy la página ya es responsiva pero con el patrón cajón lateral. (~1-1.5 d)
+- [ ] 🔴 **D5 del handoff — demo QR por matrícula SIN contraseña** (02a/02b, §3.7): **no se implementó a propósito**: la propia spec la marca *Pendiente* (permite reportar a nombre de otro alumno) y contradice la decisión de seguridad vigente "identificación por sesión, nunca matrícula por chat". Decidir en equipo cómo (candidatas: Edge Function que valida matrícula y crea con service role solo con flag de demo encendido; o el anonymous sign-in 72h ya registrado). Mientras tanto el QR abre Lumix con **login embebido en la misma pantalla** (ya funciona).
+- [ ] Spec §3.7 pide `canal_entrada = 'lumix'`: hoy el CHECK sólo admite `portal|chatbot` y la UI ya muestra "Lumix"; decidir si amerita migración de rename o se queda `chatbot`.
 
 ### Opcionales con valor de concurso (del análisis de flujos, P3)
 
