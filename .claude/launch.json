@@ -1,0 +1,16 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "lux-site",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "live-server",
+        "--port=5173",
+        "--no-browser",
+        "--ignore=node_modules"
+      ],
+      "port": 5173
+    }
+  ]
+}

@@ -2,16 +2,31 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
-const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE',
+// CORS con allowlist (auditoria F7/hardening): solo el sitio publicado y dev local.
+const ALLOWED_ORIGINS = [
+    'https://g-sad-lux.github.io',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+]
+const corsFor = (req: Request) => {
+    const origin = req.headers.get('Origin') ?? ''
+    return {
+        'Access-Control-Allow-Origin': ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0],
+        'Vary': 'Origin',
+        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE',
+    }
 }
+
+// Errores de validacion propios: se exponen al cliente. Todo lo demas
+// (errores de Postgres, etc.) responde un mensaje generico (auditoria F7).
+const httpError = (message: string, status = 400) =>
+    Object.assign(new Error(message), { expose: true, status })
 
 serve(async (req) => {
     // Handle CORS
     if (req.method === 'OPTIONS') {
-        return new Response('ok', { headers: corsHeaders })
+        return new Response('ok', { headers: corsFor(req) })
     }
 
     try {
@@ -27,7 +42,7 @@ serve(async (req) => {
 
         if (!user) {
             return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                headers: { ...corsFor(req), 'Content-Type': 'application/json' },
                 status: 401,
             })
         }
@@ -47,14 +62,20 @@ serve(async (req) => {
         }
 
         return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            headers: { ...corsFor(req), 'Content-Type': 'application/json' },
             status: 405,
         })
 
     } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 400,
+        // Detalle completo solo a los logs de la funcion, nunca al cliente.
+        console.error('ticket-manager error:', error)
+        const status = (error as { status?: number })?.status ?? 400
+        const message = (error as { expose?: boolean })?.expose
+            ? (error as Error).message
+            : 'Error interno del servidor'
+        return new Response(JSON.stringify({ error: message }), {
+            headers: { ...corsFor(req), 'Content-Type': 'application/json' },
+            status,
         })
     }
 })
@@ -64,7 +85,7 @@ async function createTicket(req: Request, supabase: any, user: any) {
 
     // Basic Validation
     if (!titulo || !categoria_id) {
-        throw new Error('Missing required fields: titulo, categoria_id')
+        throw httpError('Missing required fields: titulo, categoria_id')
     }
 
     // Insert Ticket (Assuming 'reportador_id' matches Auth User or linked profile)
@@ -77,7 +98,7 @@ async function createTicket(req: Request, supabase: any, user: any) {
         .single()
 
     if (profileError || !profile) {
-        throw new Error('User profile not found in database. Please contact support.')
+        throw httpError('User profile not found in database. Please contact support.', 404)
     }
 
     // 2. Insert Ticket
@@ -104,7 +125,7 @@ async function createTicket(req: Request, supabase: any, user: any) {
         /*
           adjunto payload expected: {
              nombre_archivo: string,
-             ruta_archivo_url: string,
+             ruta_archivo_url: string (ruta dentro del bucket privado),
              size_bytes: number,
              mime_type: string
           }
@@ -127,7 +148,7 @@ async function createTicket(req: Request, supabase: any, user: any) {
     }
 
     return new Response(JSON.stringify(data), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsFor(req), 'Content-Type': 'application/json' },
         status: 201,
     })
 }
@@ -140,7 +161,7 @@ async function listTickets(req: Request, supabase: any, user: any) {
         .eq('auth_uid', user.id)
         .single()
 
-    if (!profile) throw new Error('Profile not found')
+    if (!profile) throw httpError('Profile not found', 404)
 
     let query = supabase
         .from('ticket')
@@ -155,7 +176,8 @@ async function listTickets(req: Request, supabase: any, user: any) {
         `)
         .order('fecha_creacion', { ascending: false })
 
-    // If student or maestro, filter by own tickets (using names from DB)
+    // If student or maestro, filter by own tickets (using names from DB).
+    // Nota: RLS ya acota lo visible; este filtro es solo presentacion.
     if (['Alumno', 'Maestro', 'estudiante'].includes(profile.tipo_usuario)) {
         query = query.eq('reportador_id', profile.usuario_id)
     }
@@ -165,14 +187,16 @@ async function listTickets(req: Request, supabase: any, user: any) {
     if (error) throw error
 
     return new Response(JSON.stringify(data), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsFor(req), 'Content-Type': 'application/json' },
     })
 }
 
 async function getTicketDetails(req: Request, url: URL, supabase: any, user: any) {
     const ticketId = url.searchParams.get('id')
-    if (!ticketId) throw new Error('Missing ticket ID')
+    if (!ticketId) throw httpError('Missing ticket ID')
 
+    // Se consulta con el JWT del usuario: RLS deniega tickets ajenos ANTES
+    // de tocar historial o adjuntos.
     const { data: ticket, error: tErr } = await supabase
         .from('ticket')
         .select(`
@@ -216,8 +240,28 @@ async function getTicketDetails(req: Request, url: URL, supabase: any, user: any
         if (att) attachments = att
     } catch (e) { console.warn('Attachment fetch error:', e) }
 
+    // Bucket privado: convertir la ruta guardada en URL firmada (1 hora).
+    // createSignedUrl corre con el JWT del usuario, asi que la politica de
+    // storage (dueño de carpeta o staff) decide quien puede firmar.
+    for (const att of attachments) {
+        try {
+            let path = String(att.ruta_archivo_url ?? '')
+            if (path.startsWith('http')) {
+                // Compatibilidad con filas viejas que guardaban la URL publica
+                const marker = '/tickets/'
+                const idx = path.indexOf(marker)
+                if (idx === -1) continue
+                path = decodeURIComponent(path.slice(idx + marker.length))
+            }
+            const { data: signed } = await supabase.storage
+                .from('tickets')
+                .createSignedUrl(path, 3600)
+            if (signed?.signedUrl) att.ruta_archivo_url = signed.signedUrl
+        } catch (_e) { /* sin firma: la UI muestra solo el nombre */ }
+    }
+
     return new Response(JSON.stringify({ ticket, history: historyData, attachments }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsFor(req), 'Content-Type': 'application/json' },
         status: 200,
     })
 }
@@ -225,7 +269,7 @@ async function getTicketDetails(req: Request, url: URL, supabase: any, user: any
 async function updateTicket(req: Request, supabase: any, user: any) {
     const { ticket_id, maestro_notificado_id, estado_id } = await req.json()
 
-    if (!ticket_id) throw new Error('Missing ticket ID')
+    if (!ticket_id) throw httpError('Missing ticket ID')
 
     // 1. Check Permissions
     const { data: profile } = await supabase
@@ -234,11 +278,11 @@ async function updateTicket(req: Request, supabase: any, user: any) {
         .eq('auth_uid', user.id)
         .single()
 
-    if (!profile) throw new Error('Profile not found')
+    if (!profile) throw httpError('Profile not found', 404)
 
     const allowedRoles = ['Administrativo', 'Maestro', 'Soporte']
     if (!allowedRoles.includes(profile.tipo_usuario)) {
-        throw new Error('Unauthorized to update tickets')
+        throw httpError('Unauthorized to update tickets', 403)
     }
 
     // 2. Prepare Update Payload
@@ -247,10 +291,10 @@ async function updateTicket(req: Request, supabase: any, user: any) {
     if (estado_id !== undefined) updates.estado_id = estado_id
 
     if (Object.keys(updates).length === 0) {
-        throw new Error('No fields to update')
+        throw httpError('No fields to update')
     }
 
-    // 3. Update Ticket
+    // 3. Update Ticket (RLS: solo staff puede actualizar)
     const { data, error } = await supabase
         .from('ticket')
         .update(updates)
@@ -301,13 +345,13 @@ async function updateTicket(req: Request, supabase: any, user: any) {
     } catch (e) { console.warn('History log failed critical:', e) }
 
     return new Response(JSON.stringify(data), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsFor(req), 'Content-Type': 'application/json' },
         status: 200,
     })
 }
 
 async function listStaff(req: Request, supabase: any, user: any) {
-    // Only fetch users who can be assigned tickets (Admin, Maestro, Agente, Soporte, Administrativo)
+    // Only fetch users who can be assigned tickets (RLS devuelve vacio a alumnos)
     const { data, error } = await supabase
         .from('usuario')
         .select('usuario_id, nombre, apellido, tipo_usuario')
@@ -317,6 +361,6 @@ async function listStaff(req: Request, supabase: any, user: any) {
     if (error) throw error
 
     return new Response(JSON.stringify(data), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsFor(req), 'Content-Type': 'application/json' },
     })
 }

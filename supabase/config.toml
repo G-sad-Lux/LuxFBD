@@ -10,3 +10,9 @@ verify_jwt = true
 # cae a los mapas estaticos (IDs sembrados en 0002). Mismo comportamiento que la v1.
 # Cuando la fase 2 mueva loadCatalogs() a despues del login, funcionara con token.
 verify_jwt = true
+
+[auth]
+# F1 de la auditoria: la app no tiene registro publico; sin esto cualquiera
+# con la anon key puede crear cuentas via /auth/v1/signup.
+enable_signup = false
+minimum_password_length = 10

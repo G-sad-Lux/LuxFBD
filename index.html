@@ -5,6 +5,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Lux | Sitio Sencillo y Responsivo</title>
+    <!-- CSP: limita a donde pueden conectarse/exfiltrar scripts. El host de Supabase esta fijo; si cambia el proyecto, actualizar aqui y en config.js. -->
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://aftrxnerszxjfjxegjuk.supabase.co; connect-src 'self' https://aftrxnerszxjfjxegjuk.supabase.co ws://127.0.0.1:5173 ws://localhost:5173; object-src 'none'; base-uri 'self'; form-action 'self'">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1203,7 +1206,7 @@
     </div>
 
     <!-- Supabase Integration -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2" integrity="sha384-WgXwGL6fUsYJWNaKJgVbrJKGRQwc1vieh2oy4kw9nXqpNDz3tdSsqEYUgeHD/NuF" crossorigin="anonymous"></script>
     <script src="config.js"></script>
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
@@ -1215,7 +1218,7 @@
         const navLinks = document.querySelectorAll('.nav-link');
 
         // Initialize Supabase (Safe Mode)
-        let supabase = null;
+        // supabase (global del bundle UMD) se reemplaza por el cliente en el init de abajo.
         try {
             if (window.supabaseConfig && window.supabase) {
                 supabase = window.supabase.createClient(window.supabaseConfig.url, window.supabaseConfig.key);
@@ -1232,6 +1235,11 @@
         const projectRef = window.supabaseConfig
             ? new URL(window.supabaseConfig.url).hostname.split('.')[0]
             : '';
+
+        // Escapa texto del servidor antes de insertarlo en innerHTML (anti-XSS).
+        const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        })[c]);
 
         // --- Edge Function Integration: Catalog Service ---
         async function loadCatalogs() {
@@ -1679,13 +1687,10 @@
 
                     if (error) throw error;
 
-                    const { data: { publicUrl } } = supabase.storage
-                        .from('tickets')
-                        .getPublicUrl(filePath);
-
+                    // Bucket privado: se guarda la ruta; /details devuelve una URL firmada.
                     chatState.ticket.attachment = {
                         nombre_archivo: file.name,
-                        ruta_archivo_url: publicUrl,
+                        ruta_archivo_url: filePath,
                         size_bytes: file.size,
                         mime_type: file.type
                     };
@@ -1752,10 +1757,10 @@
 
                     row.innerHTML = `
                         <td>#${t.ticket_id}</td>
-                        <td>${t.titulo}</td>
-                        <td><span class="status-badge ${statusClass}">${statusName}</span></td>
-                        <td>${prioName}</td>
-                        <td>${assignedName}</td>
+                        <td>${esc(t.titulo)}</td>
+                        <td><span class="status-badge ${statusClass}">${esc(statusName)}</span></td>
+                        <td>${esc(prioName)}</td>
+                        <td>${esc(assignedName)}</td>
                         <td>${date}</td>
                     `;
                     row.onclick = () => openTicketDetail(t.ticket_id);
@@ -1803,11 +1808,11 @@
                 const history = data.history || [];
                 const attachments = data.attachments || [];
 
-                const statusName = ticket.estado ? ticket.estado.nombre : 'Unknown';
-                const prioName = ticket.prioridad ? ticket.prioridad.nombre : 'Unknown';
-                const areaName = ticket.area ? ticket.area.nombre : 'General';
-                const reporterName = ticket.reportador ? `${ticket.reportador.nombre} ${ticket.reportador.apellido} (${ticket.reportador.tipo_usuario})` : 'Unknown';
-                const assignedName = ticket.asignado ? `${ticket.asignado.nombre} ${ticket.asignado.apellido}` : 'Sin Asignar';
+                const statusName = esc(ticket.estado ? ticket.estado.nombre : 'Unknown');
+                const prioName = esc(ticket.prioridad ? ticket.prioridad.nombre : 'Unknown');
+                const areaName = esc(ticket.area ? ticket.area.nombre : 'General');
+                const reporterName = esc(ticket.reportador ? `${ticket.reportador.nombre} ${ticket.reportador.apellido} (${ticket.reportador.tipo_usuario})` : 'Unknown');
+                const assignedName = esc(ticket.asignado ? `${ticket.asignado.nombre} ${ticket.asignado.apellido}` : 'Sin Asignar');
 
                 // Build Actions
                 let actionHTML = '';
@@ -1818,7 +1823,7 @@
                     let staffOptions = '<option value="">-- Sin Asignar --</option>';
                     STAFF_LIST.forEach(s => {
                         const selected = (ticket.maestro_notificado_id === s.usuario_id) ? 'selected' : '';
-                        staffOptions += `<option value="${s.usuario_id}" ${selected}>${s.nombre} ${s.apellido} (${s.tipo_usuario})</option>`;
+                        staffOptions += `<option value="${esc(s.usuario_id)}" ${selected}>${esc(s.nombre)} ${esc(s.apellido)} (${esc(s.tipo_usuario)})</option>`;
                     });
 
                     actionHTML = `
@@ -1834,24 +1839,11 @@
                     `;
                 }
 
-                // Render Attachments
-                let attHTML = '';
-                if (attachments.length > 0) {
-                    attHTML = '<div class="detail-item" style="grid-column: 1 / -1; margin-top: 10px;"><label>Evidencias Adjuntas</label><div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:5px;">';
-                    attachments.forEach(att => {
-                        if (att.mime_type && att.mime_type.startsWith('image/')) {
-                            // Use onclick to open lightbox instead of new tab
-                            attHTML += `<div onclick="openImageViewer('${att.ruta_archivo_url}')" style="cursor:pointer; position:relative; group:hover;"><img src="${att.ruta_archivo_url}" style="width:100px; height:100px; object-fit:cover; border-radius:8px; border:1px solid #555; transition:transform 0.2s;"><div style="position:absolute; inset:0; background:rgba(0,0,0,0.3); display:flex; align-items:center; justify-content:center; opacity:0; hover:opacity:1; color:white; border-radius:8px;">🔍</div></div>`;
-                        } else {
-                            attHTML += `<a href="${att.ruta_archivo_url}" target="_blank" style="color: var(--gold); text-decoration: underline;">📄 ${att.nombre_archivo}</a>`;
-                        }
-                    });
-                    attHTML += '</div></div>';
-                }
+                // Adjuntos: se construyen con DOM (sin innerHTML) despues de armar la plantilla.
 
                 content.innerHTML = `
                     <h2 style="color:var(--gold); border-bottom:1px solid #333; padding-bottom:10px; margin-top:0;">
-                        Ticket #${ticket.ticket_id}: ${ticket.titulo}
+                        Ticket #${ticket.ticket_id}: ${esc(ticket.titulo)}
                     </h2>
                     
                     ${actionHTML}
@@ -1867,10 +1859,10 @@
                         <div class="detail-item" style="grid-column: 1 / -1;">
                             <label>Detalles del Problema</label>
                             <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:8px; color:#ddd;">
-                                ${ticket.detalles}
+                                ${esc(ticket.detalles)}
                             </div>
                         </div>
-                        ${attHTML}
+                        <div class="detail-item" style="grid-column: 1 / -1; margin-top: 10px;" data-att-slot hidden><label>Evidencias Adjuntas</label><div data-att-list style="display:flex; gap:10px; flex-wrap:wrap; margin-top:5px;"></div></div>
                     </div>
 
                     <h3 style="color:var(--primary);">Historial de Cambios</h3>
@@ -1879,13 +1871,45 @@
                             <div class="timeline-item">
                                 <div class="timeline-date">${new Date(h.fecha_cambio).toLocaleString()}</div>
                                 <div class="timeline-content">
-                                    <strong>${h.autor ? h.autor.nombre : 'Sistema'}:</strong> ${h.cambio || h.campo_modificado}
-                                    ${h.valor_nuevo && h.valor_nuevo !== '-' ? `<br>➔ ${h.valor_nuevo}` : ''}
+                                    <strong>${esc(h.autor ? h.autor.nombre : 'Sistema')}:</strong> ${esc(h.cambio || h.campo_modificado)}
+                                    ${h.valor_nuevo && h.valor_nuevo !== '-' ? `<br>➔ ${esc(h.valor_nuevo)}` : ''}
                                 </div>
                             </div>
                         `).join('')}
                     </div>
                 `;
+
+                // Render seguro de evidencias: src/href como propiedades, nunca como HTML.
+                const attSlot = content.querySelector('[data-att-slot]');
+                if (attSlot && attachments.length > 0) {
+                    attSlot.hidden = false;
+                    const attList = attSlot.querySelector('[data-att-list]');
+                    attachments.forEach(att => {
+                        let url = '';
+                        try {
+                            const u = new URL(att.ruta_archivo_url);
+                            if (u.protocol === 'https:' || u.protocol === 'http:') url = u.href;
+                        } catch (_) { /* ruta sin firmar o invalida: se muestra solo el nombre */ }
+                        const name = att.nombre_archivo || 'archivo';
+                        if (url && att.mime_type && att.mime_type.startsWith('image/')) {
+                            const wrap = document.createElement('div');
+                            wrap.style.cursor = 'pointer';
+                            const img = document.createElement('img');
+                            img.src = url;
+                            img.alt = name;
+                            img.style.cssText = 'width:100px; height:100px; object-fit:cover; border-radius:8px; border:1px solid #555;';
+                            wrap.appendChild(img);
+                            wrap.addEventListener('click', () => openImageViewer(url));
+                            attList.appendChild(wrap);
+                        } else {
+                            const a = document.createElement('a');
+                            if (url) { a.href = url; a.target = '_blank'; a.rel = 'noopener'; }
+                            a.textContent = '📄 ' + name;
+                            a.style.cssText = 'color: var(--gold); text-decoration: underline;';
+                            attList.appendChild(a);
+                        }
+                    });
+                }
 
             } catch (err) {
                 console.error(err);

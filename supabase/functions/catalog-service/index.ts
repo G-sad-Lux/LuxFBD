@@ -2,17 +2,25 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
-const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+// CORS con allowlist: solo el sitio publicado y dev local.
+const ALLOWED_ORIGINS = [
+    'https://g-sad-lux.github.io',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+]
+const corsFor = (req: Request) => {
+    const origin = req.headers.get('Origin') ?? ''
+    return {
+        'Access-Control-Allow-Origin': ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0],
+        'Vary': 'Origin',
+        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    }
 }
 
 serve(async (req) => {
-    if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+    if (req.method === 'OPTIONS') return new Response('ok', { headers: corsFor(req) })
 
     try {
-        // Note: Catalog service might be public or protected. 
-        // If protected, we need auth header. Assuming public for 'anon' key usage.
         const supabaseClient = createClient(
             Deno.env.get('SUPABASE_URL') ?? '',
             Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -35,13 +43,15 @@ serve(async (req) => {
         }
 
         return new Response(JSON.stringify(response), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            headers: { ...corsFor(req), 'Content-Type': 'application/json' },
             status: 200,
         })
 
     } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        // Detalle a los logs; al cliente solo un mensaje generico.
+        console.error('catalog-service error:', error)
+        return new Response(JSON.stringify({ error: 'Error interno del servidor' }), {
+            headers: { ...corsFor(req), 'Content-Type': 'application/json' },
             status: 400,
         })
     }
