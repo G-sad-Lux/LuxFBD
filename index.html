@@ -1019,6 +1019,7 @@
                         </div>
                         <button type="button">Entrar como invitado</button>
                     </div>
+                    <a id="v2-access" href="v2/alumnos.html" hidden style="display:block; text-align:center; padding:10px; border-radius:10px; background:#eef3ff; color:#1652c0; font-weight:600; text-decoration:none;">✨ Probar la nueva experiencia <small>(beta)</small></a>
                     <a href="#">Aviso de cookies</a>
                 </div>
             </div>
@@ -1823,6 +1824,9 @@
                 }
             });
             restoreSession();
+            // Acceso a la experiencia V2 (docs/PLAN_V2.md); apagada por defecto.
+            const v2Access = document.getElementById("v2-access");
+            if (v2Access && window.luxV2Enabled && window.luxV2Enabled()) v2Access.removeAttribute("hidden");
         }
 
         // --- Support Dashboard Logic (las vistas las maneja showView) ---

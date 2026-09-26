@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestión de Incidencias | Universidad Lux</title>
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://aftrxnerszxjfjxegjuk.supabase.co; connect-src 'self' https://aftrxnerszxjfjxegjuk.supabase.co ws://127.0.0.1:5173 ws://localhost:5173; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared.css">
+</head>
+
+<body>
+    <header class="v2-topbar">
+        <div class="brand">Gestión de Incidencias<small>Atención, seguimiento y soluciones · área de soporte</small></div>
+        <span class="v2-beta">BETA</span>
+        <div class="spacer"></div>
+        <button id="btn-salir" class="v2-btn secundario" hidden>Cerrar sesión</button>
+    </header>
+
+    <main class="v2-main">
+        <div class="v2-card" id="contenido">
+            <p class="v2-nota">Cargando…</p>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2"
+        integrity="sha384-WgXwGL6fUsYJWNaKJgVbrJKGRQwc1vieh2oy4kw9nXqpNDz3tdSsqEYUgeHD/NuF"
+        crossorigin="anonymous"></script>
+    <script src="../config.js"></script>
+    <script src="shared.js"></script>
+    <script>
+        (async function () {
+            if (!LuxV2.requireV2()) return;
+
+            const cont = document.getElementById('contenido');
+            const btnSalir = document.getElementById('btn-salir');
+            const esc = LuxV2.esc;
+
+            const perfil = await LuxV2.getProfile();
+            if (!perfil) {
+                cont.innerHTML =
+                    '<h2>Acceso del personal</h2>' +
+                    '<p class="v2-nota">Inicia sesión con tu cuenta institucional autorizada.</p>' +
+                    '<p><a class="v2-btn" href="../index.html">Ir al inicio de sesión</a></p>';
+                return;
+            }
+
+            if (!perfil.esStaff) {
+                // RBAC visual; el que manda es RLS + es_staff() en el servidor.
+                cont.innerHTML =
+                    '<h2>Acceso solo para personal autorizado</h2>' +
+                    '<p class="v2-nota">Tu cuenta (' + esc(perfil.email || '') + ') no tiene rol de soporte.</p>' +
+                    '<p><a class="v2-btn secundario" href="alumnos.html">Ir a Mis Tickets</a></p>';
+                return;
+            }
+
+            btnSalir.hidden = false;
+            btnSalir.addEventListener('click', LuxV2.logout);
+
+            try {
+                const tickets = await LuxV2.callFn('ticket-manager/list');
+                const abiertos = tickets.filter(function (t) { return t.estado && t.estado.nombre === 'Abierto'; }).length;
+                const sinAsignar = tickets.filter(function (t) { return !t.maestro_notificado_id; }).length;
+
+                cont.innerHTML =
+                    '<h2>Hola, ' + esc(perfil.nombreCompleto) + '</h2>' +
+                    '<p>El sistema tiene <strong>' + tickets.length + '</strong> ticket(s): ' +
+                    '<span class="v2-badge abierto">' + abiertos + ' abiertos</span> ' +
+                    '<span class="v2-badge">' + sinAsignar + ' sin asignar</span></p>' +
+                    '<p class="v2-nota">Dashboard completo (KPIs, filtros, SLA y detalle con resolución) en construcción — fase F3 del plan V2.</p>' +
+                    '<p><a class="v2-btn secundario" href="../index.html#soporte">Usar el panel v1 mientras tanto</a></p>';
+            } catch (err) {
+                console.error(err);
+                cont.innerHTML = '<h2>No se pudieron cargar los tickets</h2>' +
+                    '<p class="v2-nota">' + esc(err.message) + '</p>';
+            }
+        })();
+    </script>
+</body>
+
+</html>

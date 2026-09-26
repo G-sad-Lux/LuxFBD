@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lumix | Asistente de Soporte</title>
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://aftrxnerszxjfjxegjuk.supabase.co; connect-src 'self' https://aftrxnerszxjfjxegjuk.supabase.co ws://127.0.0.1:5173 ws://localhost:5173; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        /* Lumix es móvil primero: una sola columna a lo alto */
+        .lumix-hero {
+            max-width: 440px;
+            margin: 10vh auto 0;
+            text-align: center;
+            padding: 0 20px;
+        }
+        .lumix-avatar {
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3ad6c9, #1652c0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            margin: 0 auto 14px;
+            box-shadow: var(--v2-shadow);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="lumix-hero" id="contenido">
+        <div class="lumix-avatar">👽</div>
+        <h1>¡Hola! Soy <span style="color:var(--v2-primary)">Lumix</span></h1>
+        <p class="v2-nota">Cargando…</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2"
+        integrity="sha384-WgXwGL6fUsYJWNaKJgVbrJKGRQwc1vieh2oy4kw9nXqpNDz3tdSsqEYUgeHD/NuF"
+        crossorigin="anonymous"></script>
+    <script src="../config.js"></script>
+    <script src="shared.js"></script>
+    <script>
+        (async function () {
+            if (!LuxV2.requireV2()) return;
+            const cont = document.getElementById('contenido');
+            const sesion = await LuxV2.getSession();
+            cont.querySelector('.v2-nota').outerHTML =
+                '<p class="v2-nota">Tu asistente de soporte, optimizado para tu celular.</p>' +
+                (sesion
+                    ? '<p>Muy pronto podrás reportar y consultar tus incidencias desde aquí <strong>(fase F4)</strong>.</p>' +
+                      '<p><a class="v2-btn" href="alumnos.html">Ver mis tickets</a></p>'
+                    : '<p class="v2-nota">Primero inicia sesión en el Campus.</p>' +
+                      '<p><a class="v2-btn" href="../index.html">Iniciar sesión</a></p>');
+        })();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mis Tickets | Portal de Atención al Estudiante</title>
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://aftrxnerszxjfjxegjuk.supabase.co; connect-src 'self' https://aftrxnerszxjfjxegjuk.supabase.co ws://127.0.0.1:5173 ws://localhost:5173; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared.css">
+</head>
+
+<body>
+    <header class="v2-topbar">
+        <div class="brand">Portal de Atención al Estudiante<small>Universidad Lux · tu espacio de soporte</small></div>
+        <span class="v2-beta">BETA</span>
+        <div class="spacer"></div>
+        <button id="btn-salir" class="v2-btn secundario" hidden>Cerrar sesión</button>
+    </header>
+
+    <main class="v2-main">
+        <div class="v2-card" id="contenido">
+            <p class="v2-nota">Cargando…</p>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2"
+        integrity="sha384-WgXwGL6fUsYJWNaKJgVbrJKGRQwc1vieh2oy4kw9nXqpNDz3tdSsqEYUgeHD/NuF"
+        crossorigin="anonymous"></script>
+    <script src="../config.js"></script>
+    <script src="shared.js"></script>
+    <script>
+        (async function () {
+            if (!LuxV2.requireV2()) return;
+
+            const cont = document.getElementById('contenido');
+            const btnSalir = document.getElementById('btn-salir');
+            const esc = LuxV2.esc;
+
+            const perfil = await LuxV2.getProfile();
+            if (!perfil) {
+                cont.innerHTML =
+                    '<h2>Inicia sesión para continuar</h2>' +
+                    '<p class="v2-nota">Tu sesión del Campus Lux se comparte con este portal: entra una vez y regresa aquí.</p>' +
+                    '<p><a class="v2-btn" href="../index.html">Ir al inicio de sesión</a></p>';
+                return;
+            }
+
+            btnSalir.hidden = false;
+            btnSalir.addEventListener('click', LuxV2.logout);
+
+            try {
+                const tickets = await LuxV2.callFn('ticket-manager/list');
+                const filas = tickets.slice(0, 10).map(function (t) {
+                    const estado = t.estado ? t.estado.nombre : 'Desconocido';
+                    const cls = estado === 'Abierto' ? 'abierto' : (estado === 'Cerrado' ? 'cerrado' : '');
+                    return '<li><span class="folio">#' + esc(t.ticket_id) + '</span>' +
+                        '<span class="titulo">' + esc(t.titulo) + '</span>' +
+                        '<span class="v2-badge ' + cls + '">' + esc(estado) + '</span></li>';
+                }).join('');
+
+                cont.innerHTML =
+                    '<h2>Hola, ' + esc(perfil.nombreCompleto) + '</h2>' +
+                    '<p>Tienes <strong>' + tickets.length + '</strong> ticket(s) registrados.</p>' +
+                    '<ul class="v2-lista">' + (filas || '<li class="v2-nota">Aún no has reportado incidencias.</li>') + '</ul>' +
+                    '<p class="v2-nota">Panel completo (contadores, filtros y conversación) en construcción — fase F2 del plan V2.</p>';
+            } catch (err) {
+                console.error(err);
+                cont.innerHTML = '<h2>No se pudieron cargar tus tickets</h2>' +
+                    '<p class="v2-nota">' + esc(err.message) + '</p>';
+            }
+        })();
+    </script>
+</body>
+
+</html>

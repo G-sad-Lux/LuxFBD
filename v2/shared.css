@@ -1,0 +1,126 @@
+/* ============================================================
+   LuxFBD v2 - tokens y primitivas de diseno (figuras 5-7 del doc V2)
+   ============================================================ */
+:root {
+    --v2-primary: #1652c0;
+    --v2-primary-dark: #0d2f6e;
+    --v2-bg: #f4f7fc;
+    --v2-card: #ffffff;
+    --v2-text: #12275a;
+    --v2-muted: #5b6b8c;
+    --v2-border: #dfe6f3;
+    --v2-ok: #1fa675;
+    --v2-warn: #e8912d;
+    --v2-danger: #d64545;
+    --v2-radius: 12px;
+    --v2-shadow: 0 8px 24px rgba(18, 39, 90, 0.08);
+}
+
+* { box-sizing: border-box; }
+
+/* El atributo hidden debe ganar a cualquier display de clase */
+[hidden] { display: none !important; }
+
+body {
+    margin: 0;
+    font-family: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background: var(--v2-bg);
+    color: var(--v2-text);
+    line-height: 1.5;
+    min-height: 100vh;
+}
+
+/* Barra superior */
+.v2-topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 24px;
+    background: var(--v2-card);
+    border-bottom: 1px solid var(--v2-border);
+    box-shadow: 0 2px 10px rgba(18, 39, 90, 0.05);
+}
+.v2-topbar .brand { font-weight: 600; font-size: 1.05rem; color: var(--v2-primary-dark); }
+.v2-topbar .brand small { display: block; font-weight: 400; color: var(--v2-muted); font-size: 0.75rem; }
+.v2-topbar .spacer { flex: 1; }
+.v2-beta {
+    background: #fff3dd;
+    color: #9a6b1a;
+    border: 1px solid #f0d9a8;
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
+/* Contenido */
+.v2-main { max-width: 1100px; margin: 32px auto; padding: 0 20px; }
+
+.v2-card {
+    background: var(--v2-card);
+    border: 1px solid var(--v2-border);
+    border-radius: var(--v2-radius);
+    box-shadow: var(--v2-shadow);
+    padding: 24px;
+}
+
+.v2-btn {
+    display: inline-block;
+    background: var(--v2-primary);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font: inherit;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+.v2-btn:hover { background: var(--v2-primary-dark); }
+.v2-btn.secundario { background: transparent; color: var(--v2-primary); border: 1px solid var(--v2-primary); }
+
+.v2-badge {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 2px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background: #e8f0ff;
+    color: var(--v2-primary-dark);
+}
+.v2-badge.abierto { background: #e3f6ee; color: var(--v2-ok); }
+.v2-badge.cerrado { background: #eceff5; color: var(--v2-muted); }
+
+.v2-lista { list-style: none; margin: 16px 0 0; padding: 0; }
+.v2-lista li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 4px;
+    border-bottom: 1px solid var(--v2-border);
+}
+.v2-lista li:last-child { border-bottom: none; }
+.v2-lista .folio { font-weight: 600; color: var(--v2-primary); white-space: nowrap; }
+.v2-lista .titulo { flex: 1; }
+
+.v2-nota { color: var(--v2-muted); font-size: 0.9rem; }
+
+/* Aviso de version desactivada / sin acceso */
+.v2-off {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    gap: 6px;
+}
+.v2-off h1 { color: var(--v2-primary-dark); margin: 0 0 4px; }
+.v2-off p { margin: 4px 0; color: var(--v2-muted); }
+
+@media (max-width: 640px) {
+    .v2-main { margin: 16px auto; }
+    .v2-card { padding: 18px; }
+}
