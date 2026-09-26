@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mis Tickets | Portal de Atención al Estudiante</title>
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://aftrxnerszxjfjxegjuk.supabase.co; connect-src 'self' https://aftrxnerszxjfjxegjuk.supabase.co ws://127.0.0.1:5173 ws://localhost:5173; object-src 'none'; base-uri 'self'; form-action 'self'">
+        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://aftrxnerszxjfjxegjuk.supabase.co; connect-src 'self' https://aftrxnerszxjfjxegjuk.supabase.co wss://aftrxnerszxjfjxegjuk.supabase.co ws://127.0.0.1:5173 ws://localhost:5173; object-src 'none'; base-uri 'self'; form-action 'self'">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
@@ -35,6 +35,12 @@
             font: inherit; background: var(--v2-card); color: var(--v2-text);
         }
         .form-reporte textarea { min-height: 110px; resize: vertical; }
+        .cat-icono { width: 42px; height: 42px; border-radius: 12px; background: #eef2fb; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex: none; }
+        .estrellas { display: flex; gap: 4px; margin-top: 6px; }
+        .estrellas button { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #cbd5e1; padding: 2px; }
+        .estrellas button:hover, .estrellas button:hover ~ button { color: #cbd5e1; }
+        .estrellas:hover button { color: #f2b01e; }
+        .estrellas button:hover ~ button { color: #cbd5e1 !important; }
         .lumix-flotante { position: fixed; right: 18px; bottom: 18px; display: flex; align-items: center; gap: 10px; background: var(--v2-card); border: 1px solid var(--v2-border); border-radius: 999px; padding: 8px 16px 8px 8px; box-shadow: var(--v2-shadow); text-decoration: none; color: var(--v2-text); font-size: .8rem; line-height: 1.25; z-index: 40; }
         .lumix-flotante .cara { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #3ad6c9, #1652c0); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
         .lumix-flotante strong { color: var(--v2-primary); }
@@ -85,7 +91,7 @@
             if (!LuxV2.requireV2()) return;
 
             const esc = LuxV2.esc;
-            const { badgeEstado, fmtFecha, slaDe } = LuxV2.ui;
+            const { badgeEstado, fmtFecha, slaDe, nombreDe, iniciales, iconoCategoria, fmtBytes } = LuxV2.ui;
             const vista = document.getElementById('vista');
             const $ = (id) => document.getElementById(id);
 
@@ -119,6 +125,7 @@
                 const tarjetas = lista.map(t => {
                     const area = t.area ? t.area.nombre : '—';
                     return '<div class="tarjeta-ticket" data-id="' + t.ticket_id + '">' +
+                        '<div class="cat-icono">' + iconoCategoria(t.catalogo ? t.catalogo.nombre : '') + '</div>' +
                         '<div class="cuerpo">' +
                         '<div class="titulo"><span style="color:var(--v2-primary)">#' + t.ticket_id + '</span> · ' + esc(t.titulo) + '</div>' +
                         '<div class="desc">' + esc((t.detalles || '').slice(0, 90)) + '</div>' +
@@ -181,6 +188,11 @@
                 }
                 const t = data.ticket;
                 const comentarios = data.comments || []; // RLS: al alumno solo le llegan los externos
+                const historia = data.history || [];
+                const fechaDe = (pred) => {
+                    const h = historia.filter(pred).sort((a, b) => new Date(a.fecha_cambio) - new Date(b.fecha_cambio))[0];
+                    return h ? fmtFecha(h.fecha_cambio) : null;
+                };
                 const adjuntos = data.attachments || [];
                 const sla = slaDe(t);
 
@@ -190,9 +202,12 @@
                 const resuelto = [4, 5].includes(t.estado_id);
                 const pasos = [
                     { txt: 'Ticket registrado', sub: fmtFecha(t.fecha_creacion), hecho: true },
-                    { txt: asignado ? 'Asignado a ' + LuxV2.ui.nombreDe(t.asignado) : 'En espera de asignación', hecho: asignado },
-                    { txt: t.estado_id === 3 ? 'Esperando tu respuesta' : 'En atención', hecho: enAtencion || resuelto, actual: enAtencion },
-                    { txt: resuelto ? 'Resuelto' : 'Resolución pendiente', hecho: resuelto },
+                    { txt: asignado ? 'Asignado a ' + nombreDe(t.asignado) : 'En espera de asignación', hecho: asignado,
+                      sub: fechaDe(h => h.campo_modificado === 'asignacion' && h.valor_nuevo && h.valor_nuevo !== 'Sin asignar') },
+                    { txt: t.estado_id === 3 ? 'Esperando tu respuesta' : 'En atención', hecho: enAtencion || resuelto, actual: enAtencion,
+                      sub: fechaDe(h => h.campo_modificado === 'estado' && h.valor_nuevo === 'En proceso') },
+                    { txt: resuelto ? 'Resuelto' : 'Resolución pendiente', hecho: resuelto,
+                      sub: t.fecha_cierre ? fmtFecha(t.fecha_cierre) : fechaDe(h => h.campo_modificado === 'estado' && h.valor_nuevo === 'Resuelto') },
                 ];
                 const pasosHtml = pasos.map((p, i) =>
                     '<div class="paso' + (p.hecho ? ' hecho' : '') + (p.actual && !resuelto ? ' actual' : '') + '">' +
@@ -202,7 +217,8 @@
                 const conv = comentarios.map(c => {
                     const autorStaff = c.autor && LuxV2.STAFF_ROLES.includes(c.autor.tipo_usuario);
                     return '<div class="v2-msg ' + (autorStaff ? 'staff' : 'alumno') + '">' +
-                        '<div class="meta">' + esc(LuxV2.ui.nombreDe(c.autor) || 'Usuario') + ' · ' + esc(fmtFecha(c.fecha_creacion)) + '</div>' +
+                        '<div class="meta"><span class="ava">' + esc(iniciales(nombreDe(c.autor))) + '</span>' +
+                        esc(nombreDe(c.autor) || 'Usuario') + ' · ' + esc(fmtFecha(c.fecha_creacion)) + '</div>' +
                         esc(c.contenido) + '</div>';
                 }).join('');
 
@@ -245,6 +261,17 @@
                     (t.eta_estimada
                         ? '<p class="v2-nota" style="margin:6px 0 4px;">Atención estimada para: <strong>' + esc(fmtFecha(t.eta_estimada)) + '</strong></p>' + (resuelto ? '' : sla.html)
                         : '<p class="v2-nota">Pendiente de estimación.</p>') +
+                    (resuelto
+                        ? '<hr style="border:none; border-top:1px solid var(--v2-border); margin:12px 0;">' +
+                          '<h3 style="margin:0;">Califica la atención</h3>' +
+                          (t.calificacion
+                              ? '<p style="margin:6px 0 0; font-size:1.05rem;">' + '⭐'.repeat(t.calificacion) + ' <strong>' + esc(t.calificacion) + '/5</strong></p>' +
+                                '<p class="v2-nota" style="margin:2px 0 0;">¡Gracias por tu opinión!</p>'
+                              : '<p class="v2-nota" style="margin:4px 0 0;">¿Cómo fue la atención de soporte?</p>' +
+                                '<div class="estrellas" id="csat">' + [1, 2, 3, 4, 5].map(v =>
+                                    '<button data-v="' + v + '" title="' + v + ' de 5">★</button>').join('') + '</div>' +
+                                '<span id="csat-msg" class="v2-feedback"></span>')
+                        : '') +
                     '</div>' +
                     '</div>' +
                     '</div>';
@@ -262,12 +289,32 @@
                         img.addEventListener('click', () => { $('lightbox-img').src = url; $('lightbox').classList.add('abierta'); });
                         adjCont.appendChild(img);
                     } else {
-                        const a = document.createElement('a');
-                        if (url) { a.href = url; a.target = '_blank'; a.rel = 'noopener'; }
-                        a.textContent = '📄 ' + name;
-                        adjCont.appendChild(a);
+                        const card = document.createElement(url ? 'a' : 'div');
+                        card.className = 'archivo';
+                        if (url) { card.href = url; card.target = '_blank'; card.rel = 'noopener'; }
+                        card.innerHTML = '<span class="tipo"></span><span class="datos"><strong></strong><small></small></span>';
+                        card.querySelector('.tipo').textContent = att.mime_type === 'application/pdf' ? 'PDF' : 'DOC';
+                        card.querySelector('strong').textContent = name;
+                        card.querySelector('small').textContent =
+                            [fmtBytes(att.size_bytes), fmtFecha(att.fecha_subida)].filter(Boolean).join(' · ');
+                        adjCont.appendChild(card);
                     }
                 });
+
+                vista.querySelectorAll('#csat button').forEach(b => b.addEventListener('click', async () => {
+                    try {
+                        const { error } = await LuxV2.sb().rpc('calificar_ticket', {
+                            p_ticket_id: t.ticket_id,
+                            p_calificacion: Number(b.dataset.v),
+                        });
+                        if (error) throw new Error(error.message);
+                        renderDetalle(id);
+                    } catch (err) {
+                        const m = $('csat-msg');
+                        m.className = 'v2-feedback error';
+                        m.textContent = err.message;
+                    }
+                }));
 
                 const btnAdj = $('c-adjuntar');
                 if (btnAdj) {
@@ -352,6 +399,17 @@
                 await cargarDatos();
                 cargarNotifs();
                 route();
+
+                // Refresco en vivo (Supabase Realtime; RLS filtra los eventos)
+                let rtTimer = null;
+                LuxV2.montarRealtime(['ticket', 'comentario', 'notificacion'], () => {
+                    clearTimeout(rtTimer);
+                    rtTimer = setTimeout(async () => {
+                        await cargarDatos();
+                        cargarNotifs();
+                        if (!location.hash.match(/ticket=/)) renderPanel();
+                    }, 600);
+                });
             } catch (err) {
                 console.error(err);
                 vista.innerHTML = '<div class="v2-card"><h2>No se pudo cargar el portal</h2><p class="v2-nota">' + esc(err.message) + '</p></div>';

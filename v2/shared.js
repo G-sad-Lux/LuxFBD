@@ -145,13 +145,38 @@
         var nivel = rest < 0 ? 'danger' : (pct <= 25 ? 'warn' : '');
         return {
             nivel: nivel, pct: pct, rest: rest,
-            html: '<div class="v2-sla ' + nivel + '"><span class="txt">' + esc(fmtRestante(rest)) + '</span>' +
+            html: '<div class="v2-sla ' + nivel + '"><span class="txt">' + esc(fmtRestante(rest) + ' · ' + pct + '%') + '</span>' +
                 '<div class="barra"><div class="fill" style="width:' + pct + '%"></div></div></div>'
         };
     };
 
+    var iniciales = function (nombre) {
+        var partes = String(nombre || '').trim().split(/\s+/).filter(Boolean);
+        if (partes.length === 0) return '?';
+        return (partes[0][0] + (partes[1] ? partes[1][0] : '')).toUpperCase();
+    };
+    var iconoCategoria = function (nombre) {
+        var n = String(nombre || '').toLowerCase();
+        if (n.indexOf('acceso') !== -1) return '🔐';
+        if (n.indexOf('plataforma') !== -1) return '💻';
+        if (n.indexOf('materia') !== -1) return '📚';
+        if (n.indexOf('escolar') !== -1) return '🎓';
+        if (n.indexOf('finanza') !== -1) return '💳';
+        if (n.indexOf('otro') !== -1) return '📌';
+        return '📄';
+    };
+    var fmtBytes = function (b) {
+        if (b === null || b === undefined || b === 0) return '';
+        if (b < 1024) return b + ' B';
+        if (b < 1048576) return Math.round(b / 1024) + ' KB';
+        return (b / 1048576).toFixed(1) + ' MB';
+    };
+
     window.LuxV2.ui = {
         nombreDe: nombreDe,
+        iniciales: iniciales,
+        iconoCategoria: iconoCategoria,
+        fmtBytes: fmtBytes,
         fmtFecha: fmtFecha,
         fmtRestante: fmtRestante,
         badgeEstado: badgeEstado,
@@ -218,5 +243,20 @@
             }
         });
         return { recargar: recargar };
+    };
+
+    // Realtime: refresco en vivo. Devuelve el canal (o null si falla).
+    window.LuxV2.montarRealtime = function (tablas, alCambiar) {
+        try {
+            var ch = window.LuxV2.sb().channel('lux-cambios');
+            tablas.forEach(function (t) {
+                ch = ch.on('postgres_changes', { event: '*', schema: 'public', table: t }, function (payload) {
+                    console.debug('realtime:', t, payload.eventType);
+                    alCambiar(t, payload);
+                });
+            });
+            ch.subscribe(function (status) { console.debug('realtime estado:', status); });
+            return ch;
+        } catch (e) { console.warn('realtime no disponible:', e); return null; }
     };
 })();

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gestión de Incidencias | Universidad Lux</title>
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://aftrxnerszxjfjxegjuk.supabase.co; connect-src 'self' https://aftrxnerszxjfjxegjuk.supabase.co ws://127.0.0.1:5173 ws://localhost:5173; object-src 'none'; base-uri 'self'; form-action 'self'">
+        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://aftrxnerszxjfjxegjuk.supabase.co; connect-src 'self' https://aftrxnerszxjfjxegjuk.supabase.co wss://aftrxnerszxjfjxegjuk.supabase.co ws://127.0.0.1:5173 ws://localhost:5173; object-src 'none'; base-uri 'self'; form-action 'self'">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
@@ -59,7 +59,7 @@
 
             // Espeja la maquina de estados de la DB (0010); el servidor manda.
             const TRANSICIONES = { 1: [2, 4], 2: [3, 4], 3: [2, 4], 4: [5, 2], 5: [] };
-            const PAGE_SIZE = 10;
+            const PAGE_SIZE = 10; // default del selector
 
             const state = {
                 perfil: null, catalogs: null, staff: [],
@@ -70,7 +70,7 @@
             };
 
             // ---------- Utilidades compartidas (shared.js) ----------
-            const { badgeEstado, badgePrioridad, fmtFecha, slaDe, nombreDe } = LuxV2.ui;
+            const { badgeEstado, badgePrioridad, fmtFecha, slaDe, nombreDe, iniciales, fmtBytes } = LuxV2.ui;
 
             // ---------- Notificaciones (RLS: solo las propias) ----------
             const cargarNotifs = LuxV2.montarNotificaciones({
@@ -106,9 +106,10 @@
                     '<option value="' + esc(c.catalogo_id) + '"' + (String(c.catalogo_id) === sel ? ' selected' : '') + '>' + esc(c.nombre) + '</option>').join('');
 
                 const filtrados = ticketsFiltrados();
-                const totalPags = Math.max(1, Math.ceil(filtrados.length / PAGE_SIZE));
+                const totalPags = Math.max(1, Math.ceil(filtrados.length / (state.pageSize || PAGE_SIZE)));
                 if (state.page > totalPags) state.page = totalPags;
-                const pagina = filtrados.slice((state.page - 1) * PAGE_SIZE, state.page * PAGE_SIZE);
+                const tam = state.pageSize || PAGE_SIZE;
+                const pagina = filtrados.slice((state.page - 1) * tam, state.page * tam);
 
                 const filas = pagina.map(t => {
                     const rep = t.reportador ? nombreDe(t.reportador) : '—';
@@ -160,7 +161,10 @@
                     '</tr></thead><tbody>' +
                     (filas || '<tr><td colspan="11" class="v2-nota" style="text-align:center;">Sin tickets con esos filtros.</td></tr>') +
                     '</tbody></table>' +
-                    '<div class="v2-pag"><span class="total">' + filtrados.length + ' ticket(s)</span>' + botones + '</div></div>';
+                    '<div class="v2-pag"><span class="total">' + filtrados.length + ' ticket(s)</span>' + botones +
+                    '<select id="pag-size" title="Por página">' + [5, 10, 20, 50].map(v =>
+                        '<option' + (v === (state.pageSize || PAGE_SIZE) ? ' selected' : '') + '>' + v + '</option>').join('') +
+                    '</select></div></div>';
 
                 // listeners
                 const aplicar = () => { state.page = 1; leerFiltros(); renderDashboard(); };
@@ -171,6 +175,11 @@
                     tr.addEventListener('click', () => { location.hash = 'ticket=' + tr.dataset.id; }));
                 vista.querySelectorAll('.v2-pag button[data-pag]').forEach(b =>
                     b.addEventListener('click', () => { state.page = Number(b.dataset.pag); renderDashboard(); }));
+                $('pag-size').addEventListener('change', () => {
+                    state.pageSize = Number($('pag-size').value);
+                    state.page = 1;
+                    renderDashboard();
+                });
 
                 function leerFiltros() {
                     state.filtro = {
@@ -212,8 +221,8 @@
                     const c = it.c;
                     const autorStaff = c.autor && LuxV2.STAFF_ROLES.includes(c.autor.tipo_usuario);
                     const clase = c.tipo === 'interno' ? 'interno' : (autorStaff ? 'staff' : 'alumno');
-                    return '<div class="v2-msg ' + clase + '"><div class="meta">' + esc(nombreDe(c.autor) || 'Usuario') +
-                        ' · ' + esc(fmtFecha(c.fecha_creacion)) + '</div>' + esc(c.contenido) + '</div>';
+                    return '<div class="v2-msg ' + clase + '"><div class="meta"><span class="ava">' + esc(iniciales(nombreDe(c.autor))) + '</span>' +
+                        esc(nombreDe(c.autor) || 'Usuario') + ' · ' + esc(fmtFecha(c.fecha_creacion)) + '</div>' + esc(c.contenido) + '</div>';
                 }).join('');
 
                 const percibida = t.prioridad_reportada_id
@@ -243,7 +252,8 @@
                     (t.reportador && t.reportador.email ? ' · ' + esc(t.reportador.email) : '') + ' · ' +
                     esc(t.catalogo ? t.catalogo.nombre : '') + ' · ' + esc(t.area ? t.area.nombre : '') + ' · ' +
                     (t.canal_entrada === 'portal' ? '💻 Portal Web' : '💬 Chatbot') + ' · Creado ' + esc(fmtFecha(t.fecha_creacion)) +
-                    ' · Actualizado ' + esc(fmtFecha(t.actualizado_en)) + '</p>' +
+                    ' · Actualizado ' + esc(fmtFecha(t.actualizado_en)) +
+                    (t.calificacion ? ' · ⭐ ' + esc(t.calificacion) + '/5' : '') + '</p>' +
                     '<h3 style="margin:14px 0 6px;">Descripción del problema</h3>' +
                     '<div style="background:#f6f8fd; border-radius:10px; padding:12px;">' + esc(t.detalles) + '</div>' +
                     (t.resumen_solucion ? '<h3 style="margin:14px 0 6px;">Resolución</h3><div style="background:#e9f7ef; border-radius:10px; padding:12px;">' + esc(t.resumen_solucion) + '</div>' : '') +
@@ -307,10 +317,15 @@
                         img.addEventListener('click', () => { $('lightbox-img').src = url; $('lightbox').classList.add('abierta'); });
                         adjCont.appendChild(img);
                     } else {
-                        const a = document.createElement('a');
-                        if (url) { a.href = url; a.target = '_blank'; a.rel = 'noopener'; }
-                        a.textContent = '📄 ' + name;
-                        adjCont.appendChild(a);
+                        const card = document.createElement(url ? 'a' : 'div');
+                        card.className = 'archivo';
+                        if (url) { card.href = url; card.target = '_blank'; card.rel = 'noopener'; }
+                        card.innerHTML = '<span class="tipo"></span><span class="datos"><strong></strong><small></small></span>';
+                        card.querySelector('.tipo').textContent = att.mime_type === 'application/pdf' ? 'PDF' : 'DOC';
+                        card.querySelector('strong').textContent = name;
+                        card.querySelector('small').textContent =
+                            [fmtBytes(att.size_bytes), fmtFecha(att.fecha_subida)].filter(Boolean).join(' · ');
+                        adjCont.appendChild(card);
                     }
                 });
 
@@ -399,6 +414,7 @@
                         '<div class="v2-kpi"><div class="valor">' + (k.activos ?? '—') + '</div><div class="etiqueta">Activos ahora</div></div>' +
                         '<div class="v2-kpi warn"><div class="valor">' + ((k.por_vencer ?? 0) + (k.vencidos ?? 0)) + '</div><div class="etiqueta">En riesgo de SLA</div></div>' +
                         '<div class="v2-kpi ok"><div class="valor">' + (k.resueltos_hoy ?? '—') + '</div><div class="etiqueta">Resueltos hoy</div></div>' +
+                        '<div class="v2-kpi ok"><div class="valor">' + (k.csat_promedio ?? '—') + '</div><div class="etiqueta">CSAT promedio (' + (k.csat_respuestas ?? 0) + ' respuestas)</div></div>' +
                         '</div>' +
                         '<div class="v2-detalle">' +
                         '<div class="v2-card"><h3 style="margin:0 0 8px;">Tickets por categoría</h3>' +
@@ -472,6 +488,18 @@
                 await cargarDatos();
                 cargarNotifs();
                 route();
+
+                // Refresco en vivo (Supabase Realtime; RLS filtra los eventos)
+                let rtTimer = null;
+                LuxV2.montarRealtime(['ticket', 'comentario', 'notificacion'], () => {
+                    clearTimeout(rtTimer);
+                    rtTimer = setTimeout(async () => {
+                        await cargarDatos();
+                        cargarNotifs();
+                        if (location.hash === '' || location.hash === '#') renderDashboard();
+                        else if (location.hash === '#reportes') renderReportes();
+                    }, 600);
+                });
             } catch (err) {
                 console.error(err);
                 vista.innerHTML = '<div class="v2-card"><h2>No se pudo cargar el panel</h2><p class="v2-nota">' + esc(err.message) + '</p></div>';

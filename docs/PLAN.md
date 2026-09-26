@@ -17,6 +17,7 @@
 - [ ] **Secrets del respaldo** en GitHub (Settings → Secrets → Actions): `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `BACKUP_PASSPHRASE` → correr una vez el workflow "Backup y keep-alive" a mano y confirmar verde. *Sin esto, los datos siguen sin respaldo y el keep-alive no corre.*
 - [ ] **Transferir el proyecto Supabase a una Organización del equipo** (hoy vive en cuenta personal): crear Org, invitar a los 4, Settings → General → Transfer project.
 - [ ] Guardar las credenciales de prueba en la nota privada del equipo (no en el repo ni en documentos entregables).
+- [ ] Integrar **docs/ANEXO_TECNICO.md** al .docx entregable del equipo (reemplaza el script T-SQL y el diagrama anterior).
 
 ## 🟢 Backlog accionable
 
@@ -40,16 +41,16 @@
 
 - [x] Branding v1: título "Sitio Sencillo y Responsivo" y footer "Lux Studio" → "Universidad Lux — Soporte".
 - [x] Interruptor completo: **switch visible en el header v1** (con redirección por rol) + botón "↩ Clásica" en las páginas V2 + **flag remoto `app_flag` en DB** (cascada: URL > switch del usuario > DB > config.js).
-- [ ] Cosméticos si sobra tiempo: iconos de categoría en tarjetas, avatares en burbujas, "N por página", % numérico del SLA, fechas por paso del seguimiento, card de PDF con peso/fecha.
+- [x] Cosméticos: iconos de categoría, avatares de iniciales en burbujas, selector "N por página", % numérico en el SLA, fechas por hito en el seguimiento, card de archivo con peso/fecha.
 - [ ] **Encender la V2 por default** (`config.js v2: true`) cuando F4 esté validada — decisión de equipo antes de la demo.
 
 ### Opcionales con valor de concurso (del análisis de flujos, P3)
 
-- [ ] Encuesta CSAT (1-5) al cerrar ticket + columna y KPI.
+- [x] Encuesta CSAT (1-5): rpc `calificar_ticket` (solo reportador, solo resuelto, una vez, en bitácora) + estrellas en Mis Tickets + KPI en Reportes.
 - [x] Pantalla de reportes en admin (#reportes): tickets por categoría, tiempos por prioridad y cumplimiento de SLA sobre las vistas SQL.
-- [ ] Supabase Realtime para refresco en vivo del dashboard.
-- [ ] Correo real en eventos clave (Resend/SMTP) — después de validar in-app.
-- [ ] Actualizar el **documento entregable** (script T-SQL→PostgreSQL real, diagrama E-R regenerado sin auto-traducción, endpoints reales, sin credenciales).
+- [x] Supabase Realtime: ticket/comentario/notificacion publicados; dashboard, panel y campana se refrescan solos (RLS filtra los eventos).
+- [ ] Correo real en eventos clave — **requiere cuenta Resend del equipo** (API key como secret de función); las notificaciones in-app ya están validadas.
+- [x] Material del documento entregable listo: **docs/ANEXO_TECNICO.md** (E-R en Mermaid sin auto-traducción, las 17 migraciones como script oficial, reglas de negocio, seguridad, endpoints, SLA, operación — sin credenciales).
 
 ## ⚪ Aceptados (no se trabajan; auditoría §3)
 
@@ -69,6 +70,7 @@ Tendencias % en KPIs · visor PDF embebido · sidebar con Reportes/Catálogos/Us
 | F1 backend compartido: 4 prioridades unificadas, ETA/SLA con recálculo, máquina de estados (incl. retorno automático 3→2), resumen obligatorio, bitácora y notificaciones por triggers, comentarios int/ext con RLS, vistas KPI `security_invoker`, `/comments`, service role eliminado — suite 106/106 | `a2f808d` |
 | F3 dashboard admin (figs. 6-7) · F2 Mis Tickets verificado en vivo (ticket #2 por portal, ETA exacta, campana, comentario) | `97920fa`, `df70646` |
 | Auditoría de conformidad V2 · fix orden de catálogos | `ad44d34`, `0eb33bd` |
+| **CSAT + Realtime + cosméticos F5 + Anexo técnico** (migración 0017, suite 131/131): calificación con estrellas y KPI, refresco en vivo por Realtime con RLS, avatares/iconos/fechas-por-paso/card-archivo/%SLA/tamaño-página, y docs/ANEXO_TECNICO.md listo para el .docx. Correo queda pendiente de cuenta Resend | (resto) |
 | **Interruptor desde el frontend** (mandato 2026-09-26): switch en el header v1 + Clásica en V2 + capa remota app_flag (migración 0016, suite 120/120) · **pantalla 📊 Reportes** en admin sobre las vistas KPI. Ciclo verificado en vivo: Clásica→v1(OFF)→switch→v2 por rol; capa remota cacheada | (interruptor) |
 | **Paquete conformidad + cierre F4/F5-parcial**: D3 evidencias desde composers (alumno y staff) y Lumix · D4 filtros de fecha · D5 actualizado_en con backfill y bumps por triggers · D6 área editable en gestión con bitácora · D7 correo del reportador en detalle y búsqueda · D9 KPI En proceso · D11 botón Ver detalle · QR de Lumix en el login · branding v1 (migración 0015, suite 117/117) | (paquete) |
 | **Decisión de producto**: el reporte de tickets es SIEMPRE en formato chatbot (asistente virtual) — se eliminó el formulario clásico del portal; Lumix es el único flujo de captura en V2 (Lux-IA en v1). Lumix real construido y verificado E2E | (mismo commit que D8/D2 +1) |
