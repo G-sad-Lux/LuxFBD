@@ -1427,6 +1427,15 @@
                     loginAlert.hidden = false;
 
                     await hydrateUser(data.user);
+
+                    // D2: login único. Si venías de una página V2 (?volver=v2) y el
+                    // interruptor está encendido, te regresa al portal según tu rol.
+                    const volver = new URL(window.location.href).searchParams.get('volver');
+                    if (volver === 'v2' && window.luxV2Enabled && window.luxV2Enabled()) {
+                        window.location.href = STAFF_ROLES.includes(chatState.user.role)
+                            ? 'v2/admin.html' : 'v2/alumnos.html';
+                        return;
+                    }
                     showView(STAFF_ROLES.includes(chatState.user.role) ? 'soporte-luxia' : 'mis-cursos');
                     console.log('User Logged In:', chatState.user.email, chatState.user.role);
 
@@ -1459,7 +1468,8 @@
 
         let CATEGORY_MAP = {};
         const STATIC_CATEGORY_MAP = {
-            'finanzas': 33, 'sitio_web': 34, 'servo_web': 35, 'materias': 36, 'bloqueos': 37
+            // 0014 (D8): categorias del doc V2; codigos = valores del chat
+            'acceso': 37, 'plataforma': 34, 'materias': 36, 'servicios_escolares': 42, 'finanzas': 33, 'otros': 35
         };
 
         let PRIORITY_MAP = {};
@@ -1551,11 +1561,12 @@
                 case 'CATEGORY':
                     enableInput(false);
                     addMessage('Gracias. ¿A qué categoría pertenece el problema?', 'bot', [
-                        { label: 'Finanzas', value: 'finanzas' },
-                        { label: 'Sitio Web', value: 'sitio_web' },
-                        { label: 'Servo Web', value: 'servo_web' },
+                        { label: 'Acceso y bloqueos', value: 'acceso' },
+                        { label: 'Plataforma virtual', value: 'plataforma' },
                         { label: 'Materias', value: 'materias' },
-                        { label: 'Bloqueos/Acceso', value: 'bloqueos' }
+                        { label: 'Servicios escolares', value: 'servicios_escolares' },
+                        { label: 'Finanzas y pagos', value: 'finanzas' },
+                        { label: 'Otros', value: 'otros' }
                     ]);
                     break;
                 case 'DETAILS':
@@ -1686,7 +1697,7 @@
 
                 const load = {
                     titulo: chatState.ticket.title,
-                    categoria_id: CATEGORY_MAP[chatState.ticket.category] || 37,
+                    categoria_id: CATEGORY_MAP[chatState.ticket.category] || 35, // 35 = Otros
                     detalles: chatState.ticket.details,
                     prioridad_id: PRIORITY_MAP[chatState.ticket.priority] || 8,
                     area_notificada_id: AREA_MAP[chatState.ticket.notify] || DEFAULT_AREA_ID, // B9: el paso del chat ya cuenta

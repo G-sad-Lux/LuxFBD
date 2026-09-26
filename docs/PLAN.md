@@ -9,8 +9,7 @@
 
 ## 🔴 Decisiones abiertas (bloquean ítems marcados con su ID)
 
-- [ ] **D8 — Nombres de categorías**: ¿calcar las del doc V2 (*Acceso y bloqueos, Plataforma virtual, Servicios escolares, Finanzas y pagos, Otros*), mantener las actuales documentando equivalencia, o solo añadir "Otros"?
-- [ ] **D2 — Logins dedicados** `/admin/login` y `/alumnos/login` (§20 del doc): ¿pantalla propia por página v2 (~1 día) o se acepta el login compartido del Campus v1?
+*— ninguna por ahora — (D8 y D2 resueltas el 2026-09-26, ver Hecho)*
 
 ## 🟡 Pendientes del equipo (nadie más puede hacerlos)
 
@@ -70,3 +69,4 @@ Tendencias % en KPIs · visor PDF embebido · sidebar con Reportes/Catálogos/Us
 | F1 backend compartido: 4 prioridades unificadas, ETA/SLA con recálculo, máquina de estados (incl. retorno automático 3→2), resumen obligatorio, bitácora y notificaciones por triggers, comentarios int/ext con RLS, vistas KPI `security_invoker`, `/comments`, service role eliminado — suite 106/106 | `a2f808d` |
 | F3 dashboard admin (figs. 6-7) · F2 Mis Tickets verificado en vivo (ticket #2 por portal, ETA exacta, campana, comentario) | `97920fa`, `df70646` |
 | Auditoría de conformidad V2 · fix orden de catálogos | `ad44d34`, `0eb33bd` |
+| **D8 resuelta**: catálogo con las 6 categorías del doc V2 (Acceso y bloqueos, Plataforma virtual, Materias, Servicios escolares, Finanzas y pagos, Otros; IDs conservados, chat v1 actualizado, fallback → Otros) · **D2 resuelta**: login único que detecta el rol; con `?volver=v2` regresa a admin/alumnos según el tipo de usuario | (este commit) |
