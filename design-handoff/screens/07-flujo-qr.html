@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flujo QR con Lumix</title>
+<!-- Referencia visual estática exportada del diseño (Claude Design). No es código de producción. -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#0E1A33;background:#FFFFFF}
+*{box-sizing:border-box}
+svg.i{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.st{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px;padding:18px;background:#FFFFFF;border:1px solid #DCE3EE;border-radius:16px}
+.n{width:32px;height:32px;border-radius:50%;background:#0B1F4D;color:#FFFFFF;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tt{font-size:16px;font-weight:800;color:#0B1F4D}
+.dd{font-size:13px;line-height:1.5;color:#26324D}
+.code{font-family:ui-monospace,Consolas,monospace;font-size:12px;background:#EEF2F8;color:#26324D;border-radius:6px;padding:3px 7px;align-self:flex-start}
+.ar{width:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#8FA3C7}
+.where{font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase}
+</style>
+
+
+</head>
+<body>
+<div style="width: 1800px; height: 430px; box-sizing: border-box; padding: 32px 36px; display: flex; flex-direction: column; gap: 22px; background: #F2F5FA">
+  <div style="display: flex; align-items: baseline; gap: 14px">
+    <h1 style="margin: 0; font-size: 26px; font-weight: 800; color: #0B1F4D">Del QR al ticket en 5 pasos</h1>
+    <span style="height: 24px; padding: 0 10px; border-radius: 999px; background: #FDECD8; color: #9A4A00; font-size: 12px; font-weight: 800; display: inline-flex; align-items: center; letter-spacing: .4px">DEMO</span>
+    <span style="font-size: 14px; color: #4B5874">Las pantallas de abajo muestran los pasos 2 a 4.</span>
+  </div>
+
+  <div style="display: flex; align-items: stretch">
+    <div class="st">
+      <div style="display: flex; align-items: center; gap: 10px"><span class="n" style="background: #4B5874">0</span><span class="where" style="color: #4B5874">En la PC</span></div>
+      <div style="display: flex; gap: 12px; align-items: center"><img src="../assets/qr-lumix.svg" alt="" style="width: 64px; height: 64px; border-radius: 8px; border: 1px solid #DCE3EE; image-rendering: pixelated"><span class="tt">El portal muestra el QR</span></div>
+      <span class="dd">En el acceso del estudiante, junto al login. No requiere sesión.</span>
+      <span class="code">/alumnos/login</span>
+    </div>
+    <div class="ar"><svg class="i" width="22" height="22" viewBox="0 0 24 24"><path d="M5 12h14 M13 6l6 6-6 6"></path></svg></div>
+    <div class="st">
+      <div style="display: flex; align-items: center; gap: 10px"><span class="n">1</span><span class="where" style="color: #1A56C4">En el celular</span></div>
+      <span class="tt">Escanea con la cámara</span>
+      <span class="dd">La cámara abre Lumix en el navegador del celular, a pantalla completa.</span>
+      <span class="code">v2/lumix.html?origen=qr</span>
+    </div>
+    <div class="ar"><svg class="i" width="22" height="22" viewBox="0 0 24 24"><path d="M5 12h14 M13 6l6 6-6 6"></path></svg></div>
+    <div class="st" style="border-color: #F3C99A">
+      <div style="display: flex; align-items: center; gap: 10px"><span class="n">2</span><span class="where" style="color: #9A4A00">Solo demo</span></div>
+      <span class="tt">Escribe su matrícula</span>
+      <span class="dd">Lumix busca al alumno por matrícula y lo saluda por nombre. Sin contraseña.</span>
+      <span class="code">usuario.matricula</span>
+    </div>
+    <div class="ar"><svg class="i" width="22" height="22" viewBox="0 0 24 24"><path d="M5 12h14 M13 6l6 6-6 6"></path></svg></div>
+    <div class="st">
+      <div style="display: flex; align-items: center; gap: 10px"><span class="n">3</span><span class="where" style="color: #1A56C4">En el celular</span></div>
+      <span class="tt">Reporte guiado</span>
+      <span class="dd">Título, categoría, descripción, área y evidencia (PNG, JPG o PDF de hasta 5 MB). No pregunta prioridad.</span>
+    </div>
+    <div class="ar"><svg class="i" width="22" height="22" viewBox="0 0 24 24"><path d="M5 12h14 M13 6l6 6-6 6"></path></svg></div>
+    <div class="st" style="border-color: #BFE3CC">
+      <div style="display: flex; align-items: center; gap: 10px"><span class="n" style="background: #1F8A4C">4</span><span class="where" style="color: #1D6B3A">Ticket creado</span></div>
+      <span class="tt">Folio en estado Abierto</span>
+      <span class="dd">Llega al panel administrativo con canal Lumix y sin prioridad hasta que soporte la asigne.</span>
+      <span class="code">canal_entrada = 'lumix'</span>
+    </div>
+    <div class="ar"><svg class="i" width="22" height="22" viewBox="0 0 24 24"><path d="M5 12h14 M13 6l6 6-6 6"></path></svg></div>
+    <div class="st">
+      <div style="display: flex; align-items: center; gap: 10px"><span class="n">5</span><span class="where" style="color: #1A56C4">Seguimiento</span></div>
+      <span class="tt">Mis Tickets y mensajes</span>
+      <span class="dd">Estado, línea de tiempo y chat con el encargado del ticket, en celular o en PC.</span>
+      <span class="code">/alumnos/mis-tickets</span>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+    <div style="display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; background: #EAF1FC; color: #15479F; font-size: 13px; line-height: 1.5"><svg class="i" width="20" height="20" viewBox="0 0 24 24"><path d="M3 4h18v12H3z M8 20h8 M12 16v4"></path></svg><span><strong>Desde la PC, ya con sesión:</strong> Mis Tickets → pestaña “Hablar con Lumix” en el panel derecho → pasos 3 y 4 sin salir de la página. El ticket aparece al instante en la lista.</span></div>
+    <div style="display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; background: #FFF4E5; color: #7A3D00; font-size: 13px; line-height: 1.5; border: 1px dashed #D98B2B"><svg class="i" width="20" height="20" viewBox="0 0 24 24"><path d="M6 11h12v9H6z M8.5 11V8a3.5 3.5 0 0 1 7 0v3"></path></svg><span><strong>Fuera del demo:</strong> el paso 2 debe pedir inicio de sesión antes de crear tickets; con solo la matrícula cualquiera podría reportar a nombre de otro alumno.</span></div>
+  </div>
+</div>
+</body>
+</html>

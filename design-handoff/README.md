@@ -5,7 +5,7 @@ Diseño de las 6 interfaces de la sección 20 del documento del proyecto, hecho 
 ## Contenido
 
 - `capturas/`: PNG de cada pantalla y de sus estados clave. Es la referencia visual principal.
-- `screens/`: las 6 pantallas en HTML estático (ábrelas en el navegador). Sirven para medir espaciados, tamaños y copiar SVG; los datos son de ejemplo.
+- `screens/`: las pantallas de escritorio y celular en HTML estático (ábrelas en el navegador). Sirven para medir espaciados, tamaños y copiar SVG; los datos son de ejemplo.
 - `specs.md`: comportamiento, reglas y decisiones por pantalla.
 - `tokens.css`: valores del diseño aplicados sobre los mismos nombres que ya usa `v2/shared.css` (`--v2-*`, `.v2-badge.st-*`, `.v2-badge.pr-*`, `.v2-sla`).
 - `iconos.js`: trazos SVG de los iconos (sustituyen los emoji de `iconoCategoria()` en `shared.js`).
@@ -16,11 +16,14 @@ Diseño de las 6 interfaces de la sección 20 del documento del proyecto, hecho 
 | Pantalla (ruta del doc) | Archivo del proyecto | Capturas |
 |---|---|---|
 | Acceso del estudiante `/alumnos/login` | `v2/alumnos.html` (vista de acceso) | `01-alumnos-login.png`, `01b-alumnos-registro.png` |
-| Asistente Lumix `/chat/lumix` | `v2/lumix.html` | `02-*.png` |
-| Mis Tickets `/alumnos/mis-tickets` | `v2/alumnos.html` | `03-*.png` |
-| Login administrativo `/admin/login` | `v2/admin.html` (vista de acceso) | `04-*.png` |
-| Dashboard `/admin/dashboard` | `v2/admin.html` | `05-*.png` |
-| Detalle `/admin/tickets/[id]` | `v2/admin.html#ticket=ID` | `06-*.png` |
+| Asistente Lumix `/chat/lumix` (celular, demo por matrícula) | `v2/lumix.html` | `02*.png` |
+| Mis Tickets `/alumnos/mis-tickets` (escritorio) | `v2/alumnos.html` | `03*.png` |
+| Panel Lumix dentro de Mis Tickets (PC) | `v2/alumnos.html` + la lógica de `v2/lumix.html` | `03d-mis-tickets-panel-lumix.png` |
+| Login administrativo `/admin/login` | `v2/admin.html` (vista de acceso) | `04*.png` |
+| Dashboard `/admin/dashboard` | `v2/admin.html` | `05*.png` |
+| Detalle `/admin/tickets/[id]` | `v2/admin.html#ticket=ID` | `06*.png` |
+| Flujo QR (demo) | Referencia de flujo, no es una página | `07-flujo-qr.png` |
+| Portal en el celular: acceso, Mis Tickets, detalle | `v2/alumnos.html` (responsivo, menos de 600 px) | `08*.png`, `09*.png`, `10*.png` |
 
 ## Cómo usarlo con Claude Code
 
@@ -33,7 +36,9 @@ para que coincida con el diseño de design-handoff/capturas/ y design-handoff/sc
 
 Orden: 1) integra design-handoff/tokens.css en v2/shared.css y copia
 design-handoff/assets/ a v2/assets/; 2) v2/admin.html (dashboard y detalle);
-3) v2/alumnos.html (acceso y Mis Tickets); 4) v2/lumix.html.
+3) v2/lumix.html (modo celular con demo por matrícula, y modo embebido);
+4) v2/alumnos.html (acceso, Mis Tickets con panel Detalle / Lumix, y la
+versión responsiva para celular de las capturas 08 a 10).
 
 Reglas:
 - No toques index.html ni nada de la v1. El interruptor v2 debe seguir funcionando.

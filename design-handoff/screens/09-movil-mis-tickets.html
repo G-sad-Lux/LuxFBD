@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mis Tickets en el celular</title>
+<!-- Referencia visual estática exportada del diseño (Claude Design). No es código de producción. -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#0E1A33;background:#F2F5FA}
+*{box-sizing:border-box}
+a{color:#1A56C4}a:hover{color:#15479F}
+svg.i{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.pill{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.fc{height:36px;padding:0 14px;border:1px solid #CBD5E4;border-radius:999px;background:#FFFFFF;font:inherit;font-size:13px;font-weight:700;color:#26324D;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.fc.on{background:#0B1F4D;border-color:#0B1F4D;color:#FFFFFF}
+.tk{flex-shrink:0;display:flex;flex-direction:column;gap:8px;padding:14px;background:#FFFFFF;border:1px solid #DCE3EE;border-radius:14px;text-decoration:none;color:inherit}
+.nv{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;font-weight:700;color:#4B5874;text-decoration:none}
+.nv.on{color:#1A56C4}
+</style>
+
+
+</head>
+<body>
+<div style="width: 390px; height: 844px; display: flex; flex-direction: column; background: #F2F5FA; overflow: hidden">
+  <header style="height: 64px; flex-shrink: 0; display: flex; align-items: center; gap: 8px; padding: 0 12px 0 16px; background: #FFFFFF; border-bottom: 1px solid #DCE3EE">
+    <img src="../assets/logo-lux.png" alt="Universidad Lux" style="width: 128px; height: auto">
+    <button type="button" aria-label="Notificaciones: 1 nueva" style="margin-left: auto; position: relative; width: 44px; height: 44px; border: 0; background: transparent; color: #26324D; display: flex; align-items: center; justify-content: center"><svg class="i" width="22" height="22" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z M10 20a2 2 0 0 0 4 0"></path></svg><span style="position: absolute; top: 7px; right: 7px; min-width: 16px; height: 16px; border-radius: 8px; background: #C0262D; color: #FFFFFF; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center">1</span></button>
+    <span aria-label="Juan Pérez López" style="width: 36px; height: 36px; border-radius: 50%; background: #0B1F4D; color: #FFFFFF; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center">JP</span>
+  </header>
+
+  <main style="flex-grow: 1; min-height: 0; overflow-y: auto; padding: 18px 16px 20px; display: flex; flex-direction: column; gap: 14px">
+    <div><h1 style="margin: 0; font-size: 26px; font-weight: 800; color: #0B1F4D; letter-spacing: -0.3px">Mis Tickets</h1><p style="margin: 2px 0 0; font-size: 14px; color: #4B5874">Hola, Juan. Así van tus solicitudes.</p></div>
+
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+      <div style="padding: 10px 12px; background: #FFFFFF; border: 1px solid #DCE3EE; border-radius: 12px; display: flex; flex-direction: column"><strong style="font-size: 22px; color: #0B1F4D">3</strong><span style="font-size: 11px; font-weight: 600; color: #4B5874">Activos</span></div>
+      <div style="padding: 10px 12px; background: #FFFFFF; border: 1px solid #F3C99A; border-radius: 12px; display: flex; flex-direction: column"><strong style="font-size: 22px; color: #9A4A00">1</strong><span style="font-size: 11px; font-weight: 600; color: #4B5874">Esperan tu respuesta</span></div>
+      <div style="padding: 10px 12px; background: #FFFFFF; border: 1px solid #DCE3EE; border-radius: 12px; display: flex; flex-direction: column"><strong style="font-size: 22px; color: #0B1F4D">2</strong><span style="font-size: 11px; font-weight: 600; color: #4B5874">Resueltos</span></div>
+    </div>
+
+    <div role="tablist" aria-label="Filtrar tickets" style="display: flex; flex-shrink: 0; gap: 8px; overflow-x: auto; margin: 0 -16px; padding: 0 16px">
+      
+        <button type="button" role="tab" class="fc on">Todos · 5</button>
+      
+        <button type="button" role="tab" class="fc">Activos · 3</button>
+      
+        <button type="button" role="tab" class="fc">Esperando · 1</button>
+      
+        <button type="button" role="tab" class="fc">Resueltos · 2</button>
+      
+    </div>
+
+    
+      <a class="tk" href="10-movil-ticket.html" style="border-color: #F3C99A">
+        <div style="display: flex; align-items: center; gap: 10px">
+          <span style="width: 36px; height: 36px; border-radius: 10px; background: #EEF2F8; color: #0B1F4D; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg class="i" width="18" height="18" viewBox="0 0 24 24"><path d="M3 6h18v12H3z M3 10h18 M7 15h4"></path></svg></span>
+          <strong style="font-size: 14px; color: #0B1F4D">#00032</strong>
+          <span class="pill" style="margin-left: auto; background: #FDECD8; color: #9A4A00"><span class="dot"></span>Esperando Respuesta</span>
+        </div>
+        <span style="font-size: 15px; font-weight: 700; line-height: 1.3">Cargo duplicado en colegiatura</span>
+        <span style="font-size: 12px; color: #4B5874">Cajas · Act. hoy 09:20</span>
+        
+          <div style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px; background: #FDECD8; color: #9A4A00; font-size: 12px; font-weight: 700"><svg class="i" width="16" height="16" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"></path></svg>Rosa Garza espera tu comprobante<svg class="i" width="16" height="16" viewBox="0 0 24 24" style="margin-left: auto"><path d="M9 6l6 6-6 6"></path></svg></div>
+        
+      </a>
+    
+      <a class="tk" href="10-movil-ticket.html" style="border-color: #DCE3EE">
+        <div style="display: flex; align-items: center; gap: 10px">
+          <span style="width: 36px; height: 36px; border-radius: 10px; background: #EEF2F8; color: #0B1F4D; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg class="i" width="18" height="18" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z M14 3v4h4 M9 12h6 M9 16h6"></path></svg></span>
+          <strong style="font-size: 14px; color: #0B1F4D">#00038</strong>
+          <span class="pill" style="margin-left: auto; background: #DDF1F6; color: #0B6278"><span class="dot"></span>Abierto</span>
+        </div>
+        <span style="font-size: 15px; font-weight: 700; line-height: 1.3">Duda sobre fecha de reinscripción</span>
+        <span style="font-size: 12px; color: #4B5874">Por asignar · Act. hoy 12:05</span>
+        
+      </a>
+    
+      <a class="tk" href="10-movil-ticket.html" style="border-color: #DCE3EE">
+        <div style="display: flex; align-items: center; gap: 10px">
+          <span style="width: 36px; height: 36px; border-radius: 10px; background: #EEF2F8; color: #0B1F4D; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg class="i" width="18" height="18" viewBox="0 0 24 24"><path d="M3 4h18v12H3z M8 20h8 M12 16v4"></path></svg></span>
+          <strong style="font-size: 14px; color: #0B1F4D">#00035</strong>
+          <span class="pill" style="margin-left: auto; background: #E3ECFB; color: #1A4FB0"><span class="dot"></span>En Proceso</span>
+        </div>
+        <span style="font-size: 15px; font-weight: 700; line-height: 1.3">Problema de acceso a plataforma virtual</span>
+        <span style="font-size: 12px; color: #4B5874">Soporte Técnico · Act. hoy 11:35</span>
+        
+      </a>
+    
+      <a class="tk" href="10-movil-ticket.html" style="border-color: #DCE3EE">
+        <div style="display: flex; align-items: center; gap: 10px">
+          <span style="width: 36px; height: 36px; border-radius: 10px; background: #EEF2F8; color: #0B1F4D; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg class="i" width="18" height="18" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z M4 19V5 M9 7h6"></path></svg></span>
+          <strong style="font-size: 14px; color: #0B1F4D">#00027</strong>
+          <span class="pill" style="margin-left: auto; background: #DFF3E6; color: #1D6B3A"><span class="dot"></span>Resuelto</span>
+        </div>
+        <span style="font-size: 15px; font-weight: 700; line-height: 1.3">Problema con inscripción de materia</span>
+        <span style="font-size: 12px; color: #4B5874">Servicios Escolares · Act. 18/09/2026</span>
+        
+      </a>
+    
+      <a class="tk" href="10-movil-ticket.html" style="border-color: #DCE3EE">
+        <div style="display: flex; align-items: center; gap: 10px">
+          <span style="width: 36px; height: 36px; border-radius: 10px; background: #EEF2F8; color: #0B1F4D; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg class="i" width="18" height="18" viewBox="0 0 24 24"><path d="M2 8.5a15 15 0 0 1 20 0 M5 12a10 10 0 0 1 14 0 M8.5 15.5a5 5 0 0 1 7 0 M12 19h.01"></path></svg></span>
+          <strong style="font-size: 14px; color: #0B1F4D">#00019</strong>
+          <span class="pill" style="margin-left: auto; background: #E9ECF1; color: #4B5563"><span class="dot"></span>Cerrado</span>
+        </div>
+        <span style="font-size: 15px; font-weight: 700; line-height: 1.3">Falla en la red del campus</span>
+        <span style="font-size: 12px; color: #4B5874">Soporte Técnico · Act. 12/09/2026</span>
+        
+      </a>
+    
+  </main>
+
+  <nav aria-label="Principal" style="height: 76px; flex-shrink: 0; display: flex; align-items: stretch; background: #FFFFFF; border-top: 1px solid #DCE3EE; padding: 0 12px 8px">
+    <a class="nv on" href="09-movil-mis-tickets.html" aria-current="page"><svg class="i" width="22" height="22" viewBox="0 0 24 24"><path d="M3 7h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4z M14 7v10"></path></svg>Mis Tickets</a>
+    <a class="nv" href="02b-lumix-identificado.html" style="position: relative; top: -16px; color: #0B1F4D"><span style="width: 58px; height: 58px; border-radius: 50%; background: #1A56C4; border: 4px solid #FFFFFF; box-shadow: 0 4px 12px rgba(11,31,77,.25); display: flex; align-items: center; justify-content: center; overflow: hidden"><img src="../assets/lumix-avatar.png" alt="" style="width: 50px; height: 50px; border-radius: 50%; background: #DDF1F6"></span>Hablar con Lumix</a>
+    <a class="nv" href="#"><svg class="i" width="22" height="22" viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M4 20c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"></path></svg>Mi perfil</a>
+  </nav>
+</div>
+</body>
+</html>
