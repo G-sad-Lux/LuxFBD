@@ -50,6 +50,7 @@
         <div class="spacer"></div>
         <button id="btn-notifs" class="v2-bell" hidden>🔔<span id="notif-punto" class="punto" hidden></span></button>
         <span id="quien" class="v2-nota" hidden></span>
+        <button id="btn-clasica" class="v2-tab" title="Volver a la versión clásica">↩ Clásica</button>
         <button id="btn-salir" class="v2-btn secundario" hidden>Cerrar sesión</button>
     </header>
 
@@ -318,6 +319,11 @@
             }
             window.addEventListener('hashchange', route);
             $('ir-panel').addEventListener('click', (e) => { e.preventDefault(); location.hash = ''; });
+            $('btn-clasica').addEventListener('click', () => {
+                if (window.luxV2Set) window.luxV2Set(false);
+                window.location.href = '../index.html';
+            });
+
 
             // ---------- Arranque ----------
             const perfil = await LuxV2.getProfile();

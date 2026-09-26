@@ -21,7 +21,9 @@
         <span class="v2-beta">BETA</span>
         <div class="spacer"></div>
         <button id="btn-notifs" class="v2-bell" hidden>🔔<span id="notif-punto" class="punto" hidden></span></button>
+        <button id="ir-reportes" class="v2-tab" hidden>📊 Reportes</button>
         <span id="quien" class="v2-nota" hidden></span>
+        <button id="btn-clasica" class="v2-tab" title="Volver a la versión clásica">↩ Clásica</button>
         <button id="btn-salir" class="v2-btn secundario" hidden>Cerrar sesión</button>
     </header>
 
@@ -369,6 +371,53 @@
                 if (ev.target.id === 'lightbox') { $('lightbox').classList.remove('abierta'); $('lightbox-img').src = ''; }
             });
 
+            // ---------- Reportes (objetivo 2.2 del doc v1; vistas SQL de 0012) ----------
+            async function renderReportes() {
+                vista.innerHTML = '<div class="v2-card"><p class="v2-nota">Generando reportes…</p></div>';
+                try {
+                    const [kpiR, catR, tiemposR] = await Promise.all([
+                        LuxV2.sb().from('v_kpi_resumen').select('*').single(),
+                        LuxV2.sb().from('v_tickets_por_categoria').select('*'),
+                        LuxV2.sb().from('v_tiempo_resolucion').select('*'),
+                    ]);
+                    const k = kpiR.data || {};
+                    const cats = catR.data || [];
+                    const tiempos = tiemposR.data || [];
+
+                    const filasCat = cats.map(c =>
+                        '<tr><td>' + esc(c.categoria) + '</td><td>' + esc(c.total) + '</td><td>' + esc(c.activos) + '</td></tr>').join('');
+                    const filasTiempo = tiempos.map(t => {
+                        const pct = t.cerrados > 0 ? Math.round(100 * t.dentro_de_sla / t.cerrados) : 0;
+                        return '<tr><td>' + esc(t.prioridad) + '</td><td>' + esc(t.cerrados) + '</td><td>' +
+                            esc(t.horas_promedio ?? '—') + ' h</td><td>' + esc(t.dentro_de_sla) + ' (' + pct + '%)</td></tr>';
+                    }).join('');
+
+                    vista.innerHTML =
+                        '<p><a href="#" class="v2-nota" style="text-decoration:none;">← Volver al dashboard</a></p>' +
+                        '<h2 style="margin:0 0 12px;">📊 Reportes de soporte</h2>' +
+                        '<div class="v2-kpis">' +
+                        '<div class="v2-kpi"><div class="valor">' + (k.activos ?? '—') + '</div><div class="etiqueta">Activos ahora</div></div>' +
+                        '<div class="v2-kpi warn"><div class="valor">' + ((k.por_vencer ?? 0) + (k.vencidos ?? 0)) + '</div><div class="etiqueta">En riesgo de SLA</div></div>' +
+                        '<div class="v2-kpi ok"><div class="valor">' + (k.resueltos_hoy ?? '—') + '</div><div class="etiqueta">Resueltos hoy</div></div>' +
+                        '</div>' +
+                        '<div class="v2-detalle">' +
+                        '<div class="v2-card"><h3 style="margin:0 0 8px;">Tickets por categoría</h3>' +
+                        '<p class="v2-nota">Detecta problemas recurrentes de la plataforma (objetivo 2.2).</p>' +
+                        '<div class="v2-tabla-wrap" style="box-shadow:none; border:none;"><table class="v2-tabla" style="min-width:0;">' +
+                        '<thead><tr><th>Categoría</th><th>Total</th><th>Activos</th></tr></thead>' +
+                        '<tbody>' + (filasCat || '<tr><td colspan="3" class="v2-nota">Sin datos aún.</td></tr>') + '</tbody></table></div></div>' +
+                        '<div class="v2-card"><h3 style="margin:0 0 8px;">Tiempos de resolución por prioridad</h3>' +
+                        '<p class="v2-nota">Promedio de horas y cumplimiento del SLA en tickets cerrados.</p>' +
+                        '<div class="v2-tabla-wrap" style="box-shadow:none; border:none;"><table class="v2-tabla" style="min-width:0;">' +
+                        '<thead><tr><th>Prioridad</th><th>Cerrados</th><th>Promedio</th><th>Dentro de SLA</th></tr></thead>' +
+                        '<tbody>' + (filasTiempo || '<tr><td colspan="4" class="v2-nota">Aún no hay tickets cerrados.</td></tr>') + '</tbody></table></div></div>' +
+                        '</div>';
+                } catch (err) {
+                    console.error(err);
+                    vista.innerHTML = '<div class="v2-card"><h2>No se pudieron generar los reportes</h2><p class="v2-nota">' + esc(err.message) + '</p></div>';
+                }
+            }
+
             // ---------- Datos + enrutamiento ----------
             async function cargarDatos() {
                 const [tickets, kpiRes] = await Promise.all([
@@ -381,11 +430,18 @@
 
             function route() {
                 const m = location.hash.match(/ticket=(\d+)/);
-                if (m) renderDetalle(Number(m[1]));
-                else renderDashboard();
+                if (m) return renderDetalle(Number(m[1]));
+                if (location.hash === '#reportes') return renderReportes();
+                renderDashboard();
             }
             window.addEventListener('hashchange', route);
             $('ir-dashboard').addEventListener('click', (e) => { e.preventDefault(); location.hash = ''; });
+            $('ir-reportes').addEventListener('click', () => { location.hash = 'reportes'; });
+            $('btn-clasica').addEventListener('click', () => {
+                if (window.luxV2Set) window.luxV2Set(false);
+                window.location.href = '../index.html';
+            });
+
 
             // ---------- Arranque ----------
             const perfil = await LuxV2.getProfile();
@@ -407,6 +463,7 @@
             $('btn-salir').hidden = false;
             $('btn-salir').addEventListener('click', LuxV2.logout);
             $('btn-notifs').hidden = false;
+            $('ir-reportes').hidden = false;
 
             try {
                 const [catalogs, staff] = await Promise.all([LuxV2.getCatalogs(), LuxV2.callFn('ticket-manager/staff')]);

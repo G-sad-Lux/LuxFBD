@@ -560,6 +560,53 @@
             display: none !important;
         }
 
+        /* Switch de la nueva experiencia (V2) en el header */
+        .v2-switch {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .v2-switch input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .v2-switch .pista {
+            width: 38px;
+            height: 20px;
+            border-radius: 999px;
+            background: #cbd5e1;
+            position: relative;
+            transition: background 0.15s;
+            flex: none;
+        }
+        .v2-switch .pista::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.3);
+            transition: left 0.15s;
+        }
+        .v2-switch input:checked + .pista {
+            background: var(--primary);
+        }
+        .v2-switch input:checked + .pista::after {
+            left: 20px;
+        }
+        .v2-switch small {
+            font-size: 0.66rem;
+            line-height: 1.15;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
         form {
             display: flex;
             flex-direction: column;
@@ -974,6 +1021,11 @@
                 </ul>
             </nav>
             <div class="header-actions">
+                <label class="v2-switch" title="Activar o desactivar la nueva experiencia (V2)">
+                    <input type="checkbox" id="v2-switch">
+                    <span class="pista"></span>
+                    <small>Nueva<br>experiencia</small>
+                </label>
                 <button class="icon-button" aria-label="Notificaciones">🔔</button>
                 <button class="icon-button" aria-label="Mensajes">✉️</button>
                 <div class="profile-chip">
@@ -1849,6 +1901,21 @@
                 v2Access.removeAttribute("hidden");
                 const v2Qr = document.getElementById("v2-qr");
                 if (v2Qr) v2Qr.removeAttribute("hidden");
+            }
+            // Switch del header: escribe la preferencia del usuario y aplica al instante.
+            const v2Switch = document.getElementById("v2-switch");
+            if (v2Switch && window.luxV2Enabled) {
+                v2Switch.checked = window.luxV2Enabled();
+                v2Switch.addEventListener("change", () => {
+                    if (window.luxV2Set) window.luxV2Set(v2Switch.checked);
+                    if (v2Switch.checked && chatState.user) {
+                        // Con sesión: directo a la experiencia nueva según el rol
+                        window.location.href = STAFF_ROLES.includes(chatState.user.role)
+                            ? "v2/admin.html" : "v2/alumnos.html";
+                    } else {
+                        window.location.reload();
+                    }
+                });
             }
         }
 

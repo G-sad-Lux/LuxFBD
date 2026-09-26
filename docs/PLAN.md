@@ -39,14 +39,14 @@
 ### F5 — Pulido y cierre (≈1 día)
 
 - [x] Branding v1: título "Sitio Sencillo y Responsivo" y footer "Lux Studio" → "Universidad Lux — Soporte".
-- [ ] Flag `v2` en tabla `app_flag` (apagado remoto sin deploy) — opcional.
+- [x] Interruptor completo: **switch visible en el header v1** (con redirección por rol) + botón "↩ Clásica" en las páginas V2 + **flag remoto `app_flag` en DB** (cascada: URL > switch del usuario > DB > config.js).
 - [ ] Cosméticos si sobra tiempo: iconos de categoría en tarjetas, avatares en burbujas, "N por página", % numérico del SLA, fechas por paso del seguimiento, card de PDF con peso/fecha.
 - [ ] **Encender la V2 por default** (`config.js v2: true`) cuando F4 esté validada — decisión de equipo antes de la demo.
 
 ### Opcionales con valor de concurso (del análisis de flujos, P3)
 
 - [ ] Encuesta CSAT (1-5) al cerrar ticket + columna y KPI.
-- [ ] Pantalla de reportes (las vistas `v_tickets_por_categoria` y `v_tiempo_resolucion` ya existen; solo falta UI).
+- [x] Pantalla de reportes en admin (#reportes): tickets por categoría, tiempos por prioridad y cumplimiento de SLA sobre las vistas SQL.
 - [ ] Supabase Realtime para refresco en vivo del dashboard.
 - [ ] Correo real en eventos clave (Resend/SMTP) — después de validar in-app.
 - [ ] Actualizar el **documento entregable** (script T-SQL→PostgreSQL real, diagrama E-R regenerado sin auto-traducción, endpoints reales, sin credenciales).
@@ -69,6 +69,7 @@ Tendencias % en KPIs · visor PDF embebido · sidebar con Reportes/Catálogos/Us
 | F1 backend compartido: 4 prioridades unificadas, ETA/SLA con recálculo, máquina de estados (incl. retorno automático 3→2), resumen obligatorio, bitácora y notificaciones por triggers, comentarios int/ext con RLS, vistas KPI `security_invoker`, `/comments`, service role eliminado — suite 106/106 | `a2f808d` |
 | F3 dashboard admin (figs. 6-7) · F2 Mis Tickets verificado en vivo (ticket #2 por portal, ETA exacta, campana, comentario) | `97920fa`, `df70646` |
 | Auditoría de conformidad V2 · fix orden de catálogos | `ad44d34`, `0eb33bd` |
+| **Interruptor desde el frontend** (mandato 2026-09-26): switch en el header v1 + Clásica en V2 + capa remota app_flag (migración 0016, suite 120/120) · **pantalla 📊 Reportes** en admin sobre las vistas KPI. Ciclo verificado en vivo: Clásica→v1(OFF)→switch→v2 por rol; capa remota cacheada | (interruptor) |
 | **Paquete conformidad + cierre F4/F5-parcial**: D3 evidencias desde composers (alumno y staff) y Lumix · D4 filtros de fecha · D5 actualizado_en con backfill y bumps por triggers · D6 área editable en gestión con bitácora · D7 correo del reportador en detalle y búsqueda · D9 KPI En proceso · D11 botón Ver detalle · QR de Lumix en el login · branding v1 (migración 0015, suite 117/117) | (paquete) |
 | **Decisión de producto**: el reporte de tickets es SIEMPRE en formato chatbot (asistente virtual) — se eliminó el formulario clásico del portal; Lumix es el único flujo de captura en V2 (Lux-IA en v1). Lumix real construido y verificado E2E | (mismo commit que D8/D2 +1) |
 | **D8 resuelta**: catálogo con las 6 categorías del doc V2 (Acceso y bloqueos, Plataforma virtual, Materias, Servicios escolares, Finanzas y pagos, Otros; IDs conservados, chat v1 actualizado, fallback → Otros) · **D2 resuelta**: login único que detecta el rol; con `?volver=v2` regresa a admin/alumnos según el tipo de usuario | (este commit) |

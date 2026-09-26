@@ -5,10 +5,16 @@ window.supabaseConfig = {
 
 // ============================================================
 // Interruptor maestro de la experiencia V2 (docs/PLAN_V2.md).
-// Cascada: ?v2=on|off en la URL  >  localStorage  >  este default.
+// Cascada: ?v2=on|off (URL) > preferencia del usuario (switch del header)
+// > flag remoto en DB (tabla app_flag, sin redeploy) > este default.
 // Kill-switch en demo: agregar ?v2=off a la URL y recargar.
 // ============================================================
 window.appConfig = { v2: false };
+
+// Setter del switch del header (capa: preferencia del usuario)
+window.luxV2Set = function (on) {
+    try { localStorage.setItem('lux.v2.override', on ? 'on' : 'off'); } catch (e) { }
+};
 
 window.luxV2Enabled = function () {
     try {
@@ -18,6 +24,26 @@ window.luxV2Enabled = function () {
         var o = localStorage.getItem('lux.v2.override');
         if (o === 'on') return true;
         if (o === 'off') return false;
+        var r = localStorage.getItem('lux.v2.remote');
+        if (r === 'on') return true;
+        if (r === 'off') return false;
     } catch (e) { /* almacenamiento bloqueado: usar el default */ }
     return !!(window.appConfig && window.appConfig.v2);
 };
+
+// Capa remota: consulta app_flag en segundo plano y guarda el resultado
+// para la SIGUIENTE carga. Permite prender/apagar para todos sin deploy.
+(function () {
+    try {
+        fetch(window.supabaseConfig.url + '/rest/v1/app_flag?clave=eq.v2&select=valor', {
+            headers: {
+                apikey: window.supabaseConfig.key,
+                Authorization: 'Bearer ' + window.supabaseConfig.key
+            }
+        }).then(function (r) { return r.json(); }).then(function (d) {
+            if (Array.isArray(d) && d.length > 0) {
+                localStorage.setItem('lux.v2.remote', d[0].valor ? 'on' : 'off');
+            }
+        }).catch(function () { });
+    } catch (e) { }
+})();
