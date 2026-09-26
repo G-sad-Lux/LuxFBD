@@ -29,10 +29,10 @@ serve(async (req) => {
 
         // Fetch all Catalogs in parallel for speed
         const [cats, prios, estados, areas] = await Promise.all([
-            supabaseClient.from('catalogo').select('catalogo_id, nombre, codigo').eq('tipo', 'categoria'),
-            supabaseClient.from('catalogo').select('catalogo_id, nombre, codigo').eq('tipo', 'prioridad'),
-            supabaseClient.from('catalogo').select('catalogo_id, nombre, codigo').eq('tipo', 'estado'),
-            supabaseClient.from('catalogo').select('catalogo_id, nombre, codigo').eq('tipo', 'area')
+            supabaseClient.from('catalogo').select('catalogo_id, nombre, codigo').eq('tipo', 'categoria').order('orden'),
+            supabaseClient.from('catalogo').select('catalogo_id, nombre, codigo').eq('tipo', 'prioridad').order('orden'),
+            supabaseClient.from('catalogo').select('catalogo_id, nombre, codigo').eq('tipo', 'estado').order('orden'),
+            supabaseClient.from('catalogo').select('catalogo_id, nombre, codigo').eq('tipo', 'area').order('orden')
         ])
 
         const response = {
