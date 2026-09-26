@@ -280,7 +280,8 @@ async function updateTicket(req: Request, supabase: any, user: any) {
 
     if (!profile) throw httpError('Profile not found', 404)
 
-    const allowedRoles = ['Administrativo', 'Maestro', 'Soporte']
+    // Alineado con es_staff() de la DB (0003): Maestro es reportador, no staff.
+    const allowedRoles = ['Administrativo', 'Soporte', 'Administrador']
     if (!allowedRoles.includes(profile.tipo_usuario)) {
         throw httpError('Unauthorized to update tickets', 403)
     }

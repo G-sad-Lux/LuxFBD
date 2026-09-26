@@ -1,0 +1,75 @@
+# Respaldo de la base de datos + keep-alive del proyecto Supabase.
+#
+# Por qué existe: el plan Free pausa proyectos tras ~7 días sin actividad
+# (así se perdió el proyecto original). Este workflow consulta la API dos
+# veces por semana (actividad) y guarda un dump cifrado de datos+esquema.
+#
+# Secrets requeridos (Settings -> Secrets and variables -> Actions):
+#   SUPABASE_ACCESS_TOKEN  token personal (dashboard -> Account -> Access Tokens)
+#   SUPABASE_DB_PASSWORD   contraseña de la DB (definida al crear el proyecto)
+#   BACKUP_PASSPHRASE      frase para cifrar el respaldo (el repo es público:
+#                          los artifacts serían descargables; por eso se cifra)
+#
+# Restaurar un respaldo:
+#   gpg --decrypt --batch --passphrase "<frase>" luxfbd-backup.tar.gz.gpg | tar xz
+#   (produce schema.sql y data.sql; data.sql se aplica sobre las migraciones)
+
+name: Backup y keep-alive
+
+on:
+  schedule:
+    - cron: '0 6 * * 1,4' # lunes y jueves 06:00 UTC (~00:00 en Monterrey)
+  workflow_dispatch: {}
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Derivar ref y anon key desde config.js (una sola fuente de verdad)
+        id: cfg
+        run: |
+          REF=$(grep -oP '(?<=https://)[a-z0-9]+(?=\.supabase\.co)' config.js)
+          KEY=$(grep -oP "key: '\K[^']+" config.js)
+          echo "ref=$REF" >> "$GITHUB_OUTPUT"
+          echo "key=$KEY" >> "$GITHUB_OUTPUT"
+
+      - name: Keep-alive (consulta REST trivial)
+        run: |
+          curl -fsS "https://${{ steps.cfg.outputs.ref }}.supabase.co/rest/v1/catalogo?select=catalogo_id&limit=1" \
+            -H "apikey: ${{ steps.cfg.outputs.key }}" \
+            -H "Authorization: Bearer ${{ steps.cfg.outputs.key }}" > /dev/null
+          echo "Proyecto activo."
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Vincular proyecto
+        run: supabase link --project-ref "${{ steps.cfg.outputs.ref }}"
+
+      - name: Dump de esquema y datos
+        run: |
+          mkdir -p backup
+          supabase db dump -f backup/schema.sql
+          supabase db dump --data-only -f backup/data.sql
+          ls -la backup/
+
+      - name: Cifrar (el repo es público; el artifact no debe exponer PII)
+        run: |
+          tar czf backup.tar.gz -C backup .
+          gpg --batch --symmetric --cipher-algo AES256 \
+            --passphrase "${{ secrets.BACKUP_PASSPHRASE }}" \
+            -o luxfbd-backup.tar.gz.gpg backup.tar.gz
+          rm -rf backup backup.tar.gz
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: luxfbd-backup-${{ github.run_number }}
+          path: luxfbd-backup.tar.gz.gpg
+          retention-days: 90
+          if-no-files-found: error

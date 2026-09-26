@@ -555,6 +555,11 @@
             display: none !important;
         }
 
+        /* El atributo hidden debe ganar a cualquier display de clase */
+        [hidden] {
+            display: none !important;
+        }
+
         form {
             display: flex;
             flex-direction: column;
@@ -972,9 +977,10 @@
                 <button class="icon-button" aria-label="Notificaciones">🔔</button>
                 <button class="icon-button" aria-label="Mensajes">✉️</button>
                 <div class="profile-chip">
-                    <span>AT</span>
-                    <small>Perfil</small>
+                    <span id="profile-initials">AT</span>
+                    <small id="profile-name">Perfil</small>
                 </div>
+                <button class="icon-button" id="logout-btn" aria-label="Cerrar sesión" title="Cerrar sesión" hidden>🚪</button>
             </div>
         </div>
     </header>
@@ -1297,28 +1303,104 @@
             });
         }
 
-        function showStudentView() {
-            if (loginSection) loginSection.classList.add('hidden');
-            if (studentDashboard) {
-                studentDashboard.removeAttribute('hidden');
-                studentDashboard.scrollIntoView({ behavior: 'smooth' });
+        // Roles con permisos de gestión (única fuente en el frontend; el
+        // backend valida por su cuenta con RLS + es_staff()).
+        const STAFF_ROLES = ['Soporte', 'Administrativo', 'Administrador'];
+
+        function updateProfileChip() {
+            const initialsEl = document.getElementById('profile-initials');
+            const nameEl = document.getElementById('profile-name');
+            const logoutBtn = document.getElementById('logout-btn');
+            const u = chatState.user;
+            if (u && u.fullName) {
+                const initials = u.fullName.trim().split(/\s+/).map(p => p[0]).slice(0, 2).join('').toUpperCase() || 'US';
+                initialsEl.textContent = initials;
+                nameEl.textContent = u.fullName.split(' ')[0];
+                logoutBtn.hidden = false;
+            } else {
+                initialsEl.textContent = 'AT';
+                nameEl.textContent = 'Perfil';
+                logoutBtn.hidden = true;
             }
-            if (chatTrigger) chatTrigger.removeAttribute('hidden');
-            setActiveNav('mis-cursos');
         }
 
-        function showAdminView() {
-            if (loginSection) loginSection.classList.add('hidden');
-            if (studentDashboard) {
-                studentDashboard.removeAttribute('hidden');
-                document.querySelectorAll('.view-section').forEach(el => el.style.display = 'none');
-                document.getElementById('support-view').style.display = 'block';
-                document.getElementById('mis-cursos').style.display = 'none';
-            }
-            if (chatTrigger) chatTrigger.setAttribute('hidden', '');
+        // Carga el perfil extendido y lo deja en chatState.user
+        async function hydrateUser(user) {
+            chatState.user = { id: user.id, email: user.email };
+            const { data: profile } = await supabase
+                .from('usuario')
+                .select('tipo_usuario, nombre, apellido, usuario_id')
+                .eq('auth_uid', user.id)
+                .single();
 
-            setActiveNav('soporte-luxia');
-            loadTickets(); // Load all tickets
+            chatState.user.role = profile ? profile.tipo_usuario : 'estudiante';
+            chatState.user.profileId = profile ? profile.usuario_id : null;
+            chatState.user.fullName = profile ? `${profile.nombre} ${profile.apellido}` : 'Usuario';
+            updateProfileChip();
+        }
+
+        // Router de vistas: ÚNICA función que muestra/oculta secciones.
+        // Sin sesión solo se permite 'login'; siempre restaura lo que oculta.
+        function showView(route) {
+            const logged = !!chatState.user;
+            const isStaff = logged && STAFF_ROLES.includes(chatState.user.role);
+            if (!logged && route !== 'login') route = 'login';
+            if (logged && (route === 'login' || route === 'tablero')) route = 'mis-cursos';
+
+            const cursos = document.getElementById('mis-cursos');
+            const support = document.getElementById('support-view');
+
+            if (route === 'login') {
+                loginSection.classList.remove('hidden');
+                loginSection.style.display = '';
+                studentDashboard.setAttribute('hidden', '');
+                if (chatTrigger) chatTrigger.setAttribute('hidden', '');
+                setActiveNav('login');
+                return;
+            }
+
+            loginSection.classList.add('hidden');
+            loginSection.style.display = '';
+            studentDashboard.removeAttribute('hidden');
+            if (chatTrigger) {
+                if (isStaff) chatTrigger.setAttribute('hidden', '');
+                else chatTrigger.removeAttribute('hidden');
+            }
+
+            if (route === 'soporte-luxia') {
+                cursos.style.display = 'none';
+                support.style.display = 'block';
+                setActiveNav('soporte-luxia');
+                loadTickets();
+            } else {
+                cursos.style.display = '';
+                support.style.display = 'none';
+                setActiveNav('mis-cursos');
+            }
+        }
+
+        async function logout() {
+            try { await supabase.auth.signOut(); } catch (e) { console.warn('signOut:', e); }
+            chatState.user = null;
+            STAFF_LIST = [];
+            updateProfileChip();
+            chatWindow.classList.remove('open');
+            chatMessages.innerHTML = '';
+            chatState.step = 'INIT';
+            chatState.ticket = {};
+            if (loginAlert) loginAlert.hidden = true;
+            showView('login');
+        }
+
+        // Restaura la sesión guardada por supabase-js al recargar la página
+        async function restoreSession() {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session && session.user) {
+                    await hydrateUser(session.user);
+                    showView(STAFF_ROLES.includes(chatState.user.role) ? 'soporte-luxia' : 'mis-cursos');
+                }
+            } catch (e) { console.warn('No se pudo restaurar la sesión:', e); }
         }
 
         if (loginForm) {
@@ -1340,29 +1422,9 @@
                     loginAlert.className = 'login-alert success';
                     loginAlert.hidden = false;
 
-                    chatState.user = {
-                        id: data.user.id,
-                        email: data.user.email
-                    };
-
-                    const { data: profile } = await supabase
-                        .from('usuario')
-                        .select('tipo_usuario, nombre, apellido, usuario_id')
-                        .eq('auth_uid', data.user.id)
-                        .single();
-
-                    chatState.user.role = profile ? profile.tipo_usuario : 'estudiante';
-                    chatState.user.profileId = profile ? profile.usuario_id : null;
-                    chatState.user.fullName = profile ? `${profile.nombre} ${profile.apellido}` : 'Usuario';
-
-                    if (chatState.user.role === 'Administrativo' || chatState.user.role === 'Administrador' || chatState.user.role === 'Soporte') {
-                        console.log('Admin login detected');
-                        showAdminView();
-                    } else {
-                        showStudentView();
-                    }
-
-                    console.log('User Logged In:', data.user, profile);
+                    await hydrateUser(data.user);
+                    showView(STAFF_ROLES.includes(chatState.user.role) ? 'soporte-luxia' : 'mis-cursos');
+                    console.log('User Logged In:', chatState.user.email, chatState.user.role);
 
                 } catch (err) {
                     console.error('Login Error:', err.message);
@@ -1387,7 +1449,8 @@
         let chatState = {
             step: 'INIT',
             ticket: {},
-            history: []
+            history: [],
+            user: null
         };
 
         let CATEGORY_MAP = {};
@@ -1550,8 +1613,12 @@
                         addMessage('Selecciona tu archivo...', 'bot');
                         chatState.step = 'ATTACHMENTS';
                     } else if (nextStep === 'STATUS_CHECK') {
-                        addMessage('Esta funcionalidad estará disponible pronto.', 'bot');
-                        resetChat();
+                        checkTicketStatus();
+                    } else if (nextStep === 'EXIT') {
+                        chatWindow.classList.remove('open');
+                        chatMessages.innerHTML = '';
+                        chatState.step = 'INIT';
+                        chatState.ticket = {};
                     } else {
                         showStepPrompt(nextStep);
                     }
@@ -1564,6 +1631,7 @@
                 case 'GREETING':
                     if (input === 'report') return 'TITLE';
                     if (input === 'status') return 'STATUS_CHECK';
+                    if (input === 'exit') return 'EXIT';
                     return null;
                 case 'TITLE':
                     chatState.ticket.title = input;
@@ -1649,12 +1717,49 @@
 
             addMessage('¿Necesitas algo más?', 'bot', [
                 { label: 'Crear otro ticket', value: 'report' },
+                { label: 'Consultar estado', value: 'status' },
                 { label: 'Salir', value: 'exit' }
             ]);
+            chatState.step = 'GREETING';
+        }
 
-            setTimeout(() => {
-                chatState.step = 'GREETING';
-            }, 1000);
+        // RF-005 / doc v1 §8: consulta de estado desde el chat
+        async function checkTicketStatus() {
+            addMessage('Consultando tus tickets...', 'bot');
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) throw new Error('Sesión no disponible');
+
+                const resp = await fetch(`https://${projectRef}.supabase.co/functions/v1/ticket-manager/list`, {
+                    headers: { 'Authorization': `Bearer ${session.access_token}` }
+                });
+                if (!resp.ok) throw new Error('No se pudieron consultar los tickets');
+
+                const tickets = await resp.json();
+                if (tickets.length === 0) {
+                    addMessage('Aún no tienes tickets registrados. ¿Quieres reportar un problema?', 'bot');
+                } else {
+                    addMessage(`Tienes ${tickets.length} ticket(s) registrados:`, 'bot');
+                    tickets.slice(0, 5).forEach(t => {
+                        const estado = t.estado ? t.estado.nombre : 'Desconocido';
+                        const asignado = t.asignado ? `, atendido por ${t.asignado.nombre}` : ', aún sin asignar';
+                        addMessage(`#${t.ticket_id} · "${t.titulo}" → ${estado}${asignado}`, 'bot');
+                    });
+                    if (tickets.length > 5) {
+                        addMessage(`...y ${tickets.length - 5} más. Puedes verlos todos en "Soporte LuxIA".`, 'bot');
+                    }
+                }
+            } catch (err) {
+                console.error('Status check error:', err);
+                addMessage('No pude consultar tus tickets en este momento. Intenta de nuevo.', 'bot');
+            }
+
+            addMessage('¿Necesitas algo más?', 'bot', [
+                { label: 'Reportar un problema', value: 'report' },
+                { label: 'Consultar estado', value: 'status' },
+                { label: 'Salir', value: 'exit' }
+            ]);
+            chatState.step = 'GREETING';
         }
 
         function resetChat() {
@@ -1707,22 +1812,19 @@
         // Initial check
         if (chatTrigger) chatTrigger.setAttribute('hidden', '');
         setActiveNav('login');
-
-        // --- Support Dashboard Logic ---
-        function showSupportView() {
-            // Hide other views
-            document.querySelectorAll('section').forEach(el => el.style.display = 'none');
-            const supportView = document.getElementById('support-view');
-            if (supportView) supportView.style.display = 'block';
-
-            // Hide specific main views
-            const studentView = document.getElementById('student-view');
-            if (studentView) studentView.style.display = 'none';
-            const loginSection = document.getElementById('login');
-            if (loginSection) loginSection.style.display = 'none';
-
-            loadTickets();
+        document.getElementById('logout-btn').addEventListener('click', logout);
+        if (supabase) {
+            supabase.auth.onAuthStateChange((event) => {
+                if (event === 'SIGNED_OUT') {
+                    chatState.user = null;
+                    updateProfileChip();
+                    showView('login');
+                }
+            });
+            restoreSession();
         }
+
+        // --- Support Dashboard Logic (las vistas las maneja showView) ---
 
         async function loadTickets() {
             const tbody = document.getElementById('ticket-list-body');
@@ -1792,7 +1894,7 @@
             modal.classList.add('open');
 
             // Load staff list in background only if admin/support
-            if (chatState.user.role !== 'estudiante') {
+            if (STAFF_ROLES.includes(chatState.user.role)) {
                 await loadStaffList();
             }
 
@@ -1816,7 +1918,7 @@
 
                 // Build Actions
                 let actionHTML = '';
-                const canManage = ['Administrativo', 'Maestro', 'Soporte', 'Administrador'].includes(chatState.user.role);
+                const canManage = STAFF_ROLES.includes(chatState.user.role);
 
                 if (canManage) {
                     // Dropdown for Assignment
@@ -1958,13 +2060,11 @@
             }
         }
 
-        // Hook up navigation
+        // Hook up navigation: router con guard de sesión
         navLinks.forEach(link => {
             link.addEventListener('click', (e) => {
-                const route = link.dataset.route;
-                if (route === 'soporte-luxia') {
-                    showSupportView();
-                }
+                e.preventDefault();
+                showView(link.dataset.route);
             });
         });
 
