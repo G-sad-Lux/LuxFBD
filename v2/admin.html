@@ -15,17 +15,32 @@
 
 <body>
     <header class="v2-topbar">
-        <div class="brand">Gestión de Incidencias<small>Atención, seguimiento y soluciones · área de soporte</small></div>
+        <div class="brand"><a href="#" id="ir-dashboard" style="text-decoration:none; color:inherit;">Gestión de Incidencias</a>
+            <small>Atención, seguimiento y soluciones · área de soporte</small>
+        </div>
         <span class="v2-beta">BETA</span>
         <div class="spacer"></div>
+        <button id="btn-notifs" class="v2-bell" hidden>🔔<span id="notif-punto" class="punto" hidden></span></button>
+        <span id="quien" class="v2-nota" hidden></span>
         <button id="btn-salir" class="v2-btn secundario" hidden>Cerrar sesión</button>
     </header>
 
-    <main class="v2-main">
-        <div class="v2-card" id="contenido">
-            <p class="v2-nota">Cargando…</p>
+    <div id="notif-panel" class="v2-notif-panel" hidden>
+        <div style="display:flex; align-items:center; gap:8px;">
+            <strong style="flex:1;">Notificaciones</strong>
+            <button id="btn-leidas" class="v2-tab">Marcar leídas</button>
         </div>
+        <div id="notif-lista"></div>
+    </div>
+
+    <main class="v2-main">
+        <div id="vista"><div class="v2-card"><p class="v2-nota">Cargando…</p></div></div>
     </main>
+
+    <div id="lightbox" class="v2-lightbox">
+        <img id="lightbox-img" alt="Evidencia">
+        <p>Clic fuera de la imagen para cerrar</p>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2"
         integrity="sha384-WgXwGL6fUsYJWNaKJgVbrJKGRQwc1vieh2oy4kw9nXqpNDz3tdSsqEYUgeHD/NuF"
@@ -36,47 +51,394 @@
         (async function () {
             if (!LuxV2.requireV2()) return;
 
-            const cont = document.getElementById('contenido');
-            const btnSalir = document.getElementById('btn-salir');
             const esc = LuxV2.esc;
+            const vista = document.getElementById('vista');
+            const $ = (id) => document.getElementById(id);
 
+            // Espeja la maquina de estados de la DB (0010); el servidor manda.
+            const TRANSICIONES = { 1: [2, 4], 2: [3, 4], 3: [2, 4], 4: [5, 2], 5: [] };
+            const PAGE_SIZE = 10;
+
+            const state = {
+                perfil: null, catalogs: null, staff: [],
+                tickets: [], kpi: null,
+                filtro: { q: '', estado: '', categoria: '', prioridad: '', resp: '' },
+                page: 1,
+                tabComentario: 'externo',
+            };
+
+            // ---------- Utilidades de presentacion ----------
+            const badgeEstado = (t) => {
+                const nombre = t.estado ? t.estado.nombre : 'Desconocido';
+                const codigo = nombre.toLowerCase().replace(/\s+/g, '_');
+                return '<span class="v2-badge st-' + esc(codigo) + '">' + esc(nombre) + '</span>';
+            };
+            const badgePrioridad = (t) => {
+                const p = t.prioridad || {};
+                return '<span class="v2-badge pr-' + esc(p.codigo || '') + '">' + esc(p.nombre || '-') + '</span>';
+            };
+            const fmtFecha = (v) => v ? new Date(v).toLocaleString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+            const fmtRestante = (ms) => {
+                const abs = Math.abs(ms), h = Math.floor(abs / 3600000), m = Math.floor((abs % 3600000) / 60000);
+                const txt = h > 0 ? (h + ' h ' + m + ' min') : (m + ' min');
+                return ms >= 0 ? txt + ' restantes' : 'Vencido hace ' + txt;
+            };
+            const slaDe = (t) => {
+                if (!t.eta_estimada || [4, 5].includes(t.estado_id)) return { html: '<span class="v2-nota">—</span>' };
+                const total = new Date(t.eta_estimada) - new Date(t.fecha_creacion);
+                const rest = new Date(t.eta_estimada) - Date.now();
+                const pct = total > 0 ? Math.max(0, Math.min(100, Math.round(100 * rest / total))) : 0;
+                const nivel = rest < 0 ? 'danger' : (pct <= 25 ? 'warn' : '');
+                return {
+                    nivel, pct, rest,
+                    html: '<div class="v2-sla ' + nivel + '"><span class="txt">' + esc(fmtRestante(rest)) + '</span>' +
+                        '<div class="barra"><div class="fill" style="width:' + pct + '%"></div></div></div>'
+                };
+            };
+            const nombreDe = (u) => u ? ((u.nombre || '') + ' ' + (u.apellido || '')).trim() : '';
+
+            // ---------- Notificaciones (RLS: solo las propias) ----------
+            async function cargarNotifs() {
+                try {
+                    const { data } = await LuxV2.sb().from('notificacion')
+                        .select('notificacion_id, ticket_id, tipo, contenido, leida, creado_at')
+                        .order('creado_at', { ascending: false }).limit(12);
+                    const notifs = data || [];
+                    const noLeidas = notifs.filter(n => !n.leida).length;
+                    $('notif-punto').hidden = noLeidas === 0;
+                    if (noLeidas > 0) $('notif-punto').textContent = noLeidas;
+                    $('notif-lista').innerHTML = notifs.length === 0
+                        ? '<p class="v2-nota" style="padding:8px;">Sin notificaciones.</p>'
+                        : notifs.map(n =>
+                            '<div class="item' + (n.leida ? '' : ' nueva') + '" data-ticket="' + esc(n.ticket_id ?? '') + '">'
+                            + esc(n.contenido) + '<time>' + esc(fmtFecha(n.creado_at)) + '</time></div>').join('');
+                } catch (e) { console.warn('notifs:', e); }
+            }
+            $('btn-notifs').addEventListener('click', () => { $('notif-panel').hidden = !$('notif-panel').hidden; });
+            $('btn-leidas').addEventListener('click', async () => {
+                try {
+                    await LuxV2.sb().from('notificacion').update({ leida: true }).eq('leida', false);
+                    cargarNotifs();
+                } catch (e) { console.warn(e); }
+            });
+            $('notif-lista').addEventListener('click', (ev) => {
+                const item = ev.target.closest('.item');
+                if (item && item.dataset.ticket) { $('notif-panel').hidden = true; location.hash = 'ticket=' + item.dataset.ticket; }
+            });
+
+            // ---------- Dashboard (fig. 6) ----------
+            function ticketsFiltrados() {
+                const f = state.filtro, q = f.q.trim().toLowerCase();
+                return state.tickets.filter(t => {
+                    if (f.estado && String(t.estado_id) !== f.estado) return false;
+                    if (f.categoria && String(t.categoria_id) !== f.categoria) return false;
+                    if (f.prioridad && String(t.prioridad_id) !== f.prioridad) return false;
+                    if (f.resp === 'sin' && t.maestro_notificado_id) return false;
+                    if (f.resp && f.resp !== 'sin' && String(t.maestro_notificado_id) !== f.resp) return false;
+                    if (q) {
+                        const pajar = ('#' + t.ticket_id + ' ' + t.titulo + ' ' + nombreDe(t.reportador)).toLowerCase();
+                        if (!pajar.includes(q)) return false;
+                    }
+                    return true;
+                });
+            }
+
+            function renderDashboard() {
+                const k = state.kpi || {};
+                const cat = state.catalogs || { estados: [], categorias: [], prioridades: [] };
+                const opts = (lista, sel) => lista.map(c =>
+                    '<option value="' + esc(c.catalogo_id) + '"' + (String(c.catalogo_id) === sel ? ' selected' : '') + '>' + esc(c.nombre) + '</option>').join('');
+
+                const filtrados = ticketsFiltrados();
+                const totalPags = Math.max(1, Math.ceil(filtrados.length / PAGE_SIZE));
+                if (state.page > totalPags) state.page = totalPags;
+                const pagina = filtrados.slice((state.page - 1) * PAGE_SIZE, state.page * PAGE_SIZE);
+
+                const filas = pagina.map(t => {
+                    const rep = t.reportador ? nombreDe(t.reportador) : '—';
+                    const asignado = t.asignado ? nombreDe(t.asignado) : 'Sin asignar';
+                    return '<tr data-id="' + t.ticket_id + '">' +
+                        '<td><strong style="color:var(--v2-primary)">#' + t.ticket_id + '</strong></td>' +
+                        '<td>' + esc(fmtFecha(t.fecha_creacion)) + '</td>' +
+                        '<td>' + esc(rep) + '<span class="sub">' + esc(t.reportador ? t.reportador.tipo_usuario : '') + '</span></td>' +
+                        '<td>' + esc(t.titulo) + '</td>' +
+                        '<td>' + esc(t.catalogo ? t.catalogo.nombre : '—') + '</td>' +
+                        '<td>' + (t.canal_entrada === 'portal' ? '💻 Portal' : '💬 Chatbot') + '</td>' +
+                        '<td>' + badgePrioridad(t) + '</td>' +
+                        '<td>' + badgeEstado(t) + '</td>' +
+                        '<td>' + esc(asignado) + '</td>' +
+                        '<td>' + slaDe(t).html + '</td>' +
+                        '</tr>';
+                }).join('');
+
+                let botones = '';
+                for (let p = 1; p <= totalPags; p++) {
+                    botones += '<button data-pag="' + p + '"' + (p === state.page ? ' class="activa"' : '') + '>' + p + '</button>';
+                }
+
+                vista.innerHTML =
+                    '<div class="v2-kpis">' +
+                    '<div class="v2-kpi"><div class="valor">' + (k.activos ?? '—') + '</div><div class="etiqueta">Tickets activos</div></div>' +
+                    '<div class="v2-kpi warn"><div class="valor">' + (k.por_vencer ?? '—') + '</div><div class="etiqueta">Por vencer (4 h)</div></div>' +
+                    '<div class="v2-kpi danger"><div class="valor">' + (k.vencidos ?? '—') + '</div><div class="etiqueta">SLA vencido</div></div>' +
+                    '<div class="v2-kpi danger"><div class="valor">' + (k.alta_prioridad ?? '—') + '</div><div class="etiqueta">Alta / Crítica</div></div>' +
+                    '<div class="v2-kpi"><div class="valor">' + (k.sin_asignar ?? '—') + '</div><div class="etiqueta">Sin asignar</div></div>' +
+                    '<div class="v2-kpi ok"><div class="valor">' + (k.resueltos_hoy ?? '—') + '</div><div class="etiqueta">Resueltos hoy</div></div>' +
+                    '</div>' +
+                    '<div class="v2-filtros">' +
+                    '<input type="search" id="f-q" placeholder="Buscar por folio, título o alumno…" value="' + esc(state.filtro.q) + '">' +
+                    '<select id="f-estado"><option value="">Estado: todos</option>' + opts(cat.estados, state.filtro.estado) + '</select>' +
+                    '<select id="f-categoria"><option value="">Categoría: todas</option>' + opts(cat.categorias, state.filtro.categoria) + '</select>' +
+                    '<select id="f-prioridad"><option value="">Prioridad: todas</option>' + opts(cat.prioridades, state.filtro.prioridad) + '</select>' +
+                    '<select id="f-resp"><option value="">Responsable: todos</option><option value="sin"' + (state.filtro.resp === 'sin' ? ' selected' : '') + '>Sin asignar</option>' +
+                    state.staff.map(s => '<option value="' + s.usuario_id + '"' + (String(s.usuario_id) === state.filtro.resp ? ' selected' : '') + '>' + esc(nombreDe(s)) + '</option>').join('') +
+                    '</select>' +
+                    '<button id="f-refrescar" class="v2-btn secundario" title="Refrescar">⟳</button>' +
+                    '</div>' +
+                    '<div class="v2-tabla-wrap"><table class="v2-tabla"><thead><tr>' +
+                    '<th>Folio</th><th>Fecha</th><th>Alumno</th><th>Asunto</th><th>Categoría</th><th>Canal</th><th>Prioridad</th><th>Estado</th><th>Responsable</th><th>SLA</th>' +
+                    '</tr></thead><tbody>' +
+                    (filas || '<tr><td colspan="10" class="v2-nota" style="text-align:center;">Sin tickets con esos filtros.</td></tr>') +
+                    '</tbody></table>' +
+                    '<div class="v2-pag"><span class="total">' + filtrados.length + ' ticket(s)</span>' + botones + '</div></div>';
+
+                // listeners
+                const aplicar = () => { state.page = 1; leerFiltros(); renderDashboard(); };
+                $('f-q').addEventListener('input', aplicar);
+                ['f-estado', 'f-categoria', 'f-prioridad', 'f-resp'].forEach(id => $(id).addEventListener('change', aplicar));
+                $('f-refrescar').addEventListener('click', async () => { await cargarDatos(); renderDashboard(); });
+                vista.querySelectorAll('tbody tr[data-id]').forEach(tr =>
+                    tr.addEventListener('click', () => { location.hash = 'ticket=' + tr.dataset.id; }));
+                vista.querySelectorAll('.v2-pag button[data-pag]').forEach(b =>
+                    b.addEventListener('click', () => { state.page = Number(b.dataset.pag); renderDashboard(); }));
+
+                function leerFiltros() {
+                    state.filtro = {
+                        q: $('f-q').value, estado: $('f-estado').value, categoria: $('f-categoria').value,
+                        prioridad: $('f-prioridad').value, resp: $('f-resp').value,
+                    };
+                }
+            }
+
+            // ---------- Detalle (fig. 7) ----------
+            async function renderDetalle(id) {
+                vista.innerHTML = '<div class="v2-card"><p class="v2-nota">Cargando ticket #' + esc(id) + '…</p></div>';
+                let data;
+                try {
+                    data = await LuxV2.callFn('ticket-manager/details?id=' + encodeURIComponent(id));
+                } catch (err) {
+                    vista.innerHTML = '<div class="v2-card"><h2>No se pudo abrir el ticket</h2><p class="v2-nota">' + esc(err.message) + '</p>' +
+                        '<p><a class="v2-btn secundario" href="#">← Volver a tickets</a></p></div>';
+                    return;
+                }
+                const t = data.ticket;
+                const historia = data.history || [];
+                const comentarios = data.comments || [];
+                const adjuntos = data.attachments || [];
+                const sla = slaDe(t);
+
+                // Conversacion + bitacora en una sola linea de tiempo (fig. 7)
+                const items = [];
+                comentarios.forEach(c => items.push({ fecha: c.fecha_creacion, tipo: 'msg', c }));
+                historia.forEach(h => items.push({ fecha: h.fecha_cambio, tipo: 'hist', h }));
+                items.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+                const conv = items.map(it => {
+                    if (it.tipo === 'hist') {
+                        const h = it.h;
+                        return '<div class="v2-hist"><time>' + esc(fmtFecha(h.fecha_cambio)) + '</time>' +
+                            esc(h.cambio || h.campo_modificado || '') + '</div>';
+                    }
+                    const c = it.c;
+                    const autorStaff = c.autor && LuxV2.STAFF_ROLES.includes(c.autor.tipo_usuario);
+                    const clase = c.tipo === 'interno' ? 'interno' : (autorStaff ? 'staff' : 'alumno');
+                    return '<div class="v2-msg ' + clase + '"><div class="meta">' + esc(nombreDe(c.autor) || 'Usuario') +
+                        ' · ' + esc(fmtFecha(c.fecha_creacion)) + '</div>' + esc(c.contenido) + '</div>';
+                }).join('');
+
+                const percibida = t.prioridad_reportada_id
+                    ? (state.catalogs.prioridades.find(p => p.catalogo_id === t.prioridad_reportada_id) || {}).nombre
+                    : null;
+
+                const staffOpts = ['<option value="">— Sin asignar —</option>']
+                    .concat(state.staff.map(s => '<option value="' + s.usuario_id + '"' +
+                        (t.maestro_notificado_id === s.usuario_id ? ' selected' : '') + '>' + esc(nombreDe(s)) + '</option>')).join('');
+                const prioOpts = state.catalogs.prioridades.map(p => '<option value="' + p.catalogo_id + '"' +
+                    (t.prioridad_id === p.catalogo_id ? ' selected' : '') + '>' + esc(p.nombre) + '</option>').join('');
+
+                const botonesEstado = (TRANSICIONES[t.estado_id] || []).map(destino => {
+                    if (destino === 4) return '<button class="v2-btn" id="btn-resolver">✔ Resolver ticket <small>(requiere resumen)</small></button>';
+                    const etiquetas = { 2: (t.estado_id === 4 ? '↩ Reabrir (a En proceso)' : '▶ ' + (t.estado_id === 3 ? 'Reanudar atención' : 'Iniciar atención')), 3: '⏸ Pasar a Esperando respuesta', 5: '🔒 Cerrar ticket' };
+                    return '<button class="v2-btn secundario" data-estado="' + destino + '">' + etiquetas[destino] + '</button>';
+                }).join('');
+
+                vista.innerHTML =
+                    '<p><a href="#" class="v2-nota" style="text-decoration:none;">← Volver a tickets</a></p>' +
+                    '<div class="v2-detalle">' +
+                    '<div>' +
+                    '<div class="v2-card">' +
+                    '<h2 style="margin:0 0 4px;">Ticket #' + t.ticket_id + ' ' + badgeEstado(t) + '</h2>' +
+                    '<p style="margin:0 0 10px; font-size:1.05rem;">' + esc(t.titulo) + '</p>' +
+                    '<p class="v2-nota">' + esc(nombreDe(t.reportador)) + ' (' + esc(t.reportador ? t.reportador.tipo_usuario : '') + ') · ' +
+                    esc(t.catalogo ? t.catalogo.nombre : '') + ' · ' + esc(t.area ? t.area.nombre : '') + ' · ' +
+                    (t.canal_entrada === 'portal' ? '💻 Portal Web' : '💬 Chatbot') + ' · Creado ' + esc(fmtFecha(t.fecha_creacion)) + '</p>' +
+                    '<h3 style="margin:14px 0 6px;">Descripción del problema</h3>' +
+                    '<div style="background:#f6f8fd; border-radius:10px; padding:12px;">' + esc(t.detalles) + '</div>' +
+                    (t.resumen_solucion ? '<h3 style="margin:14px 0 6px;">Resolución</h3><div style="background:#e9f7ef; border-radius:10px; padding:12px;">' + esc(t.resumen_solucion) + '</div>' : '') +
+                    '<h3 style="margin:14px 0 0;">Evidencias (' + adjuntos.length + ')</h3>' +
+                    '<div class="v2-adj" id="adjuntos"></div>' +
+                    '</div>' +
+                    '<div class="v2-card" style="margin-top:18px;">' +
+                    '<h3 style="margin:0;">Historial y conversación</h3>' +
+                    '<div class="v2-conv">' + (conv || '<p class="v2-nota">Sin movimientos aún.</p>') + '</div>' +
+                    '<div class="v2-tabs">' +
+                    '<button class="v2-tab' + (state.tabComentario === 'externo' ? ' activa' : '') + '" data-tab="externo">💬 Respuesta pública</button>' +
+                    '<button class="v2-tab interna' + (state.tabComentario === 'interno' ? ' activa' : '') + '" data-tab="interno">📝 Nota interna</button>' +
+                    '</div>' +
+                    '<div class="v2-composer">' +
+                    '<textarea id="comentario-texto" maxlength="2000" placeholder="Escribe aquí…"></textarea>' +
+                    '<div style="display:flex; gap:10px; align-items:center; margin-top:8px;">' +
+                    '<button class="v2-btn" id="btn-comentar">Enviar</button>' +
+                    '<span id="comentario-msg" class="v2-feedback"></span>' +
+                    '</div></div>' +
+                    '</div>' +
+                    '</div>' +
+                    '<div>' +
+                    '<div class="v2-card v2-gestion">' +
+                    '<h3 style="margin:0;">⚙ Gestión del ticket</h3>' +
+                    '<label>Prioridad oficial</label><select id="g-prioridad">' + prioOpts + '</select>' +
+                    (percibida ? '<p class="v2-nota" style="margin:4px 0 0;">El reportador la percibió como: <strong>' + esc(percibida) + '</strong></p>' : '') +
+                    '<label>Responsable</label><select id="g-resp">' + staffOpts + '</select>' +
+                    '<div class="v2-acciones"><button class="v2-btn secundario" id="btn-aplicar">Guardar cambios</button></div>' +
+                    '<hr style="border:none; border-top:1px solid var(--v2-border); margin:14px 0;">' +
+                    '<h3 style="margin:0;">SLA</h3>' +
+                    (t.eta_estimada ? '<p class="v2-nota" style="margin:6px 0 4px;">Límite: ' + esc(fmtFecha(t.eta_estimada)) + '</p>' + sla.html
+                        : '<p class="v2-nota">Sin SLA (ticket previo a las reglas).</p>') +
+                    '<hr style="border:none; border-top:1px solid var(--v2-border); margin:14px 0;">' +
+                    '<div class="v2-acciones">' + (botonesEstado || '<p class="v2-nota">Ticket cerrado; sin acciones.</p>') + '</div>' +
+                    '<div id="resolver-caja" hidden>' +
+                    '<label>Resumen de la solución (obligatorio)</label>' +
+                    '<textarea id="resolver-texto" maxlength="2000" placeholder="Qué se hizo para resolverlo…"></textarea>' +
+                    '<div class="v2-acciones"><button class="v2-btn" id="btn-confirmar-resolver">Confirmar resolución</button></div>' +
+                    '</div>' +
+                    '<span id="gestion-msg" class="v2-feedback"></span>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
+
+                // Adjuntos via DOM (URLs firmadas por /details)
+                const adjCont = $('adjuntos');
+                if (adjuntos.length === 0) adjCont.innerHTML = '<p class="v2-nota">Sin evidencias.</p>';
+                adjuntos.forEach(att => {
+                    let url = '';
+                    try { const u = new URL(att.ruta_archivo_url); if (u.protocol === 'https:' || u.protocol === 'http:') url = u.href; } catch (_) { }
+                    const name = att.nombre_archivo || 'archivo';
+                    if (url && att.mime_type && att.mime_type.startsWith('image/')) {
+                        const img = document.createElement('img');
+                        img.src = url; img.alt = name;
+                        img.addEventListener('click', () => { $('lightbox-img').src = url; $('lightbox').classList.add('abierta'); });
+                        adjCont.appendChild(img);
+                    } else {
+                        const a = document.createElement('a');
+                        if (url) { a.href = url; a.target = '_blank'; a.rel = 'noopener'; }
+                        a.textContent = '📄 ' + name;
+                        adjCont.appendChild(a);
+                    }
+                });
+
+                const feedback = (id, texto, ok) => { const el = $(id); el.textContent = texto; el.className = 'v2-feedback ' + (ok ? 'ok' : 'error'); };
+
+                // Acciones de gestion
+                async function actualizar(payload, msgId) {
+                    try {
+                        await LuxV2.callFn('ticket-manager/update', { method: 'PUT', body: Object.assign({ ticket_id: t.ticket_id }, payload) });
+                        await Promise.all([cargarDatos(), cargarNotifs()]);
+                        renderDetalle(id);
+                    } catch (err) { feedback(msgId, err.message, false); }
+                }
+                $('btn-aplicar').addEventListener('click', () => {
+                    const payload = {};
+                    const prio = Number($('g-prioridad').value);
+                    const resp = $('g-resp').value === '' ? null : Number($('g-resp').value);
+                    if (prio !== t.prioridad_id) payload.prioridad_id = prio;
+                    if (resp !== t.maestro_notificado_id) payload.maestro_notificado_id = resp;
+                    if (Object.keys(payload).length === 0) return feedback('gestion-msg', 'No hay cambios que guardar.', false);
+                    actualizar(payload, 'gestion-msg');
+                });
+                vista.querySelectorAll('[data-estado]').forEach(b =>
+                    b.addEventListener('click', () => actualizar({ estado_id: Number(b.dataset.estado) }, 'gestion-msg')));
+                const btnResolver = $('btn-resolver');
+                if (btnResolver) btnResolver.addEventListener('click', () => { $('resolver-caja').hidden = !$('resolver-caja').hidden; });
+                const btnConfirmar = $('btn-confirmar-resolver');
+                if (btnConfirmar) btnConfirmar.addEventListener('click', () =>
+                    actualizar({ estado_id: 4, resumen_solucion: $('resolver-texto').value }, 'gestion-msg'));
+
+                // Comentarios
+                vista.querySelectorAll('.v2-tab[data-tab]').forEach(tab =>
+                    tab.addEventListener('click', () => { state.tabComentario = tab.dataset.tab; renderDetalle(id); }));
+                $('btn-comentar').addEventListener('click', async () => {
+                    try {
+                        await LuxV2.callFn('ticket-manager/comments', {
+                            method: 'POST',
+                            body: { ticket_id: t.ticket_id, contenido: $('comentario-texto').value, tipo: state.tabComentario }
+                        });
+                        renderDetalle(id);
+                    } catch (err) { feedback('comentario-msg', err.message, false); }
+                });
+            }
+
+            $('lightbox').addEventListener('click', (ev) => {
+                if (ev.target.id === 'lightbox') { $('lightbox').classList.remove('abierta'); $('lightbox-img').src = ''; }
+            });
+
+            // ---------- Datos + enrutamiento ----------
+            async function cargarDatos() {
+                const [tickets, kpiRes] = await Promise.all([
+                    LuxV2.callFn('ticket-manager/list'),
+                    LuxV2.sb().from('v_kpi_resumen').select('*').single(),
+                ]);
+                state.tickets = tickets;
+                state.kpi = kpiRes.data || null;
+            }
+
+            function route() {
+                const m = location.hash.match(/ticket=(\d+)/);
+                if (m) renderDetalle(Number(m[1]));
+                else renderDashboard();
+            }
+            window.addEventListener('hashchange', route);
+            $('ir-dashboard').addEventListener('click', (e) => { e.preventDefault(); location.hash = ''; });
+
+            // ---------- Arranque ----------
             const perfil = await LuxV2.getProfile();
             if (!perfil) {
-                cont.innerHTML =
-                    '<h2>Acceso del personal</h2>' +
+                vista.innerHTML = '<div class="v2-card"><h2>Acceso del personal</h2>' +
                     '<p class="v2-nota">Inicia sesión con tu cuenta institucional autorizada.</p>' +
-                    '<p><a class="v2-btn" href="../index.html">Ir al inicio de sesión</a></p>';
+                    '<p><a class="v2-btn" href="../index.html">Ir al inicio de sesión</a></p></div>';
                 return;
             }
-
             if (!perfil.esStaff) {
-                // RBAC visual; el que manda es RLS + es_staff() en el servidor.
-                cont.innerHTML =
-                    '<h2>Acceso solo para personal autorizado</h2>' +
+                vista.innerHTML = '<div class="v2-card"><h2>Acceso solo para personal autorizado</h2>' +
                     '<p class="v2-nota">Tu cuenta (' + esc(perfil.email || '') + ') no tiene rol de soporte.</p>' +
-                    '<p><a class="v2-btn secundario" href="alumnos.html">Ir a Mis Tickets</a></p>';
+                    '<p><a class="v2-btn secundario" href="alumnos.html">Ir a Mis Tickets</a></p></div>';
                 return;
             }
-
-            btnSalir.hidden = false;
-            btnSalir.addEventListener('click', LuxV2.logout);
+            state.perfil = perfil;
+            $('quien').textContent = perfil.nombreCompleto + ' · ' + perfil.tipo_usuario;
+            $('quien').hidden = false;
+            $('btn-salir').hidden = false;
+            $('btn-salir').addEventListener('click', LuxV2.logout);
+            $('btn-notifs').hidden = false;
 
             try {
-                const tickets = await LuxV2.callFn('ticket-manager/list');
-                const abiertos = tickets.filter(function (t) { return t.estado && t.estado.nombre === 'Abierto'; }).length;
-                const sinAsignar = tickets.filter(function (t) { return !t.maestro_notificado_id; }).length;
-
-                cont.innerHTML =
-                    '<h2>Hola, ' + esc(perfil.nombreCompleto) + '</h2>' +
-                    '<p>El sistema tiene <strong>' + tickets.length + '</strong> ticket(s): ' +
-                    '<span class="v2-badge abierto">' + abiertos + ' abiertos</span> ' +
-                    '<span class="v2-badge">' + sinAsignar + ' sin asignar</span></p>' +
-                    '<p class="v2-nota">Dashboard completo (KPIs, filtros, SLA y detalle con resolución) en construcción — fase F3 del plan V2.</p>' +
-                    '<p><a class="v2-btn secundario" href="../index.html#soporte">Usar el panel v1 mientras tanto</a></p>';
+                const [catalogs, staff] = await Promise.all([LuxV2.getCatalogs(), LuxV2.callFn('ticket-manager/staff')]);
+                state.catalogs = catalogs;
+                state.staff = staff;
+                await cargarDatos();
+                cargarNotifs();
+                route();
             } catch (err) {
                 console.error(err);
-                cont.innerHTML = '<h2>No se pudieron cargar los tickets</h2>' +
-                    '<p class="v2-nota">' + esc(err.message) + '</p>';
+                vista.innerHTML = '<div class="v2-card"><h2>No se pudo cargar el panel</h2><p class="v2-nota">' + esc(err.message) + '</p></div>';
             }
         })();
     </script>
