@@ -6,6 +6,7 @@
     "dev": "live-server --open=index.html --port=5173 --ignore=node_modules"
   },
   "devDependencies": {
-    "live-server": "^1.2.2"
+    "live-server": "^1.2.2",
+    "supabase": "^2.118.0"
   }
 }

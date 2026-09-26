@@ -1,0 +1,12 @@
+# Configuracion del CLI de Supabase (npx supabase ...)
+# El ref del proyecto remoto se fija con `npx supabase link --project-ref <ref>`.
+project_id = "LuxFBD"
+
+[functions.ticket-manager]
+verify_jwt = true
+
+[functions.catalog-service]
+# Se llama antes del login sin token: la plataforma responde 401 y el frontend
+# cae a los mapas estaticos (IDs sembrados en 0002). Mismo comportamiento que la v1.
+# Cuando la fase 2 mueva loadCatalogs() a despues del login, funcionara con token.
+verify_jwt = true

@@ -1227,12 +1227,17 @@
             console.error('Critical error initializing Supabase:', err);
         }
 
+        // Ref del proyecto Supabase derivado de config.js:
+        // al migrar de proyecto solo se edita config.js.
+        const projectRef = window.supabaseConfig
+            ? new URL(window.supabaseConfig.url).hostname.split('.')[0]
+            : '';
+
         // --- Edge Function Integration: Catalog Service ---
         async function loadCatalogs() {
             try {
                 const { data: { session } } = await supabase.auth.getSession();
                 const token = session?.access_token;
-                const projectRef = 'nsrduorngzyoiwpbkgku';
                 const funcUrl = `https://${projectRef}.supabase.co/functions/v1/catalog-service`;
 
                 const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
@@ -1596,7 +1601,6 @@
 
                 const { data: { session } } = await supabase.auth.getSession();
                 const token = session?.access_token;
-                const projectRef = 'nsrduorngzyoiwpbkgku';
                 const funcUrl = `https://${projectRef}.supabase.co/functions/v1/ticket-manager/create`;
 
                 const load = {
@@ -1722,7 +1726,6 @@
             try {
                 const { data: { session } } = await supabase.auth.getSession();
                 const token = session?.access_token;
-                const projectRef = 'nsrduorngzyoiwpbkgku';
 
                 const resp = await fetch(`https://${projectRef}.supabase.co/functions/v1/ticket-manager/list`, {
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -1770,7 +1773,6 @@
             if (STAFF_LIST.length > 0) return;
             try {
                 const { data: { session } } = await supabase.auth.getSession();
-                const projectRef = 'nsrduorngzyoiwpbkgku';
                 const resp = await fetch(`https://${projectRef}.supabase.co/functions/v1/ticket-manager/staff`, {
                     headers: { 'Authorization': `Bearer ${session?.access_token}` }
                 });
@@ -1791,7 +1793,6 @@
 
             try {
                 const { data: { session } } = await supabase.auth.getSession();
-                const projectRef = 'nsrduorngzyoiwpbkgku';
                 const resp = await fetch(`https://${projectRef}.supabase.co/functions/v1/ticket-manager/details?id=${ticketId}`, {
                     headers: { 'Authorization': `Bearer ${session?.access_token}` }
                 });
@@ -1909,7 +1910,6 @@
 
             try {
                 const { data: { session } } = await supabase.auth.getSession();
-                const projectRef = 'nsrduorngzyoiwpbkgku';
                 const funcUrl = `https://${projectRef}.supabase.co/functions/v1/ticket-manager/update`;
 
                 const resp = await fetch(funcUrl, {
