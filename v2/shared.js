@@ -108,3 +108,92 @@
         getCatalogs: getCatalogs
     };
 })();
+
+// ============================================================
+// Helpers de UI compartidos por admin.html y alumnos.html (F2/F3)
+// ============================================================
+(function () {
+    'use strict';
+    var esc = window.LuxV2.esc;
+
+    var nombreDe = function (u) {
+        return u ? ((u.nombre || '') + ' ' + (u.apellido || '')).trim() : '';
+    };
+    var fmtFecha = function (v) {
+        return v ? new Date(v).toLocaleString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+    };
+    var fmtRestante = function (ms) {
+        var abs = Math.abs(ms), h = Math.floor(abs / 3600000), m = Math.floor((abs % 3600000) / 60000);
+        var txt = h > 0 ? (h + ' h ' + m + ' min') : (m + ' min');
+        return ms >= 0 ? txt + ' restantes' : 'Vencido hace ' + txt;
+    };
+    var badgeEstado = function (t) {
+        var nombre = t.estado ? t.estado.nombre : 'Desconocido';
+        var codigo = nombre.toLowerCase().replace(/\s+/g, '_');
+        return '<span class="v2-badge st-' + esc(codigo) + '">' + esc(nombre) + '</span>';
+    };
+    var badgePrioridad = function (t) {
+        var p = t.prioridad || {};
+        return '<span class="v2-badge pr-' + esc(p.codigo || '') + '">' + esc(p.nombre || '-') + '</span>';
+    };
+    // Semaforo de SLA: ok / warn (<=25% del tiempo) / danger (vencido).
+    var slaDe = function (t) {
+        if (!t.eta_estimada || t.estado_id === 4 || t.estado_id === 5) return { html: '<span class="v2-nota">—</span>' };
+        var total = new Date(t.eta_estimada) - new Date(t.fecha_creacion);
+        var rest = new Date(t.eta_estimada) - Date.now();
+        var pct = total > 0 ? Math.max(0, Math.min(100, Math.round(100 * rest / total))) : 0;
+        var nivel = rest < 0 ? 'danger' : (pct <= 25 ? 'warn' : '');
+        return {
+            nivel: nivel, pct: pct, rest: rest,
+            html: '<div class="v2-sla ' + nivel + '"><span class="txt">' + esc(fmtRestante(rest)) + '</span>' +
+                '<div class="barra"><div class="fill" style="width:' + pct + '%"></div></div></div>'
+        };
+    };
+
+    window.LuxV2.ui = {
+        nombreDe: nombreDe,
+        fmtFecha: fmtFecha,
+        fmtRestante: fmtRestante,
+        badgeEstado: badgeEstado,
+        badgePrioridad: badgePrioridad,
+        slaDe: slaDe,
+    };
+
+    // Campana de notificaciones (tabla notificacion bajo RLS de destinatario).
+    // opts: { bell, punto, panel, lista, btnLeidas, alAbrirTicket(ticketId) }
+    // Devuelve { recargar }.
+    window.LuxV2.montarNotificaciones = function (opts) {
+        async function recargar() {
+            try {
+                var r = await window.LuxV2.sb().from('notificacion')
+                    .select('notificacion_id, ticket_id, tipo, contenido, leida, creado_at')
+                    .order('creado_at', { ascending: false }).limit(12);
+                var notifs = r.data || [];
+                var noLeidas = notifs.filter(function (n) { return !n.leida; }).length;
+                opts.punto.hidden = noLeidas === 0;
+                if (noLeidas > 0) opts.punto.textContent = noLeidas;
+                opts.lista.innerHTML = notifs.length === 0
+                    ? '<p class="v2-nota" style="padding:8px;">Sin notificaciones.</p>'
+                    : notifs.map(function (n) {
+                        return '<div class="item' + (n.leida ? '' : ' nueva') + '" data-ticket="' + esc(n.ticket_id == null ? '' : n.ticket_id) + '">'
+                            + esc(n.contenido) + '<time>' + esc(fmtFecha(n.creado_at)) + '</time></div>';
+                    }).join('');
+            } catch (e) { console.warn('notificaciones:', e); }
+        }
+        opts.bell.addEventListener('click', function () { opts.panel.hidden = !opts.panel.hidden; });
+        opts.btnLeidas.addEventListener('click', async function () {
+            try {
+                await window.LuxV2.sb().from('notificacion').update({ leida: true }).eq('leida', false);
+                recargar();
+            } catch (e) { console.warn(e); }
+        });
+        opts.lista.addEventListener('click', function (ev) {
+            var item = ev.target.closest('.item');
+            if (item && item.dataset.ticket && opts.alAbrirTicket) {
+                opts.panel.hidden = true;
+                opts.alAbrirTicket(item.dataset.ticket);
+            }
+        });
+        return { recargar: recargar };
+    };
+})();

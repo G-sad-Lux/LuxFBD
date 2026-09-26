@@ -11,21 +11,61 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="shared.css">
+    <style>
+        .tarjeta-ticket { display: flex; gap: 14px; align-items: flex-start; padding: 14px 4px; border-bottom: 1px solid var(--v2-border); cursor: pointer; }
+        .tarjeta-ticket:last-child { border-bottom: none; }
+        .tarjeta-ticket:hover { background: #f4f8ff; }
+        .tarjeta-ticket .cuerpo { flex: 1; min-width: 0; }
+        .tarjeta-ticket .titulo { font-weight: 600; }
+        .tarjeta-ticket .desc { color: var(--v2-muted); font-size: 0.85rem; margin: 2px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .tarjeta-ticket .meta { color: var(--v2-muted); font-size: 0.78rem; }
+        .tarjeta-ticket .lado { text-align: right; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+        .chip-info { background: #fdf1de; color: #9a6b1a; border-radius: 999px; padding: 2px 10px; font-size: 0.72rem; font-weight: 600; }
+        .pasos { display: flex; flex-direction: column; gap: 0; margin: 10px 0; }
+        .paso { display: flex; gap: 10px; align-items: flex-start; }
+        .paso .punto { width: 14px; height: 14px; border-radius: 50%; background: #dfe6f3; margin-top: 3px; flex: none; }
+        .paso.hecho .punto { background: var(--v2-ok); }
+        .paso.actual .punto { background: var(--v2-primary); box-shadow: 0 0 0 4px #e8f0ff; }
+        .paso .linea { width: 2px; height: 18px; background: var(--v2-border); margin-left: 6px; }
+        .paso .texto { font-size: 0.88rem; }
+        .paso .texto small { display: block; color: var(--v2-muted); }
+        .form-reporte label { display: block; font-size: 0.8rem; color: var(--v2-muted); margin: 12px 0 4px; }
+        .form-reporte input, .form-reporte select, .form-reporte textarea {
+            width: 100%; padding: 9px; border: 1px solid var(--v2-border); border-radius: 8px;
+            font: inherit; background: var(--v2-card); color: var(--v2-text);
+        }
+        .form-reporte textarea { min-height: 110px; resize: vertical; }
+    </style>
 </head>
 
 <body>
     <header class="v2-topbar">
-        <div class="brand">Portal de Atención al Estudiante<small>Universidad Lux · tu espacio de soporte</small></div>
+        <div class="brand"><a href="#" id="ir-panel" style="text-decoration:none; color:inherit;">Portal de Atención al Estudiante</a>
+            <small>Universidad Lux · tu espacio de soporte</small>
+        </div>
         <span class="v2-beta">BETA</span>
         <div class="spacer"></div>
+        <button id="btn-notifs" class="v2-bell" hidden>🔔<span id="notif-punto" class="punto" hidden></span></button>
+        <span id="quien" class="v2-nota" hidden></span>
         <button id="btn-salir" class="v2-btn secundario" hidden>Cerrar sesión</button>
     </header>
 
-    <main class="v2-main">
-        <div class="v2-card" id="contenido">
-            <p class="v2-nota">Cargando…</p>
+    <div id="notif-panel" class="v2-notif-panel" hidden>
+        <div style="display:flex; align-items:center; gap:8px;">
+            <strong style="flex:1;">Notificaciones</strong>
+            <button id="btn-leidas" class="v2-tab">Marcar leídas</button>
         </div>
+        <div id="notif-lista"></div>
+    </div>
+
+    <main class="v2-main">
+        <div id="vista"><div class="v2-card"><p class="v2-nota">Cargando…</p></div></div>
     </main>
+
+    <div id="lightbox" class="v2-lightbox">
+        <img id="lightbox-img" alt="Evidencia">
+        <p>Clic fuera de la imagen para cerrar</p>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2"
         integrity="sha384-WgXwGL6fUsYJWNaKJgVbrJKGRQwc1vieh2oy4kw9nXqpNDz3tdSsqEYUgeHD/NuF"
@@ -36,41 +76,298 @@
         (async function () {
             if (!LuxV2.requireV2()) return;
 
-            const cont = document.getElementById('contenido');
-            const btnSalir = document.getElementById('btn-salir');
             const esc = LuxV2.esc;
+            const { badgeEstado, fmtFecha, slaDe } = LuxV2.ui;
+            const vista = document.getElementById('vista');
+            const $ = (id) => document.getElementById(id);
 
-            const perfil = await LuxV2.getProfile();
-            if (!perfil) {
-                cont.innerHTML =
-                    '<h2>Inicia sesión para continuar</h2>' +
-                    '<p class="v2-nota">Tu sesión del Campus Lux se comparte con este portal: entra una vez y regresa aquí.</p>' +
-                    '<p><a class="v2-btn" href="../index.html">Ir al inicio de sesión</a></p>';
-                return;
+            const state = {
+                perfil: null, catalogs: null, tickets: [],
+                filtro: { q: '', estado: '', categoria: '' },
+            };
+
+            // ---------- Panel "Mis Tickets" (fig. 5) ----------
+            function filtrados() {
+                const f = state.filtro, q = f.q.trim().toLowerCase();
+                return state.tickets.filter(t => {
+                    if (f.estado && String(t.estado_id) !== f.estado) return false;
+                    if (f.categoria && String(t.categoria_id) !== f.categoria) return false;
+                    if (q && !(('#' + t.ticket_id + ' ' + t.titulo).toLowerCase().includes(q))) return false;
+                    return true;
+                });
             }
 
-            btnSalir.hidden = false;
-            btnSalir.addEventListener('click', LuxV2.logout);
+            function renderPanel() {
+                const activos = state.tickets.filter(t => [1, 2, 3].includes(t.estado_id)).length;
+                const esperando = state.tickets.filter(t => t.estado_id === 3).length;
+                const resueltos = state.tickets.filter(t => [4, 5].includes(t.estado_id)).length;
+                const cat = state.catalogs || { estados: [], categorias: [] };
+                const opts = (lista, sel) => lista.map(c =>
+                    '<option value="' + esc(c.catalogo_id) + '"' + (String(c.catalogo_id) === sel ? ' selected' : '') + '>' + esc(c.nombre) + '</option>').join('');
 
-            try {
-                const tickets = await LuxV2.callFn('ticket-manager/list');
-                const filas = tickets.slice(0, 10).map(function (t) {
-                    const estado = t.estado ? t.estado.nombre : 'Desconocido';
-                    const cls = estado === 'Abierto' ? 'abierto' : (estado === 'Cerrado' ? 'cerrado' : '');
-                    return '<li><span class="folio">#' + esc(t.ticket_id) + '</span>' +
-                        '<span class="titulo">' + esc(t.titulo) + '</span>' +
-                        '<span class="v2-badge ' + cls + '">' + esc(estado) + '</span></li>';
+                const lista = filtrados();
+                const tarjetas = lista.map(t => {
+                    const area = t.area ? t.area.nombre : '—';
+                    return '<div class="tarjeta-ticket" data-id="' + t.ticket_id + '">' +
+                        '<div class="cuerpo">' +
+                        '<div class="titulo"><span style="color:var(--v2-primary)">#' + t.ticket_id + '</span> · ' + esc(t.titulo) + '</div>' +
+                        '<div class="desc">' + esc((t.detalles || '').slice(0, 90)) + '</div>' +
+                        '<div class="meta">' + esc(t.catalogo ? t.catalogo.nombre : '') + ' · ' + esc(area) + ' · Creado ' + esc(fmtFecha(t.fecha_creacion)) + '</div>' +
+                        '</div>' +
+                        '<div class="lado">' + badgeEstado(t) +
+                        (t.estado_id === 3 ? '<span class="chip-info">⚠ Se requiere tu información</span>' : '') +
+                        '<button class="v2-btn secundario" style="padding:6px 12px; font-size:.82rem;">' + (t.estado_id === 3 ? 'Responder' : 'Ver detalle') + '</button>' +
+                        '</div></div>';
                 }).join('');
 
-                cont.innerHTML =
-                    '<h2>Hola, ' + esc(perfil.nombreCompleto) + '</h2>' +
-                    '<p>Tienes <strong>' + tickets.length + '</strong> ticket(s) registrados.</p>' +
-                    '<ul class="v2-lista">' + (filas || '<li class="v2-nota">Aún no has reportado incidencias.</li>') + '</ul>' +
-                    '<p class="v2-nota">Panel completo (contadores, filtros y conversación) en construcción — fase F2 del plan V2.</p>';
+                vista.innerHTML =
+                    '<div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px;">' +
+                    '<h2 style="margin:0; flex:1;">Mis Tickets</h2>' +
+                    '<a class="v2-btn" href="#nuevo">＋ Reportar nuevo problema</a>' +
+                    '</div>' +
+                    '<div class="v2-kpis">' +
+                    '<div class="v2-kpi"><div class="valor">' + activos + '</div><div class="etiqueta">Tickets activos</div></div>' +
+                    '<div class="v2-kpi warn"><div class="valor">' + esperando + '</div><div class="etiqueta">Esperando tu respuesta</div></div>' +
+                    '<div class="v2-kpi ok"><div class="valor">' + resueltos + '</div><div class="etiqueta">Resueltos</div></div>' +
+                    '</div>' +
+                    '<div class="v2-filtros">' +
+                    '<input type="search" id="f-q" placeholder="Buscar por folio o título…" value="' + esc(state.filtro.q) + '">' +
+                    '<select id="f-estado"><option value="">Estado: todos</option>' + opts(cat.estados, state.filtro.estado) + '</select>' +
+                    '<select id="f-categoria"><option value="">Categoría: todas</option>' + opts(cat.categorias, state.filtro.categoria) + '</select>' +
+                    '</div>' +
+                    '<div class="v2-card">' +
+                    (tarjetas || '<p class="v2-nota">Aún no has reportado incidencias. Usa "Reportar nuevo problema" o el asistente del Campus.</p>') +
+                    '</div>';
+
+                const aplicar = () => {
+                    state.filtro = { q: $('f-q').value, estado: $('f-estado').value, categoria: $('f-categoria').value };
+                    renderPanel();
+                };
+                $('f-q').addEventListener('input', aplicar);
+                $('f-estado').addEventListener('change', aplicar);
+                $('f-categoria').addEventListener('change', aplicar);
+                vista.querySelectorAll('.tarjeta-ticket').forEach(el =>
+                    el.addEventListener('click', () => { location.hash = 'ticket=' + el.dataset.id; }));
+            }
+
+            // ---------- Reportar por el portal (canal 'portal', §5.3: sin prioridad) ----------
+            function renderNuevo() {
+                const cat = state.catalogs || { categorias: [], areas: [] };
+                vista.innerHTML =
+                    '<p><a href="#" class="v2-nota" style="text-decoration:none;">← Volver a mis tickets</a></p>' +
+                    '<div class="v2-card form-reporte" style="max-width:640px;">' +
+                    '<h2 style="margin:0;">Reportar un problema</h2>' +
+                    '<p class="v2-nota">La prioridad la determina el equipo de soporte según reglas institucionales.</p>' +
+                    '<label>Título o resumen *</label><input id="n-titulo" maxlength="255" placeholder="Ej. No puedo entrar a la plataforma">' +
+                    '<label>Categoría *</label><select id="n-categoria">' +
+                    cat.categorias.map(c => '<option value="' + c.catalogo_id + '">' + esc(c.nombre) + '</option>').join('') + '</select>' +
+                    '<label>Área relacionada (opcional)</label><select id="n-area"><option value="">— Que soporte decida —</option>' +
+                    cat.areas.map(a => '<option value="' + a.catalogo_id + '">' + esc(a.nombre) + '</option>').join('') + '</select>' +
+                    '<label>Descripción detallada *</label><textarea id="n-detalles" maxlength="5000" placeholder="Cuéntanos qué pasó, desde cuándo y qué mensaje de error ves…"></textarea>' +
+                    '<div style="display:flex; gap:10px; align-items:center; margin-top:14px;">' +
+                    '<button class="v2-btn" id="n-enviar">Registrar ticket</button>' +
+                    '<span id="n-msg" class="v2-feedback"></span>' +
+                    '</div>' +
+                    '<p class="v2-nota" style="margin-top:10px;">¿Prefieres adjuntar evidencias? Por ahora hazlo desde el asistente del <a href="../index.html">Campus</a>.</p>' +
+                    '</div>';
+
+                $('n-enviar').addEventListener('click', async () => {
+                    const titulo = $('n-titulo').value.trim();
+                    const detalles = $('n-detalles').value.trim();
+                    const msg = $('n-msg');
+                    msg.className = 'v2-feedback error';
+                    if (titulo.length < 5) { msg.textContent = 'El título necesita al menos 5 caracteres.'; return; }
+                    if (detalles.length < 15) { msg.textContent = 'Danos más detalle (mínimo 15 caracteres).'; return; }
+                    msg.className = 'v2-feedback'; msg.textContent = 'Registrando…';
+                    try {
+                        const body = {
+                            titulo, detalles,
+                            categoria_id: Number($('n-categoria').value),
+                            canal_entrada: 'portal',
+                        };
+                        if ($('n-area').value) body.area_notificada_id = Number($('n-area').value);
+                        const t = await LuxV2.callFn('ticket-manager/create', { method: 'POST', body });
+                        await cargarDatos();
+                        cargarNotifs();
+                        vista.innerHTML =
+                            '<div class="v2-card" style="max-width:640px; text-align:center;">' +
+                            '<h2 style="color:var(--v2-ok); margin:0;">✅ Ticket #' + esc(t.ticket_id) + ' registrado</h2>' +
+                            '<p class="v2-nota">Te notificaremos cada avance. Tiempo estimado de atención: ' + esc(fmtFecha(t.eta_estimada)) + '</p>' +
+                            '<div style="display:flex; gap:10px; justify-content:center; margin-top:10px;">' +
+                            '<a class="v2-btn" href="#ticket=' + esc(t.ticket_id) + '">Ver mi ticket</a>' +
+                            '<a class="v2-btn secundario" href="#">Volver al panel</a>' +
+                            '</div></div>';
+                    } catch (err) {
+                        msg.className = 'v2-feedback error';
+                        msg.textContent = err.message;
+                    }
+                });
+            }
+
+            // ---------- Detalle con seguimiento (fig. 5, drawer) ----------
+            async function renderDetalle(id) {
+                vista.innerHTML = '<div class="v2-card"><p class="v2-nota">Cargando ticket #' + esc(id) + '…</p></div>';
+                let data;
+                try {
+                    data = await LuxV2.callFn('ticket-manager/details?id=' + encodeURIComponent(id));
+                } catch (err) {
+                    vista.innerHTML = '<div class="v2-card"><h2>No se pudo abrir el ticket</h2><p class="v2-nota">' + esc(err.message) + '</p>' +
+                        '<p><a class="v2-btn secundario" href="#">← Volver</a></p></div>';
+                    return;
+                }
+                const t = data.ticket;
+                const comentarios = data.comments || []; // RLS: al alumno solo le llegan los externos
+                const adjuntos = data.attachments || [];
+                const sla = slaDe(t);
+
+                // Seguimiento (fig. 5): pasos derivados del estado + asignacion
+                const asignado = !!t.maestro_notificado_id;
+                const enAtencion = [2, 3].includes(t.estado_id);
+                const resuelto = [4, 5].includes(t.estado_id);
+                const pasos = [
+                    { txt: 'Ticket registrado', sub: fmtFecha(t.fecha_creacion), hecho: true },
+                    { txt: asignado ? 'Asignado a ' + LuxV2.ui.nombreDe(t.asignado) : 'En espera de asignación', hecho: asignado },
+                    { txt: t.estado_id === 3 ? 'Esperando tu respuesta' : 'En atención', hecho: enAtencion || resuelto, actual: enAtencion },
+                    { txt: resuelto ? 'Resuelto' : 'Resolución pendiente', hecho: resuelto },
+                ];
+                const pasosHtml = pasos.map((p, i) =>
+                    '<div class="paso' + (p.hecho ? ' hecho' : '') + (p.actual && !resuelto ? ' actual' : '') + '">' +
+                    '<div><div class="punto"></div>' + (i < pasos.length - 1 ? '<div class="linea"></div>' : '') + '</div>' +
+                    '<div class="texto">' + esc(p.txt) + (p.sub ? '<small>' + esc(p.sub) + '</small>' : '') + '</div></div>').join('');
+
+                const conv = comentarios.map(c => {
+                    const autorStaff = c.autor && LuxV2.STAFF_ROLES.includes(c.autor.tipo_usuario);
+                    return '<div class="v2-msg ' + (autorStaff ? 'staff' : 'alumno') + '">' +
+                        '<div class="meta">' + esc(LuxV2.ui.nombreDe(c.autor) || 'Usuario') + ' · ' + esc(fmtFecha(c.fecha_creacion)) + '</div>' +
+                        esc(c.contenido) + '</div>';
+                }).join('');
+
+                vista.innerHTML =
+                    '<p><a href="#" class="v2-nota" style="text-decoration:none;">← Volver a mis tickets</a></p>' +
+                    '<div class="v2-detalle">' +
+                    '<div>' +
+                    '<div class="v2-card">' +
+                    '<h2 style="margin:0 0 4px;">Ticket #' + t.ticket_id + ' ' + badgeEstado(t) + '</h2>' +
+                    '<p style="margin:0 0 8px; font-size:1.05rem;">' + esc(t.titulo) + '</p>' +
+                    '<p class="v2-nota">' + esc(t.catalogo ? t.catalogo.nombre : '') + ' · ' + esc(t.area ? t.area.nombre : '') +
+                    ' · ' + (t.canal_entrada === 'portal' ? '💻 Portal Web' : '💬 Asistente') + '</p>' +
+                    (t.estado_id === 3 ? '<p><span class="chip-info">⚠ Soporte necesita información tuya: responde abajo.</span></p>' : '') +
+                    '<h3 style="margin:12px 0 6px;">Descripción</h3>' +
+                    '<div style="background:#f6f8fd; border-radius:10px; padding:12px;">' + esc(t.detalles) + '</div>' +
+                    (t.resumen_solucion ? '<h3 style="margin:12px 0 6px;">Solución</h3><div style="background:#e9f7ef; border-radius:10px; padding:12px;">' + esc(t.resumen_solucion) + '</div>' : '') +
+                    '<h3 style="margin:12px 0 0;">Evidencias (' + adjuntos.length + ')</h3>' +
+                    '<div class="v2-adj" id="adjuntos"></div>' +
+                    '</div>' +
+                    '<div class="v2-card" style="margin-top:18px;">' +
+                    '<h3 style="margin:0;">Historial de mensajes</h3>' +
+                    '<div class="v2-conv">' + (conv || '<p class="v2-nota">Aún no hay mensajes. Soporte te escribirá por aquí.</p>') + '</div>' +
+                    ([5].includes(t.estado_id) ? '<p class="v2-nota" style="margin-top:10px;">Este ticket está cerrado.</p>' :
+                        '<div class="v2-composer" style="margin-top:12px;">' +
+                        '<textarea id="c-texto" maxlength="2000" placeholder="Escribe tu respuesta para soporte…"></textarea>' +
+                        '<div style="display:flex; gap:10px; align-items:center; margin-top:8px;">' +
+                        '<button class="v2-btn" id="c-enviar">Enviar respuesta</button>' +
+                        '<span id="c-msg" class="v2-feedback"></span>' +
+                        '</div></div>') +
+                    '</div>' +
+                    '</div>' +
+                    '<div>' +
+                    '<div class="v2-card">' +
+                    '<h3 style="margin:0;">Seguimiento del ticket</h3>' +
+                    '<div class="pasos">' + pasosHtml + '</div>' +
+                    '<hr style="border:none; border-top:1px solid var(--v2-border); margin:12px 0;">' +
+                    '<h3 style="margin:0;">Tiempo estimado</h3>' +
+                    (t.eta_estimada
+                        ? '<p class="v2-nota" style="margin:6px 0 4px;">Atención estimada para: <strong>' + esc(fmtFecha(t.eta_estimada)) + '</strong></p>' + (resuelto ? '' : sla.html)
+                        : '<p class="v2-nota">Pendiente de estimación.</p>') +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
+
+                // Evidencias via DOM (URLs firmadas)
+                const adjCont = $('adjuntos');
+                if (adjuntos.length === 0) adjCont.innerHTML = '<p class="v2-nota">Sin evidencias.</p>';
+                adjuntos.forEach(att => {
+                    let url = '';
+                    try { const u = new URL(att.ruta_archivo_url); if (u.protocol === 'https:' || u.protocol === 'http:') url = u.href; } catch (_) { }
+                    const name = att.nombre_archivo || 'archivo';
+                    if (url && att.mime_type && att.mime_type.startsWith('image/')) {
+                        const img = document.createElement('img');
+                        img.src = url; img.alt = name;
+                        img.addEventListener('click', () => { $('lightbox-img').src = url; $('lightbox').classList.add('abierta'); });
+                        adjCont.appendChild(img);
+                    } else {
+                        const a = document.createElement('a');
+                        if (url) { a.href = url; a.target = '_blank'; a.rel = 'noopener'; }
+                        a.textContent = '📄 ' + name;
+                        adjCont.appendChild(a);
+                    }
+                });
+
+                const btnEnviar = $('c-enviar');
+                if (btnEnviar) btnEnviar.addEventListener('click', async () => {
+                    const msg = $('c-msg');
+                    try {
+                        await LuxV2.callFn('ticket-manager/comments', {
+                            method: 'POST',
+                            body: { ticket_id: t.ticket_id, contenido: $('c-texto').value, tipo: 'externo' }
+                        });
+                        await cargarDatos();
+                        cargarNotifs();
+                        renderDetalle(id); // si estaba "Esperando respuesta", la DB ya lo regresó a "En proceso"
+                    } catch (err) {
+                        msg.className = 'v2-feedback error';
+                        msg.textContent = err.message;
+                    }
+                });
+            }
+
+            $('lightbox').addEventListener('click', (ev) => {
+                if (ev.target.id === 'lightbox') { $('lightbox').classList.remove('abierta'); $('lightbox-img').src = ''; }
+            });
+
+            // ---------- Datos + rutas ----------
+            async function cargarDatos() {
+                state.tickets = await LuxV2.callFn('ticket-manager/list');
+            }
+            function route() {
+                const m = location.hash.match(/ticket=(\d+)/);
+                if (m) return renderDetalle(Number(m[1]));
+                if (location.hash === '#nuevo') return renderNuevo();
+                renderPanel();
+            }
+            window.addEventListener('hashchange', route);
+            $('ir-panel').addEventListener('click', (e) => { e.preventDefault(); location.hash = ''; });
+
+            // ---------- Arranque ----------
+            const perfil = await LuxV2.getProfile();
+            if (!perfil) {
+                vista.innerHTML =
+                    '<div class="v2-card"><h2>Inicia sesión para continuar</h2>' +
+                    '<p class="v2-nota">Tu sesión del Campus Lux se comparte con este portal: entra una vez y regresa aquí.</p>' +
+                    '<p><a class="v2-btn" href="../index.html">Ir al inicio de sesión</a></p></div>';
+                return;
+            }
+            state.perfil = perfil;
+            $('quien').textContent = perfil.nombreCompleto;
+            $('quien').hidden = false;
+            $('btn-salir').hidden = false;
+            $('btn-salir').addEventListener('click', LuxV2.logout);
+            $('btn-notifs').hidden = false;
+
+            const cargarNotifs = LuxV2.montarNotificaciones({
+                bell: $('btn-notifs'), punto: $('notif-punto'), panel: $('notif-panel'),
+                lista: $('notif-lista'), btnLeidas: $('btn-leidas'),
+                alAbrirTicket: (tid) => { location.hash = 'ticket=' + tid; },
+            }).recargar;
+
+            try {
+                state.catalogs = await LuxV2.getCatalogs();
+                await cargarDatos();
+                cargarNotifs();
+                route();
             } catch (err) {
                 console.error(err);
-                cont.innerHTML = '<h2>No se pudieron cargar tus tickets</h2>' +
-                    '<p class="v2-nota">' + esc(err.message) + '</p>';
+                vista.innerHTML = '<div class="v2-card"><h2>No se pudo cargar el portal</h2><p class="v2-nota">' + esc(err.message) + '</p></div>';
             }
         })();
     </script>
