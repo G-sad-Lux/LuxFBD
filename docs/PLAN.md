@@ -30,11 +30,11 @@
 - [ ] **D9 — Tarjeta KPI "En proceso"** (el dato ya está en `v_kpi_resumen`). (10 min)
 - [ ] **D11 — Botón "Ver detalle" explícito** en las filas del dashboard (accesibilidad; hoy solo clic en fila). (30 min)
 
-### F4 — Lumix móvil + QR (≈1.5 días)
+### F4 — Lumix móvil + QR
 
-- [ ] `v2/lumix.html` real: máquina de estados conversacional (reutilizar patrón v1), branding Lumix + mascota, mobile-first, **sin pregunta de prioridad**, canal `chatbot`, adjuntar evidencia, consultar estado. *Hecho cuando: reporte end-to-end desde un teléfono.*
-- [ ] QR en el login del Campus (y en fig. 3 del doc) apuntando a `https://g-sad-lux.github.io/LuxFBD/v2/lumix.html` (generado build-time, sin servicios externos por CSP).
-- [ ] Botón/mascota "Hablar con Lumix" en `v2/alumnos.html` (fig. 5).
+- [x] `v2/lumix.html` real: asistente conversacional completo (título→categoría→detalles→área→evidencia), sin pregunta de prioridad, canal `chatbot`, adjuntar con validación 5MB/tipos, consultar estado, chips que se apagan al usarse. E2E verificado (ticket #3 con ETA). *Pendiente menor: probar la subida de archivo con un archivo real (requiere diálogo del sistema).*
+- [x] Botón/mascota "Hablar con Lumix" + CTA del panel → Lumix (fig. 5); `?volver=lumix` en el login único.
+- [ ] **QR en el login del Campus** apuntando a `https://g-sad-lux.github.io/LuxFBD/v2/lumix.html` (generado build-time, sin servicios externos por CSP). (2-3 h)
 
 ### F5 — Pulido y cierre (≈1 día)
 
@@ -69,4 +69,5 @@ Tendencias % en KPIs · visor PDF embebido · sidebar con Reportes/Catálogos/Us
 | F1 backend compartido: 4 prioridades unificadas, ETA/SLA con recálculo, máquina de estados (incl. retorno automático 3→2), resumen obligatorio, bitácora y notificaciones por triggers, comentarios int/ext con RLS, vistas KPI `security_invoker`, `/comments`, service role eliminado — suite 106/106 | `a2f808d` |
 | F3 dashboard admin (figs. 6-7) · F2 Mis Tickets verificado en vivo (ticket #2 por portal, ETA exacta, campana, comentario) | `97920fa`, `df70646` |
 | Auditoría de conformidad V2 · fix orden de catálogos | `ad44d34`, `0eb33bd` |
+| **Decisión de producto**: el reporte de tickets es SIEMPRE en formato chatbot (asistente virtual) — se eliminó el formulario clásico del portal; Lumix es el único flujo de captura en V2 (Lux-IA en v1). Lumix real construido y verificado E2E | (mismo commit que D8/D2 +1) |
 | **D8 resuelta**: catálogo con las 6 categorías del doc V2 (Acceso y bloqueos, Plataforma virtual, Materias, Servicios escolares, Finanzas y pagos, Otros; IDs conservados, chat v1 actualizado, fallback → Otros) · **D2 resuelta**: login único que detecta el rol; con `?volver=v2` regresa a admin/alumnos según el tipo de usuario | (este commit) |

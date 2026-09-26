@@ -35,6 +35,9 @@
             font: inherit; background: var(--v2-card); color: var(--v2-text);
         }
         .form-reporte textarea { min-height: 110px; resize: vertical; }
+        .lumix-flotante { position: fixed; right: 18px; bottom: 18px; display: flex; align-items: center; gap: 10px; background: var(--v2-card); border: 1px solid var(--v2-border); border-radius: 999px; padding: 8px 16px 8px 8px; box-shadow: var(--v2-shadow); text-decoration: none; color: var(--v2-text); font-size: .8rem; line-height: 1.25; z-index: 40; }
+        .lumix-flotante .cara { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #3ad6c9, #1652c0); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .lumix-flotante strong { color: var(--v2-primary); }
     </style>
 </head>
 
@@ -61,6 +64,10 @@
     <main class="v2-main">
         <div id="vista"><div class="v2-card"><p class="v2-nota">Cargando…</p></div></div>
     </main>
+
+    <a class="lumix-flotante" href="lumix.html" title="Hablar con Lumix">
+        <span class="cara">👽</span><span>¿Necesitas ayuda?<br><strong>Hablar con Lumix</strong></span>
+    </a>
 
     <div id="lightbox" class="v2-lightbox">
         <img id="lightbox-img" alt="Evidencia">
@@ -123,7 +130,7 @@
                 vista.innerHTML =
                     '<div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px;">' +
                     '<h2 style="margin:0; flex:1;">Mis Tickets</h2>' +
-                    '<a class="v2-btn" href="#nuevo">＋ Reportar nuevo problema</a>' +
+                    '<a class="v2-btn" href="lumix.html">💬 Reportar nuevo problema</a>' +
                     '</div>' +
                     '<div class="v2-kpis">' +
                     '<div class="v2-kpi"><div class="valor">' + activos + '</div><div class="etiqueta">Tickets activos</div></div>' +
@@ -136,7 +143,7 @@
                     '<select id="f-categoria"><option value="">Categoría: todas</option>' + opts(cat.categorias, state.filtro.categoria) + '</select>' +
                     '</div>' +
                     '<div class="v2-card">' +
-                    (tarjetas || '<p class="v2-nota">Aún no has reportado incidencias. Usa "Reportar nuevo problema" o el asistente del Campus.</p>') +
+                    (tarjetas || '<p class="v2-nota">Aún no has reportado incidencias. Toca "Reportar nuevo problema" y Lumix te acompaña paso a paso.</p>') +
                     '</div>';
 
                 const aplicar = () => {
@@ -150,59 +157,8 @@
                     el.addEventListener('click', () => { location.hash = 'ticket=' + el.dataset.id; }));
             }
 
-            // ---------- Reportar por el portal (canal 'portal', §5.3: sin prioridad) ----------
-            function renderNuevo() {
-                const cat = state.catalogs || { categorias: [], areas: [] };
-                vista.innerHTML =
-                    '<p><a href="#" class="v2-nota" style="text-decoration:none;">← Volver a mis tickets</a></p>' +
-                    '<div class="v2-card form-reporte" style="max-width:640px;">' +
-                    '<h2 style="margin:0;">Reportar un problema</h2>' +
-                    '<p class="v2-nota">La prioridad la determina el equipo de soporte según reglas institucionales.</p>' +
-                    '<label>Título o resumen *</label><input id="n-titulo" maxlength="255" placeholder="Ej. No puedo entrar a la plataforma">' +
-                    '<label>Categoría *</label><select id="n-categoria">' +
-                    cat.categorias.map(c => '<option value="' + c.catalogo_id + '">' + esc(c.nombre) + '</option>').join('') + '</select>' +
-                    '<label>Área relacionada (opcional)</label><select id="n-area"><option value="">— Que soporte decida —</option>' +
-                    cat.areas.map(a => '<option value="' + a.catalogo_id + '">' + esc(a.nombre) + '</option>').join('') + '</select>' +
-                    '<label>Descripción detallada *</label><textarea id="n-detalles" maxlength="5000" placeholder="Cuéntanos qué pasó, desde cuándo y qué mensaje de error ves…"></textarea>' +
-                    '<div style="display:flex; gap:10px; align-items:center; margin-top:14px;">' +
-                    '<button class="v2-btn" id="n-enviar">Registrar ticket</button>' +
-                    '<span id="n-msg" class="v2-feedback"></span>' +
-                    '</div>' +
-                    '<p class="v2-nota" style="margin-top:10px;">¿Prefieres adjuntar evidencias? Por ahora hazlo desde el asistente del <a href="../index.html">Campus</a>.</p>' +
-                    '</div>';
-
-                $('n-enviar').addEventListener('click', async () => {
-                    const titulo = $('n-titulo').value.trim();
-                    const detalles = $('n-detalles').value.trim();
-                    const msg = $('n-msg');
-                    msg.className = 'v2-feedback error';
-                    if (titulo.length < 5) { msg.textContent = 'El título necesita al menos 5 caracteres.'; return; }
-                    if (detalles.length < 15) { msg.textContent = 'Danos más detalle (mínimo 15 caracteres).'; return; }
-                    msg.className = 'v2-feedback'; msg.textContent = 'Registrando…';
-                    try {
-                        const body = {
-                            titulo, detalles,
-                            categoria_id: Number($('n-categoria').value),
-                            canal_entrada: 'portal',
-                        };
-                        if ($('n-area').value) body.area_notificada_id = Number($('n-area').value);
-                        const t = await LuxV2.callFn('ticket-manager/create', { method: 'POST', body });
-                        await cargarDatos();
-                        cargarNotifs();
-                        vista.innerHTML =
-                            '<div class="v2-card" style="max-width:640px; text-align:center;">' +
-                            '<h2 style="color:var(--v2-ok); margin:0;">✅ Ticket #' + esc(t.ticket_id) + ' registrado</h2>' +
-                            '<p class="v2-nota">Te notificaremos cada avance. Tiempo estimado de atención: ' + esc(fmtFecha(t.eta_estimada)) + '</p>' +
-                            '<div style="display:flex; gap:10px; justify-content:center; margin-top:10px;">' +
-                            '<a class="v2-btn" href="#ticket=' + esc(t.ticket_id) + '">Ver mi ticket</a>' +
-                            '<a class="v2-btn secundario" href="#">Volver al panel</a>' +
-                            '</div></div>';
-                    } catch (err) {
-                        msg.className = 'v2-feedback error';
-                        msg.textContent = err.message;
-                    }
-                });
-            }
+            // El reporte de tickets es SIEMPRE con el asistente (formato chatbot):
+            // ver v2/lumix.html. Decision de producto 2026-09-26; no reintroducir formularios.
 
             // ---------- Detalle con seguimiento (fig. 5, drawer) ----------
             async function renderDetalle(id) {
@@ -332,7 +288,6 @@
             function route() {
                 const m = location.hash.match(/ticket=(\d+)/);
                 if (m) return renderDetalle(Number(m[1]));
-                if (location.hash === '#nuevo') return renderNuevo();
                 renderPanel();
             }
             window.addEventListener('hashchange', route);

@@ -1431,9 +1431,10 @@
                     // D2: login único. Si venías de una página V2 (?volver=v2) y el
                     // interruptor está encendido, te regresa al portal según tu rol.
                     const volver = new URL(window.location.href).searchParams.get('volver');
-                    if (volver === 'v2' && window.luxV2Enabled && window.luxV2Enabled()) {
-                        window.location.href = STAFF_ROLES.includes(chatState.user.role)
-                            ? 'v2/admin.html' : 'v2/alumnos.html';
+                    if ((volver === 'v2' || volver === 'lumix') && window.luxV2Enabled && window.luxV2Enabled()) {
+                        window.location.href = volver === 'lumix'
+                            ? 'v2/lumix.html'
+                            : (STAFF_ROLES.includes(chatState.user.role) ? 'v2/admin.html' : 'v2/alumnos.html');
                         return;
                     }
                     showView(STAFF_ROLES.includes(chatState.user.role) ? 'soporte-luxia' : 'mis-cursos');
