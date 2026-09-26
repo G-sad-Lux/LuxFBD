@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Lux | Sitio Sencillo y Responsivo</title>
+    <title>Universidad Lux | Soporte</title>
     <!-- CSP: limita a donde pueden conectarse/exfiltrar scripts. El host de Supabase esta fijo; si cambia el proyecto, actualizar aqui y en config.js. -->
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://aftrxnerszxjfjxegjuk.supabase.co; connect-src 'self' https://aftrxnerszxjfjxegjuk.supabase.co ws://127.0.0.1:5173 ws://localhost:5173; object-src 'none'; base-uri 'self'; form-action 'self'">
@@ -1020,6 +1020,10 @@
                         <button type="button">Entrar como invitado</button>
                     </div>
                     <a id="v2-access" href="v2/alumnos.html" hidden style="display:block; text-align:center; padding:10px; border-radius:10px; background:#eef3ff; color:#1652c0; font-weight:600; text-decoration:none;">✨ Probar la nueva experiencia <small>(beta)</small></a>
+                    <div id="v2-qr" hidden style="display:flex; align-items:center; gap:12px; background:#f4f8ff; border:1px solid #dfe6f3; border-radius:12px; padding:10px;">
+                        <img src="v2/assets/qr-lumix.svg" alt="Código QR para abrir Lumix" width="88" height="88" style="border-radius:8px; background:#fff; padding:4px;">
+                        <div style="font-size:0.85rem; line-height:1.35;">¿Necesitas reportar un problema?<br><strong style="color:#1652c0;">Escanea y habla con Lumix</strong> desde tu celular.</div>
+                    </div>
                     <a href="#">Aviso de cookies</a>
                 </div>
             </div>
@@ -1177,7 +1181,7 @@
     </main>
 
     <footer>
-        © <span id="year"></span> Lux Studio. Todos los derechos reservados.
+        © <span id="year"></span> Universidad Lux. Todos los derechos reservados.
     </footer>
 
     <!-- Chatbot Widget -->
@@ -1841,7 +1845,11 @@
             restoreSession();
             // Acceso a la experiencia V2 (docs/PLAN_V2.md); apagada por defecto.
             const v2Access = document.getElementById("v2-access");
-            if (v2Access && window.luxV2Enabled && window.luxV2Enabled()) v2Access.removeAttribute("hidden");
+            if (v2Access && window.luxV2Enabled && window.luxV2Enabled()) {
+                v2Access.removeAttribute("hidden");
+                const v2Qr = document.getElementById("v2-qr");
+                if (v2Qr) v2Qr.removeAttribute("hidden");
+            }
         }
 
         // --- Support Dashboard Logic (las vistas las maneja showView) ---

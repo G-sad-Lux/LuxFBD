@@ -159,7 +159,7 @@ async function listTickets(req: Request, supabase: any, user: any) {
             prioridad:prioridad_id(nombre, codigo),
             estado:estado_id(nombre),
             area:area_notificada_id(nombre),
-            reportador:reportador_id(nombre, apellido, tipo_usuario),
+            reportador:reportador_id(nombre, apellido, tipo_usuario, email),
             asignado:maestro_notificado_id(nombre, apellido)
         `)
         .order('fecha_creacion', { ascending: false })
@@ -191,7 +191,7 @@ async function getTicketDetails(req: Request, url: URL, supabase: any, user: any
             prioridad:prioridad_id(nombre, codigo),
             estado:estado_id(nombre),
             area:area_notificada_id(nombre),
-            reportador:reportador_id(nombre, apellido, tipo_usuario),
+            reportador:reportador_id(nombre, apellido, tipo_usuario, email),
             asignado:maestro_notificado_id(nombre, apellido)
         `)
         .eq('ticket_id', ticketId)
@@ -254,7 +254,7 @@ async function getTicketDetails(req: Request, url: URL, supabase: any, user: any
 }
 
 async function updateTicket(req: Request, supabase: any, user: any) {
-    const { ticket_id, maestro_notificado_id, estado_id, prioridad_id, resumen_solucion } = await req.json()
+    const { ticket_id, maestro_notificado_id, estado_id, prioridad_id, resumen_solucion, area_notificada_id } = await req.json()
 
     if (!ticket_id) throw httpError('Missing ticket ID')
 
@@ -268,6 +268,7 @@ async function updateTicket(req: Request, supabase: any, user: any) {
     if (estado_id !== undefined) updates.estado_id = estado_id
     if (prioridad_id !== undefined) updates.prioridad_id = prioridad_id
     if (resumen_solucion !== undefined) updates.resumen_solucion = resumen_solucion
+    if (area_notificada_id !== undefined) updates.area_notificada_id = area_notificada_id // D6: reasignar departamento
 
     if (Object.keys(updates).length === 0) {
         throw httpError('No fields to update')

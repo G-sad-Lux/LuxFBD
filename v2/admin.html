@@ -62,7 +62,7 @@
             const state = {
                 perfil: null, catalogs: null, staff: [],
                 tickets: [], kpi: null,
-                filtro: { q: '', estado: '', categoria: '', prioridad: '', resp: '' },
+                filtro: { q: '', estado: '', categoria: '', prioridad: '', resp: '', desde: '', hasta: '' },
                 page: 1,
                 tabComentario: 'externo',
             };
@@ -86,8 +86,11 @@
                     if (f.prioridad && String(t.prioridad_id) !== f.prioridad) return false;
                     if (f.resp === 'sin' && t.maestro_notificado_id) return false;
                     if (f.resp && f.resp !== 'sin' && String(t.maestro_notificado_id) !== f.resp) return false;
+                    if (f.desde && t.fecha_creacion < f.desde) return false;
+                    if (f.hasta && t.fecha_creacion > f.hasta + 'T23:59:59') return false;
                     if (q) {
-                        const pajar = ('#' + t.ticket_id + ' ' + t.titulo + ' ' + nombreDe(t.reportador)).toLowerCase();
+                        const pajar = ('#' + t.ticket_id + ' ' + t.titulo + ' ' + nombreDe(t.reportador) + ' '
+                            + (t.reportador && t.reportador.email ? t.reportador.email : '')).toLowerCase();
                         if (!pajar.includes(q)) return false;
                     }
                     return true;
@@ -119,6 +122,7 @@
                         '<td>' + badgeEstado(t) + '</td>' +
                         '<td>' + esc(asignado) + '</td>' +
                         '<td>' + slaDe(t).html + '</td>' +
+                        '<td><button class="v2-btn secundario" style="padding:5px 12px; font-size:.8rem;">Ver detalle</button></td>' +
                         '</tr>';
                 }).join('');
 
@@ -130,6 +134,7 @@
                 vista.innerHTML =
                     '<div class="v2-kpis">' +
                     '<div class="v2-kpi"><div class="valor">' + (k.activos ?? '—') + '</div><div class="etiqueta">Tickets activos</div></div>' +
+                    '<div class="v2-kpi"><div class="valor">' + (k.en_proceso ?? '—') + '</div><div class="etiqueta">En proceso</div></div>' +
                     '<div class="v2-kpi warn"><div class="valor">' + (k.por_vencer ?? '—') + '</div><div class="etiqueta">Por vencer (4 h)</div></div>' +
                     '<div class="v2-kpi danger"><div class="valor">' + (k.vencidos ?? '—') + '</div><div class="etiqueta">SLA vencido</div></div>' +
                     '<div class="v2-kpi danger"><div class="valor">' + (k.alta_prioridad ?? '—') + '</div><div class="etiqueta">Alta / Crítica</div></div>' +
@@ -144,19 +149,21 @@
                     '<select id="f-resp"><option value="">Responsable: todos</option><option value="sin"' + (state.filtro.resp === 'sin' ? ' selected' : '') + '>Sin asignar</option>' +
                     state.staff.map(s => '<option value="' + s.usuario_id + '"' + (String(s.usuario_id) === state.filtro.resp ? ' selected' : '') + '>' + esc(nombreDe(s)) + '</option>').join('') +
                     '</select>' +
+                    '<input type="date" id="f-desde" title="Desde" value="' + esc(state.filtro.desde) + '">' +
+                    '<input type="date" id="f-hasta" title="Hasta" value="' + esc(state.filtro.hasta) + '">' +
                     '<button id="f-refrescar" class="v2-btn secundario" title="Refrescar">⟳</button>' +
                     '</div>' +
                     '<div class="v2-tabla-wrap"><table class="v2-tabla"><thead><tr>' +
-                    '<th>Folio</th><th>Fecha</th><th>Alumno</th><th>Asunto</th><th>Categoría</th><th>Canal</th><th>Prioridad</th><th>Estado</th><th>Responsable</th><th>SLA</th>' +
+                    '<th>Folio</th><th>Fecha</th><th>Alumno</th><th>Asunto</th><th>Categoría</th><th>Canal</th><th>Prioridad</th><th>Estado</th><th>Responsable</th><th>SLA</th><th>Acciones</th>' +
                     '</tr></thead><tbody>' +
-                    (filas || '<tr><td colspan="10" class="v2-nota" style="text-align:center;">Sin tickets con esos filtros.</td></tr>') +
+                    (filas || '<tr><td colspan="11" class="v2-nota" style="text-align:center;">Sin tickets con esos filtros.</td></tr>') +
                     '</tbody></table>' +
                     '<div class="v2-pag"><span class="total">' + filtrados.length + ' ticket(s)</span>' + botones + '</div></div>';
 
                 // listeners
                 const aplicar = () => { state.page = 1; leerFiltros(); renderDashboard(); };
                 $('f-q').addEventListener('input', aplicar);
-                ['f-estado', 'f-categoria', 'f-prioridad', 'f-resp'].forEach(id => $(id).addEventListener('change', aplicar));
+                ['f-estado', 'f-categoria', 'f-prioridad', 'f-resp', 'f-desde', 'f-hasta'].forEach(id => $(id).addEventListener('change', aplicar));
                 $('f-refrescar').addEventListener('click', async () => { await cargarDatos(); renderDashboard(); });
                 vista.querySelectorAll('tbody tr[data-id]').forEach(tr =>
                     tr.addEventListener('click', () => { location.hash = 'ticket=' + tr.dataset.id; }));
@@ -167,6 +174,7 @@
                     state.filtro = {
                         q: $('f-q').value, estado: $('f-estado').value, categoria: $('f-categoria').value,
                         prioridad: $('f-prioridad').value, resp: $('f-resp').value,
+                        desde: $('f-desde').value, hasta: $('f-hasta').value,
                     };
                 }
             }
@@ -229,9 +237,11 @@
                     '<div class="v2-card">' +
                     '<h2 style="margin:0 0 4px;">Ticket #' + t.ticket_id + ' ' + badgeEstado(t) + '</h2>' +
                     '<p style="margin:0 0 10px; font-size:1.05rem;">' + esc(t.titulo) + '</p>' +
-                    '<p class="v2-nota">' + esc(nombreDe(t.reportador)) + ' (' + esc(t.reportador ? t.reportador.tipo_usuario : '') + ') · ' +
+                    '<p class="v2-nota">' + esc(nombreDe(t.reportador)) + ' (' + esc(t.reportador ? t.reportador.tipo_usuario : '') + ')' +
+                    (t.reportador && t.reportador.email ? ' · ' + esc(t.reportador.email) : '') + ' · ' +
                     esc(t.catalogo ? t.catalogo.nombre : '') + ' · ' + esc(t.area ? t.area.nombre : '') + ' · ' +
-                    (t.canal_entrada === 'portal' ? '💻 Portal Web' : '💬 Chatbot') + ' · Creado ' + esc(fmtFecha(t.fecha_creacion)) + '</p>' +
+                    (t.canal_entrada === 'portal' ? '💻 Portal Web' : '💬 Chatbot') + ' · Creado ' + esc(fmtFecha(t.fecha_creacion)) +
+                    ' · Actualizado ' + esc(fmtFecha(t.actualizado_en)) + '</p>' +
                     '<h3 style="margin:14px 0 6px;">Descripción del problema</h3>' +
                     '<div style="background:#f6f8fd; border-radius:10px; padding:12px;">' + esc(t.detalles) + '</div>' +
                     (t.resumen_solucion ? '<h3 style="margin:14px 0 6px;">Resolución</h3><div style="background:#e9f7ef; border-radius:10px; padding:12px;">' + esc(t.resumen_solucion) + '</div>' : '') +
@@ -249,6 +259,8 @@
                     '<textarea id="comentario-texto" maxlength="2000" placeholder="Escribe aquí…"></textarea>' +
                     '<div style="display:flex; gap:10px; align-items:center; margin-top:8px;">' +
                     '<button class="v2-btn" id="btn-comentar">Enviar</button>' +
+                    '<button class="v2-btn secundario" id="btn-adjuntar-com" title="Adjuntar evidencia">📎</button>' +
+                    '<input type="file" id="archivo-com" accept="image/png,image/jpeg,application/pdf" hidden>' +
                     '<span id="comentario-msg" class="v2-feedback"></span>' +
                     '</div></div>' +
                     '</div>' +
@@ -259,6 +271,10 @@
                     '<label>Prioridad oficial</label><select id="g-prioridad">' + prioOpts + '</select>' +
                     (percibida ? '<p class="v2-nota" style="margin:4px 0 0;">El reportador la percibió como: <strong>' + esc(percibida) + '</strong></p>' : '') +
                     '<label>Responsable</label><select id="g-resp">' + staffOpts + '</select>' +
+                    '<label>Área responsable</label><select id="g-area">' +
+                    state.catalogs.areas.map(a => '<option value="' + a.catalogo_id + '"' +
+                        (t.area_notificada_id === a.catalogo_id ? ' selected' : '') + '>' + esc(a.nombre) + '</option>').join('') +
+                    '</select>' +
                     '<div class="v2-acciones"><button class="v2-btn secundario" id="btn-aplicar">Guardar cambios</button></div>' +
                     '<hr style="border:none; border-top:1px solid var(--v2-border); margin:14px 0;">' +
                     '<h3 style="margin:0;">SLA</h3>' +
@@ -312,6 +328,8 @@
                     const resp = $('g-resp').value === '' ? null : Number($('g-resp').value);
                     if (prio !== t.prioridad_id) payload.prioridad_id = prio;
                     if (resp !== t.maestro_notificado_id) payload.maestro_notificado_id = resp;
+                    const area = Number($('g-area').value);
+                    if (area !== t.area_notificada_id) payload.area_notificada_id = area;
                     if (Object.keys(payload).length === 0) return feedback('gestion-msg', 'No hay cambios que guardar.', false);
                     actualizar(payload, 'gestion-msg');
                 });
@@ -326,6 +344,16 @@
                 // Comentarios
                 vista.querySelectorAll('.v2-tab[data-tab]').forEach(tab =>
                     tab.addEventListener('click', () => { state.tabComentario = tab.dataset.tab; renderDetalle(id); }));
+                $('btn-adjuntar-com').addEventListener('click', () => $('archivo-com').click());
+                $('archivo-com').addEventListener('change', async () => {
+                    const f = $('archivo-com').files[0];
+                    $('archivo-com').value = '';
+                    if (!f) return;
+                    try {
+                        await LuxV2.subirEvidencia(state.perfil.usuario_id, t.ticket_id, f);
+                        renderDetalle(id);
+                    } catch (err) { feedback('comentario-msg', err.message, false); }
+                });
                 $('btn-comentar').addEventListener('click', async () => {
                     try {
                         await LuxV2.callFn('ticket-manager/comments', {

@@ -7,6 +7,7 @@
   },
   "devDependencies": {
     "live-server": "^1.2.2",
+    "qrcode": "^1.5.4",
     "supabase": "^2.118.0"
   }
 }

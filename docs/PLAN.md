@@ -20,25 +20,25 @@
 
 ## 🟢 Backlog accionable
 
-### Paquete conformidad V2 (D-items de la auditoría, ~2 días)
+### Paquete conformidad V2 (D-items de la auditoría) — ✅ COMPLETADO
 
-- [ ] **D3 — Adjuntar evidencias desde la V2** (formulario del portal + composer del alumno + composer de staff 📎): subida al bucket vía `shared.js` + fila en `adjunto`. La RLS ya lo permite. *Hecho cuando: un archivo subido desde el portal aparece firmado en el detalle admin.* (0.5-1 d)
-- [ ] **D5 — "Última actualización" por ticket**: migración `actualizado_en` mantenida por los triggers existentes + mostrarla en tarjetas (fig. 5) y tabla admin. (3-4 h)
-- [ ] **D6 — Cambio de ÁREA en gestión** + auditoría: `/update` acepta `area_notificada_id`, caso nuevo en el trigger AFTER, select en el panel de gestión. (2-3 h)
-- [ ] **D7 — Correo/matrícula del estudiante**: `email` en el embed del reportador, visible en detalle (figs. 6-7) y buscable en el dashboard. (2 h)
-- [ ] **D4 — Filtro por rango de fechas** en dashboard y Mis Tickets. (2-3 h)
-- [ ] **D9 — Tarjeta KPI "En proceso"** (el dato ya está en `v_kpi_resumen`). (10 min)
-- [ ] **D11 — Botón "Ver detalle" explícito** en las filas del dashboard (accesibilidad; hoy solo clic en fila). (30 min)
+- [x] **D3 — Adjuntar evidencias desde la V2** (formulario del portal + composer del alumno + composer de staff 📎): subida al bucket vía `shared.js` + fila en `adjunto`. La RLS ya lo permite. *Hecho cuando: un archivo subido desde el portal aparece firmado en el detalle admin.* (0.5-1 d)
+- [x] **D5 — "Última actualización" por ticket**: migración `actualizado_en` mantenida por los triggers existentes + mostrarla en tarjetas (fig. 5) y tabla admin. (3-4 h)
+- [x] **D6 — Cambio de ÁREA en gestión** + auditoría: `/update` acepta `area_notificada_id`, caso nuevo en el trigger AFTER, select en el panel de gestión. (2-3 h)
+- [x] **D7 — Correo/matrícula del estudiante**: `email` en el embed del reportador, visible en detalle (figs. 6-7) y buscable en el dashboard. (2 h)
+- [x] **D4 — Filtro por rango de fechas** en dashboard y Mis Tickets. (2-3 h)
+- [x] **D9 — Tarjeta KPI "En proceso"** (el dato ya está en `v_kpi_resumen`). (10 min)
+- [x] **D11 — Botón "Ver detalle" explícito** en las filas del dashboard (accesibilidad; hoy solo clic en fila). (30 min)
 
 ### F4 — Lumix móvil + QR
 
 - [x] `v2/lumix.html` real: asistente conversacional completo (título→categoría→detalles→área→evidencia), sin pregunta de prioridad, canal `chatbot`, adjuntar con validación 5MB/tipos, consultar estado, chips que se apagan al usarse. E2E verificado (ticket #3 con ETA). *Pendiente menor: probar la subida de archivo con un archivo real (requiere diálogo del sistema).*
 - [x] Botón/mascota "Hablar con Lumix" + CTA del panel → Lumix (fig. 5); `?volver=lumix` en el login único.
-- [ ] **QR en el login del Campus** apuntando a `https://g-sad-lux.github.io/LuxFBD/v2/lumix.html` (generado build-time, sin servicios externos por CSP). (2-3 h)
+- [x] **QR en el login del Campus** (SVG build-time en v2/assets/qr-lumix.svg, visible con el interruptor ON) apuntando a `https://g-sad-lux.github.io/LuxFBD/v2/lumix.html` (generado build-time, sin servicios externos por CSP). (2-3 h)
 
 ### F5 — Pulido y cierre (≈1 día)
 
-- [ ] Branding v1: título "Sitio Sencillo y Responsivo" y footer "Lux Studio" → "Universidad Lux — Soporte".
+- [x] Branding v1: título "Sitio Sencillo y Responsivo" y footer "Lux Studio" → "Universidad Lux — Soporte".
 - [ ] Flag `v2` en tabla `app_flag` (apagado remoto sin deploy) — opcional.
 - [ ] Cosméticos si sobra tiempo: iconos de categoría en tarjetas, avatares en burbujas, "N por página", % numérico del SLA, fechas por paso del seguimiento, card de PDF con peso/fecha.
 - [ ] **Encender la V2 por default** (`config.js v2: true`) cuando F4 esté validada — decisión de equipo antes de la demo.
@@ -69,5 +69,6 @@ Tendencias % en KPIs · visor PDF embebido · sidebar con Reportes/Catálogos/Us
 | F1 backend compartido: 4 prioridades unificadas, ETA/SLA con recálculo, máquina de estados (incl. retorno automático 3→2), resumen obligatorio, bitácora y notificaciones por triggers, comentarios int/ext con RLS, vistas KPI `security_invoker`, `/comments`, service role eliminado — suite 106/106 | `a2f808d` |
 | F3 dashboard admin (figs. 6-7) · F2 Mis Tickets verificado en vivo (ticket #2 por portal, ETA exacta, campana, comentario) | `97920fa`, `df70646` |
 | Auditoría de conformidad V2 · fix orden de catálogos | `ad44d34`, `0eb33bd` |
+| **Paquete conformidad + cierre F4/F5-parcial**: D3 evidencias desde composers (alumno y staff) y Lumix · D4 filtros de fecha · D5 actualizado_en con backfill y bumps por triggers · D6 área editable en gestión con bitácora · D7 correo del reportador en detalle y búsqueda · D9 KPI En proceso · D11 botón Ver detalle · QR de Lumix en el login · branding v1 (migración 0015, suite 117/117) | (paquete) |
 | **Decisión de producto**: el reporte de tickets es SIEMPRE en formato chatbot (asistente virtual) — se eliminó el formulario clásico del portal; Lumix es el único flujo de captura en V2 (Lux-IA en v1). Lumix real construido y verificado E2E | (mismo commit que D8/D2 +1) |
 | **D8 resuelta**: catálogo con las 6 categorías del doc V2 (Acceso y bloqueos, Plataforma virtual, Materias, Servicios escolares, Finanzas y pagos, Otros; IDs conservados, chat v1 actualizado, fallback → Otros) · **D2 resuelta**: login único que detecta el rol; con `?volver=v2` regresa a admin/alumnos según el tipo de usuario | (este commit) |

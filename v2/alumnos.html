@@ -90,7 +90,7 @@
 
             const state = {
                 perfil: null, catalogs: null, tickets: [],
-                filtro: { q: '', estado: '', categoria: '' },
+                filtro: { q: '', estado: '', categoria: '', desde: '', hasta: '' },
             };
 
             // ---------- Panel "Mis Tickets" (fig. 5) ----------
@@ -100,6 +100,8 @@
                     if (f.estado && String(t.estado_id) !== f.estado) return false;
                     if (f.categoria && String(t.categoria_id) !== f.categoria) return false;
                     if (q && !(('#' + t.ticket_id + ' ' + t.titulo).toLowerCase().includes(q))) return false;
+                    if (f.desde && t.fecha_creacion < f.desde) return false;
+                    if (f.hasta && t.fecha_creacion > f.hasta + 'T23:59:59') return false;
                     return true;
                 });
             }
@@ -119,7 +121,8 @@
                         '<div class="cuerpo">' +
                         '<div class="titulo"><span style="color:var(--v2-primary)">#' + t.ticket_id + '</span> · ' + esc(t.titulo) + '</div>' +
                         '<div class="desc">' + esc((t.detalles || '').slice(0, 90)) + '</div>' +
-                        '<div class="meta">' + esc(t.catalogo ? t.catalogo.nombre : '') + ' · ' + esc(area) + ' · Creado ' + esc(fmtFecha(t.fecha_creacion)) + '</div>' +
+                        '<div class="meta">' + esc(t.catalogo ? t.catalogo.nombre : '') + ' · ' + esc(area) + ' · Creado ' + esc(fmtFecha(t.fecha_creacion)) +
+                        ' · Actualizado ' + esc(fmtFecha(t.actualizado_en)) + '</div>' +
                         '</div>' +
                         '<div class="lado">' + badgeEstado(t) +
                         (t.estado_id === 3 ? '<span class="chip-info">⚠ Se requiere tu información</span>' : '') +
@@ -141,18 +144,22 @@
                     '<input type="search" id="f-q" placeholder="Buscar por folio o título…" value="' + esc(state.filtro.q) + '">' +
                     '<select id="f-estado"><option value="">Estado: todos</option>' + opts(cat.estados, state.filtro.estado) + '</select>' +
                     '<select id="f-categoria"><option value="">Categoría: todas</option>' + opts(cat.categorias, state.filtro.categoria) + '</select>' +
+                    '<input type="date" id="f-desde" title="Desde" value="' + esc(state.filtro.desde) + '">' +
+                    '<input type="date" id="f-hasta" title="Hasta" value="' + esc(state.filtro.hasta) + '">' +
                     '</div>' +
                     '<div class="v2-card">' +
                     (tarjetas || '<p class="v2-nota">Aún no has reportado incidencias. Toca "Reportar nuevo problema" y Lumix te acompaña paso a paso.</p>') +
                     '</div>';
 
                 const aplicar = () => {
-                    state.filtro = { q: $('f-q').value, estado: $('f-estado').value, categoria: $('f-categoria').value };
+                    state.filtro = {
+                        q: $('f-q').value, estado: $('f-estado').value, categoria: $('f-categoria').value,
+                        desde: $('f-desde').value, hasta: $('f-hasta').value,
+                    };
                     renderPanel();
                 };
                 $('f-q').addEventListener('input', aplicar);
-                $('f-estado').addEventListener('change', aplicar);
-                $('f-categoria').addEventListener('change', aplicar);
+                ['f-estado', 'f-categoria', 'f-desde', 'f-hasta'].forEach(id => $(id).addEventListener('change', aplicar));
                 vista.querySelectorAll('.tarjeta-ticket').forEach(el =>
                     el.addEventListener('click', () => { location.hash = 'ticket=' + el.dataset.id; }));
             }
@@ -222,6 +229,8 @@
                         '<textarea id="c-texto" maxlength="2000" placeholder="Escribe tu respuesta para soporte…"></textarea>' +
                         '<div style="display:flex; gap:10px; align-items:center; margin-top:8px;">' +
                         '<button class="v2-btn" id="c-enviar">Enviar respuesta</button>' +
+                        '<button class="v2-btn secundario" id="c-adjuntar" title="Adjuntar evidencia">📎</button>' +
+                        '<input type="file" id="c-archivo" accept="image/png,image/jpeg,application/pdf" hidden>' +
                         '<span id="c-msg" class="v2-feedback"></span>' +
                         '</div></div>') +
                     '</div>' +
@@ -259,6 +268,23 @@
                     }
                 });
 
+                const btnAdj = $('c-adjuntar');
+                if (btnAdj) {
+                    btnAdj.addEventListener('click', () => $('c-archivo').click());
+                    $('c-archivo').addEventListener('change', async () => {
+                        const f = $('c-archivo').files[0];
+                        $('c-archivo').value = '';
+                        if (!f) return;
+                        const msg = $('c-msg');
+                        try {
+                            await LuxV2.subirEvidencia(state.perfil.usuario_id, t.ticket_id, f);
+                            renderDetalle(id);
+                        } catch (err) {
+                            msg.className = 'v2-feedback error';
+                            msg.textContent = err.message;
+                        }
+                    });
+                }
                 const btnEnviar = $('c-enviar');
                 if (btnEnviar) btnEnviar.addEventListener('click', async () => {
                     const msg = $('c-msg');

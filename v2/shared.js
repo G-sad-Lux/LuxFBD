@@ -162,6 +162,29 @@
     // Campana de notificaciones (tabla notificacion bajo RLS de destinatario).
     // opts: { bell, punto, panel, lista, btnLeidas, alAbrirTicket(ticketId) }
     // Devuelve { recargar }.
+    // D3: sube una evidencia al bucket privado y la liga al ticket.
+    // La RLS exige: subido_por propio + ticket visible (0006/0011).
+    window.LuxV2.subirEvidencia = async function (usuarioId, ticketId, file) {
+        var tipos = ['image/png', 'image/jpeg', 'application/pdf'];
+        if (tipos.indexOf(file.type) === -1) throw new Error('Formato no permitido: usa PNG, JPG o PDF.');
+        if (file.size > 5 * 1024 * 1024) throw new Error('El archivo excede 5 MB.');
+        var r = await window.LuxV2.sb().auth.getSession();
+        var session = r.data.session;
+        if (!session) throw new Error('Sesión no disponible');
+        var ruta = session.user.id + '/' + Date.now() + '_' + file.name.replace(/[^\w.-]/g, '');
+        var up = await window.LuxV2.sb().storage.from('tickets').upload(ruta, file);
+        if (up.error) throw up.error;
+        var ins = await window.LuxV2.sb().from('adjunto').insert({
+            ticket_id: ticketId,
+            subido_por_id: usuarioId,
+            nombre_archivo: file.name,
+            ruta_archivo_url: ruta,
+            mime_type: file.type,
+            size_bytes: file.size,
+        });
+        if (ins.error) throw ins.error;
+    };
+
     window.LuxV2.montarNotificaciones = function (opts) {
         async function recargar() {
             try {
