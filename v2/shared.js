@@ -122,6 +122,33 @@
     var fmtFecha = function (v) {
         return v ? new Date(v).toLocaleString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
     };
+    var fmtHora = function (v) {
+        return v ? new Date(v).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }) : '';
+    };
+    // "21/09 · 12:05" (folio/fecha apilados y horas de la conversacion)
+    var fmtFechaCorta = function (v) {
+        if (!v) return '—';
+        var d = new Date(v);
+        return d.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit' }) + ' · ' + fmtHora(v);
+    };
+    // "Hace 1 h 35 min" / "Hace 3 días"
+    var fmtRelativo = function (v) {
+        if (!v) return '';
+        var ms = Date.now() - new Date(v);
+        if (ms < 0) ms = 0;
+        var min = Math.floor(ms / 60000), h = Math.floor(min / 60), d = Math.floor(h / 24);
+        if (d >= 1) return 'Hace ' + d + (d === 1 ? ' día' : ' días');
+        if (h >= 1) return 'Hace ' + h + ' h ' + (min % 60) + ' min';
+        return 'Hace ' + min + ' min';
+    };
+    // "Act. hoy 12:05" / "Act. 18/09/2026"
+    var fmtAct = function (v) {
+        if (!v) return '';
+        var f = new Date(v), hoy = new Date();
+        return f.toDateString() === hoy.toDateString()
+            ? 'Act. hoy ' + fmtHora(v)
+            : 'Act. ' + f.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    };
     var fmtRestante = function (ms) {
         var abs = Math.abs(ms), h = Math.floor(abs / 3600000), m = Math.floor((abs % 3600000) / 60000);
         var txt = h > 0 ? (h + ' h ' + m + ' min') : (m + ' min');
@@ -137,15 +164,23 @@
         return '<span class="v2-badge pr-' + esc(p.codigo || '') + '">' + esc(p.nombre || '-') + '</span>';
     };
     // Semaforo de SLA: ok / warn (<=25% del tiempo) / danger (vencido).
+    // Resuelto/Cerrado: "Cumplido" si cerro dentro del compromiso; "—" si no aplica.
     var slaDe = function (t) {
-        if (!t.eta_estimada || t.estado_id === 4 || t.estado_id === 5) return { html: '<span class="v2-nota">—</span>' };
+        if (t.estado_id === 4 || t.estado_id === 5) {
+            if (t.eta_estimada && t.fecha_cierre && new Date(t.fecha_cierre) <= new Date(t.eta_estimada)) {
+                return { done: true, html: '<div class="v2-sla"><span class="txt">Cumplido</span>' +
+                    '<div class="barra"><div class="fill" style="width:0%"></div></div></div>' };
+            }
+            return { done: true, html: '<span class="v2-nota">—</span>' };
+        }
+        if (!t.eta_estimada) return { html: '<span class="v2-nota">—</span>' };
         var total = new Date(t.eta_estimada) - new Date(t.fecha_creacion);
         var rest = new Date(t.eta_estimada) - Date.now();
         var pct = total > 0 ? Math.max(0, Math.min(100, Math.round(100 * rest / total))) : 0;
         var nivel = rest < 0 ? 'danger' : (pct <= 25 ? 'warn' : '');
         return {
             nivel: nivel, pct: pct, rest: rest,
-            html: '<div class="v2-sla ' + nivel + '"><span class="txt">' + esc(fmtRestante(rest) + ' · ' + pct + '%') + '</span>' +
+            html: '<div class="v2-sla ' + nivel + '"><span class="txt">' + esc(fmtRestante(rest)) + '</span>' +
                 '<div class="barra"><div class="fill" style="width:' + pct + '%"></div></div></div>'
         };
     };
@@ -155,15 +190,37 @@
         if (partes.length === 0) return '?';
         return (partes[0][0] + (partes[1] ? partes[1][0] : '')).toUpperCase();
     };
-    var iconoCategoria = function (nombre) {
+
+    // ---- Iconos de trazo (v2/iconos.js). svgIcono('ui.campana') / svgIcono(pathD) ----
+    var svgIcono = function (ref, clase) {
+        var d = ref;
+        if (window.LuxIconos && ref && ref.indexOf(' ') === -1 && ref.indexOf('.') !== -1) {
+            var p = ref.split('.');
+            d = (window.LuxIconos[p[0]] || {})[p[1]] || '';
+        }
+        return '<svg class="v2-ico' + (clase ? ' ' + esc(clase) : '') + '" viewBox="0 0 24 24" aria-hidden="true"><path d="' + esc(d) + '"/></svg>';
+    };
+    // Icono de categoria por codigo del catalogo; el embed del ticket solo trae
+    // nombre, asi que tambien se resuelve por nombre (mismas 6 del doc V2).
+    var codigoCategoria = function (nombre) {
         var n = String(nombre || '').toLowerCase();
-        if (n.indexOf('acceso') !== -1) return '🔐';
-        if (n.indexOf('plataforma') !== -1) return '💻';
-        if (n.indexOf('materia') !== -1) return '📚';
-        if (n.indexOf('escolar') !== -1) return '🎓';
-        if (n.indexOf('finanza') !== -1) return '💳';
-        if (n.indexOf('otro') !== -1) return '📌';
-        return '📄';
+        if (n.indexOf('acceso') !== -1) return 'acceso';
+        if (n.indexOf('plataforma') !== -1) return 'plataforma';
+        if (n.indexOf('materia') !== -1) return 'materias';
+        if (n.indexOf('escolar') !== -1) return 'servicios_escolares';
+        if (n.indexOf('finanza') !== -1) return 'finanzas';
+        return 'otros';
+    };
+    var iconoCategoria = function (nombreOCodigo, clase) {
+        var cats = (window.LuxIconos || {}).categoria || {};
+        var codigo = cats[nombreOCodigo] ? nombreOCodigo : codigoCategoria(nombreOCodigo);
+        return svgIcono('categoria.' + codigo, clase);
+    };
+    // Canal de entrada: 'chatbot' -> Lumix, 'portal' -> Portal web
+    var canalDe = function (canal) {
+        return canal === 'portal'
+            ? { nombre: 'Portal web', icono: svgIcono('canal.portal', 'chica') }
+            : { nombre: 'Lumix', icono: svgIcono('canal.lumix', 'chica') };
     };
     var fmtBytes = function (b) {
         if (b === null || b === undefined || b === 0) return '';
@@ -175,9 +232,16 @@
     window.LuxV2.ui = {
         nombreDe: nombreDe,
         iniciales: iniciales,
+        svgIcono: svgIcono,
         iconoCategoria: iconoCategoria,
+        codigoCategoria: codigoCategoria,
+        canalDe: canalDe,
         fmtBytes: fmtBytes,
         fmtFecha: fmtFecha,
+        fmtHora: fmtHora,
+        fmtFechaCorta: fmtFechaCorta,
+        fmtRelativo: fmtRelativo,
+        fmtAct: fmtAct,
         fmtRestante: fmtRestante,
         badgeEstado: badgeEstado,
         badgePrioridad: badgePrioridad,
