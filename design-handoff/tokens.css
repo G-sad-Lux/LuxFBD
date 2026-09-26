@@ -1,0 +1,92 @@
+/* ============================================================
+   Tokens del diseño v2 (Claude Design, 26/09/2026)
+   Mismos nombres que v2/shared.css: integrar reemplazando los valores
+   existentes y agregando los nuevos. No es una hoja adicional.
+   ============================================================ */
+:root {
+    /* Marca */
+    --v2-primary: #1a56c4;
+    --v2-primary-dark: #15479f;
+    --v2-navy: #0b1f4d;          /* nuevo: barras laterales, panel login admin */
+    --v2-navy-2: #13295e;        /* nuevo: hover en barra lateral */
+    --v2-accent: #e8731c;        /* nuevo: acento naranja (uso limitado) */
+    --v2-accent-soft: #f5a15c;   /* nuevo: acento sobre azul marino */
+
+    /* Superficies y texto */
+    --v2-bg: #f2f5fa;
+    --v2-card: #ffffff;
+    --v2-text: #0e1a33;
+    --v2-heading: #0b1f4d;       /* nuevo */
+    --v2-muted: #4b5874;
+    --v2-subtle: #66728b;        /* nuevo: marcadores de posición */
+    --v2-border: #dce3ee;
+    --v2-border-strong: #cbd5e4; /* nuevo: bordes de campos */
+
+    /* Semáforo */
+    --v2-ok: #1f8a4c;
+    --v2-warn: #d97706;
+    --v2-danger: #c0262d;
+
+    /* Forma */
+    --v2-radius: 12px;
+    --v2-radius-sm: 10px;        /* nuevo: campos y botones */
+    --v2-radius-lg: 16px;        /* nuevo: tarjetas */
+    --v2-radius-xl: 20px;        /* nuevo: paneles de login */
+    --v2-shadow: none;           /* el diseño separa con borde */
+    --v2-shadow-modal: 0 24px 60px rgba(11, 31, 77, 0.3);
+
+    /* Tipografía (decisión D4) */
+    --v2-font: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+    /* Nota interna */
+    --v2-internal-bg: #fff4e5;
+    --v2-internal-border: #d98b2b;
+    --v2-internal-text: #9a4a00;
+}
+
+body { font-family: var(--v2-font); }
+
+/* Estados */
+.v2-badge.st-abierto              { background: #ddf1f6; color: #0b6278; }
+.v2-badge.st-en_proceso           { background: #e3ecfb; color: #1a4fb0; }
+.v2-badge.st-esperando_respuesta  { background: #fdecd8; color: #9a4a00; }
+.v2-badge.st-resuelto             { background: #dff3e6; color: #1d6b3a; }
+.v2-badge.st-cerrado              { background: #e9ecf1; color: #4b5563; }
+.v2-badge[class*="st-"]::before   { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; display: inline-block; margin-right: 6px; }
+
+/* Prioridades */
+.v2-badge.pr-baja     { background: #e3f2ea; color: #2f6b4f; }
+.v2-badge.pr-media    { background: #fbf0d2; color: #7a4f00; }
+.v2-badge.pr-alta     { background: #fde6dc; color: #b23a12; }
+.v2-badge.pr-critica  { background: #b42318; color: #ffffff; }
+.v2-badge.pr-sin      { background: #ffffff; color: #4b5874; border: 1px dashed #9aa6bd; } /* "Por clasificar", ver D1 */
+
+/* Pills */
+.v2-badge { display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+
+/* SLA: la barra es el % RESTANTE (igual que slaDe) */
+.v2-sla .txt           { font-size: 12px; font-weight: 700; color: #1d6b3a; }
+.v2-sla .barra         { height: 6px; border-radius: 3px; background: #e4e9f1; }
+.v2-sla .fill          { background: var(--v2-ok); }
+.v2-sla.warn .txt      { color: #9a4a00; }
+.v2-sla.warn .fill     { background: var(--v2-warn); }
+.v2-sla.danger .txt    { color: #b42318; }
+.v2-sla.danger .fill   { background: var(--v2-danger); }
+
+/* Mensajes */
+.v2-msg.alumno  { background: #f2f5fa; border-radius: 4px 12px 12px 12px; }
+.v2-msg.staff   { background: #eaf1fc; border-radius: 12px 4px 12px 12px; }
+.v2-msg.interno { background: var(--v2-internal-bg); border: 1px dashed var(--v2-internal-border); border-radius: 12px; }
+.v2-msg.interno .meta { color: var(--v2-internal-text); }
+
+/* Pestañas de redacción */
+.v2-tab.activa          { background: var(--v2-primary); border-color: var(--v2-primary); color: #fff; }
+.v2-tab.interna.activa  { background: var(--v2-internal-text); border-color: var(--v2-internal-text); color: #fff; }
+
+/* Botones */
+.v2-btn             { border-radius: var(--v2-radius-sm); font-weight: 700; min-height: 40px; }
+.v2-btn.secundario  { background: #fff; color: var(--v2-heading); border: 1px solid var(--v2-heading); }
+.v2-btn.acento      { background: var(--v2-accent); color: #fff; } /* nuevo: "Responder" del alumno, "Abrir Lumix" */
+
+/* Foco visible */
+:where(a, button, input, select, textarea):focus-visible { outline: 2px solid var(--v2-primary); outline-offset: 2px; }

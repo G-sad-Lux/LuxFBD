@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Detalle del ticket #00035</title>
+<!-- Referencia visual estática exportada del diseño (Claude Design). No es código de producción. -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#0E1A33;background:#F2F5FA}
+*{box-sizing:border-box}
+a{color:#1A56C4}a:hover{color:#15479F}
+svg.i{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.side a{display:flex;align-items:center;gap:12px;height:46px;padding:0 14px;border-radius:10px;color:#C9D5EE;text-decoration:none;font-size:14px;font-weight:600}
+.side a:hover{background:#13295E;color:#fff}
+.side a.on{background:#1A56C4;color:#fff}
+.pill{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:999px;font-size:13px;font-weight:700;white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+.card{background:#fff;border:1px solid #DCE3EE;border-radius:16px}
+.h3{margin:0;font-size:15px;font-weight:700;color:#0B1F4D;display:flex;align-items:center;gap:8px}
+.mk{font-size:11px;font-weight:700;color:#4B5874;text-transform:uppercase;letter-spacing:.4px}
+.mv{font-size:14px;font-weight:600}
+.sel{height:42px;border:1px solid #CBD5E4;border-radius:10px;background:#fff;font:inherit;font-size:14px;color:#0E1A33;padding:0 10px;width:100%}
+.lbl{font-size:12px;font-weight:700;color:#26324D}
+.tb{height:40px;padding:0 14px;border:0;border-bottom:3px solid transparent;background:transparent;font:inherit;font-size:14px;font-weight:700;color:#4B5874;cursor:pointer}
+.tb.on{color:#0B1F4D;border-bottom-color:#1A56C4}
+.ct{height:36px;padding:0 14px;border:1px solid #DCE3EE;border-radius:8px;background:#fff;font:inherit;font-size:13px;font-weight:700;color:#4B5874;cursor:pointer;display:flex;align-items:center;gap:6px}
+.ct.pub{background:#1A56C4;border-color:#1A56C4;color:#fff}
+.ct.int{background:#9A4A00;border-color:#9A4A00;color:#fff}
+.ev{font-size:12px;color:#4B5874;display:flex;align-items:center;gap:8px;justify-content:center}
+.ev:before,.ev:after{content:"";height:1px;background:#E4E9F1;flex-grow:1}
+.ib{width:34px;height:34px;border:1px solid #DCE3EE;border-radius:8px;background:#fff;color:#26324D;display:flex;align-items:center;justify-content:center;cursor:pointer}
+</style>
+
+
+</head>
+<body>
+<div style="position: relative; width: 1440px; height: 1120px; display: flex; background: #F2F5FA; overflow: hidden">
+  <aside class="side" style="width: 224px; flex-shrink: 0; background: #0B1F4D; display: flex; flex-direction: column; gap: 4px; padding: 22px 14px 28px">
+    <img src="../assets/logo-lux-blanco.png" alt="Universidad Lux" style="width: 172px; height: auto; margin: 4px 10px 26px">
+    <a href="05-admin-dashboard.html"><svg class="i" width="20" height="20" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7 M5 10v10h14V10"></path></svg>Dashboard</a>
+    <a class="on" href="06-admin-ticket-detalle.html" aria-current="page"><svg class="i" width="20" height="20" viewBox="0 0 24 24"><path d="M3 7h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4z M14 7v10"></path></svg>Tickets</a>
+    <a href="#"><svg class="i" width="20" height="20" viewBox="0 0 24 24"><path d="M4 20V10 M10 20V4 M16 20v-7 M3 20h18"></path></svg>Reportes</a>
+    <a href="#"><svg class="i" width="20" height="20" viewBox="0 0 24 24"><path d="M12 3c4.4 0 8 1.3 8 3s-3.6 3-8 3-8-1.3-8-3 3.6-3 8-3z M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6 M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"></path></svg>Catálogos</a>
+    <a href="#"><svg class="i" width="20" height="20" viewBox="0 0 24 24"><path d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z M2.5 20c1-3.5 3.5-5 6.5-5s5.5 1.5 6.5 5 M16 4.5a3.5 3.5 0 0 1 0 6.5 M18 15c2 .7 3 2.3 3.5 5"></path></svg>Usuarios y roles</a>
+    <a href="#"><svg class="i" width="20" height="20" viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M4 12h2 M18 12h2 M12 4v2 M12 18v2 M6.3 6.3l1.4 1.4 M16.3 16.3l1.4 1.4 M6.3 17.7l1.4-1.4 M16.3 7.7l1.4-1.4"></path></svg>Configuración</a>
+    <div style="margin-top: auto; padding: 0 10px; display: flex; flex-direction: column; gap: 10px">
+      <span style="font-size: 12px; font-weight: 700; letter-spacing: 1.4px; color: #C9D5EE; text-transform: uppercase; line-height: 1.5">Tu universidad<br>siempre contigo</span>
+      <span style="width: 32px; height: 3px; background: #E8731C; border-radius: 2px"></span>
+    </div>
+  </aside>
+
+  <div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column">
+    <header style="height: 72px; flex-shrink: 0; display: flex; align-items: center; gap: 20px; padding: 0 28px; background: #FFFFFF; border-bottom: 1px solid #DCE3EE">
+      <nav aria-label="Ruta" style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #4B5874"><a href="05-admin-dashboard.html" style="font-weight: 600; text-decoration: none">Tickets</a><svg class="i" width="14" height="14" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"></path></svg><span style="font-weight: 700; color: #0E1A33">#00035</span></nav>
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 8px; width: 320px; height: 42px; padding: 0 12px; border: 1px solid #CBD5E4; border-radius: 10px; color: #66728B; background: #F7F9FC"><svg class="i" width="18" height="18" viewBox="0 0 24 24"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z M20 20l-4-4"></path></svg><label for="gq2" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Búsqueda global</label><input id="gq2" type="search" placeholder="Folio, matrícula o nombre" style="border: 0; outline: 0; background: transparent; flex-grow: 1; min-width: 0; font: inherit; font-size: 14px"></div>
+      <button type="button" aria-label="Notificaciones: 3 nuevas" style="position: relative; width: 44px; height: 44px; border: 0; border-radius: 10px; background: transparent; color: #26324D; display: flex; align-items: center; justify-content: center"><svg class="i" width="22" height="22" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z M10 20a2 2 0 0 0 4 0"></path></svg><span style="position: absolute; top: 6px; right: 6px; min-width: 18px; height: 18px; border-radius: 9px; background: #C0262D; color: #FFFFFF; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center">3</span></button>
+      <div style="display: flex; align-items: center; gap: 10px">
+        <span style="width: 40px; height: 40px; border-radius: 50%; background: #1A56C4; color: #FFFFFF; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center">LM</span>
+        <div style="display: flex; flex-direction: column"><strong style="font-size: 14px">Laura Méndez</strong><span style="font-size: 12px; color: #4B5874">Administradora</span></div>
+      </div>
+      <a href="04-admin-login.html" style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border: 1px solid #CBD5E4; border-radius: 10px; text-decoration: none; font-size: 14px; font-weight: 600; color: #0B1F4D"><svg class="i" width="18" height="18" viewBox="0 0 24 24"><path d="M15 4h4v16h-4 M10 8l-4 4 4 4 M6 12h10"></path></svg>Cerrar sesión</a>
+    </header>
+
+    <main style="flex-grow: 1; min-height: 0; display: flex; flex-direction: column; gap: 16px; padding: 18px 28px 24px">
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <a href="05-admin-dashboard.html" style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; text-decoration: none; align-self: flex-start"><svg class="i" width="16" height="16" viewBox="0 0 24 24"><path d="M19 12H5 M11 6l-6 6 6 6"></path></svg>Volver al panel</a>
+        <div style="display: flex; align-items: center; gap: 12px">
+          <h1 style="margin: 0; font-size: 30px; font-weight: 800; color: #0B1F4D; letter-spacing: -0.4px">Ticket #00035</h1>
+          <span class="pill" style="background: #E3ECFB; color: #1A4FB0"><span class="dot"></span>En Proceso</span>
+          <span class="pill" style="background: #FDE6DC; color: #B23A12"><svg class="i" width="14" height="14" viewBox="0 0 24 24"><path d="M5 21V4 M5 4h11l-2 4 2 4H5"></path></svg>Prioridad Alta</span>
+        </div>
+        <span style="font-size: 17px; font-weight: 600">Problema de acceso a plataforma virtual</span>
+        <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; padding: 14px 18px; background: #FFFFFF; border: 1px solid #DCE3EE; border-radius: 14px">
+          <div style="display: flex; flex-direction: column; gap: 3px"><span class="mk">Estudiante</span><span class="mv">Juan Pérez López</span><span style="font-size: 12px; color: #4B5874">Matrícula A012345</span></div>
+          <div style="display: flex; flex-direction: column; gap: 3px"><span class="mk">Categoría</span><span class="mv">Plataforma virtual</span><span style="font-size: 12px; color: #4B5874">Área sugerida: Soporte Técnico</span></div>
+          <div style="display: flex; flex-direction: column; gap: 3px"><span class="mk">Creado</span><span class="mv">21/09/2026 · 10:35</span><span style="font-size: 12px; color: #4B5874">Hace 1 h 35 min</span></div>
+          <div style="display: flex; flex-direction: column; gap: 3px"><span class="mk">Canal</span><span class="mv" style="display: flex; align-items: center; gap: 6px"><svg class="i" width="16" height="16" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"></path></svg>Lumix</span><span style="font-size: 12px; color: #4B5874">Asistente virtual (QR)</span></div>
+          <div style="display: flex; flex-direction: column; gap: 3px"><span class="mk">Responsable</span><span class="mv">Carlos Ramírez</span><span style="font-size: 12px; color: #4B5874">Soporte Técnico</span></div>
+        </div>
+      </div>
+
+      <div style="flex-grow: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 348px; gap: 18px">
+        <div style="display: flex; flex-direction: column; gap: 16px; min-height: 0">
+          <div style="display: grid; grid-template-columns: minmax(0, 1fr) 372px; gap: 16px">
+            <section class="card" style="padding: 18px 20px; display: flex; flex-direction: column; gap: 10px">
+              <h2 class="h3"><svg class="i" width="18" height="18" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z M14 3v4h4 M9 12h6 M9 16h6"></path></svg>Descripción original</h2>
+              <p style="margin: 0; font-size: 14px; line-height: 1.55">Desde ayer me aparece “credenciales inválidas” al entrar a la plataforma virtual, aunque mi contraseña es correcta. Ya intenté desde otro navegador y desde el celular.</p>
+              <span style="margin-top: auto; font-size: 12px; color: #4B5874">Área indicada por el estudiante: Soporte Técnico</span>
+            </section>
+            <section class="card" style="padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+              <div style="display: flex; align-items: center; justify-content: space-between"><h2 class="h3"><svg class="i" width="18" height="18" viewBox="0 0 24 24"><path d="M20 11.5l-8 8a5 5 0 0 1-7-7l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7L9.7 17.2a1.7 1.7 0 0 1-2.4-2.4L15 7"></path></svg>Evidencias (2)</h2><span style="font-size: 11px; font-weight: 700; color: #4B5874; display: flex; align-items: center; gap: 4px"><svg class="i" width="12" height="12" viewBox="0 0 24 24"><path d="M6 11h12v9H6z M8.5 11V8a3.5 3.5 0 0 1 7 0v3"></path></svg>Acceso protegido</span></div>
+              <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+                <div style="display: flex; flex-direction: column; gap: 8px">
+                  <div style="height: 92px; border-radius: 10px; border: 1px solid #DCE3EE; background: #F4F7FC; display: flex; flex-direction: column; overflow: hidden">
+                    <div style="height: 14px; background: #E4E9F1; display: flex; gap: 3px; align-items: center; padding: 0 6px"><span style="width: 5px; height: 5px; border-radius: 50%; background: #B6C1D4"></span><span style="width: 5px; height: 5px; border-radius: 50%; background: #B6C1D4"></span><span style="width: 5px; height: 5px; border-radius: 50%; background: #B6C1D4"></span></div>
+                    <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px"><span style="width: 22px; height: 22px; border-radius: 50%; background: #C0262D; color: #FFFFFF; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center">!</span><span style="font-size: 10px; font-weight: 700">Credenciales inválidas</span><span style="width: 56px; height: 10px; border-radius: 3px; background: #1A56C4"></span></div>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 6px"><div style="display: flex; flex-direction: column; flex-grow: 1; min-width: 0"><span style="font-size: 12px; font-weight: 700">captura_error.png</span><span style="font-size: 11px; color: #4B5874">245 KB · 21/09/2026</span></div><button type="button" class="ib" aria-label="Ver captura_error.png"><svg class="i" width="16" height="16" viewBox="0 0 24 24"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z M20 20l-4-4 M11 8v6 M8 11h6"></path></svg></button></div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px">
+                  <div style="height: 92px; border-radius: 10px; border: 1px solid #DCE3EE; background: #F4F7FC; display: flex; align-items: center; justify-content: center"><div style="position: relative; width: 48px; height: 60px; background: #FFFFFF; border: 1px solid #CBD5E4; border-radius: 4px"><span style="position: absolute; left: -8px; bottom: 10px; padding: 2px 6px; border-radius: 4px; background: #C0262D; color: #FFFFFF; font-size: 10px; font-weight: 800">PDF</span></div></div>
+                  <div style="display: flex; align-items: center; gap: 6px"><div style="display: flex; flex-direction: column; flex-grow: 1; min-width: 0"><span style="font-size: 12px; font-weight: 700">evidencia.pdf</span><span style="font-size: 11px; color: #4B5874">1.2 MB · 21/09/2026</span></div><button type="button" class="ib" aria-label="Ver evidencia.pdf"><svg class="i" width="16" height="16" viewBox="0 0 24 24"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z M20 20l-4-4 M11 8v6 M8 11h6"></path></svg></button></div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <section class="card" style="flex-grow: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden">
+            <div role="tablist" aria-label="Historial" style="display: flex; gap: 6px; padding: 6px 16px 0; border-bottom: 1px solid #E4E9F1">
+              <button role="tab" class="tb on">Conversación</button>
+              <button role="tab" class="tb">Bitácora de auditoría (9)</button>
+            </div>
+
+            <div style="flex-grow: 1; min-height: 0; overflow-y: auto">
+            
+              <div style="padding: 16px 20px; display: flex; flex-direction: column; gap: 12px">
+                <div class="ev">21/09 · 10:35 · Ticket creado desde Lumix</div>
+                <div class="ev">11:02 · Laura Méndez asignó prioridad Alta</div>
+                <div class="ev">11:10 · Asignado a Soporte Técnico · Carlos Ramírez</div>
+                <div class="ev">11:15 · Estado: Abierto → En Proceso</div>
+                <div style="display: flex; gap: 10px; max-width: 78%">
+                  <span style="width: 32px; height: 32px; border-radius: 50%; background: #0B1F4D; color: #FFFFFF; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0">JP</span>
+                  <div style="background: #F2F5FA; border-radius: 4px 12px 12px 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px"><div style="display: flex; gap: 12px; justify-content: space-between"><strong style="font-size: 12px">Juan Pérez López · Estudiante</strong><span style="font-size: 11px; color: #4B5874">11:20</span></div><span style="font-size: 14px">Continúo sin poder ingresar.</span></div>
+                </div>
+                <div style="display: flex; gap: 10px; max-width: 78%; align-self: flex-end; flex-direction: row-reverse">
+                  <span style="width: 32px; height: 32px; border-radius: 50%; background: #1A56C4; color: #FFFFFF; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0">CR</span>
+                  <div style="background: #EAF1FC; border-radius: 12px 4px 12px 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px"><div style="display: flex; gap: 12px; justify-content: space-between"><strong style="font-size: 12px">Carlos Ramírez · Soporte Técnico</strong><span style="font-size: 11px; color: #4B5874">11:35 · Pública</span></div><span style="font-size: 14px">Estamos revisando la configuración de tu cuenta. Te avisaremos en cuanto tengamos una actualización.</span></div>
+                </div>
+                <div style="align-self: flex-end; max-width: 78%; background: #FFF4E5; border: 1px dashed #D98B2B; border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px">
+                  <div style="display: flex; gap: 12px; justify-content: space-between; align-items: center"><strong style="font-size: 12px; color: #9A4A00; display: flex; align-items: center; gap: 6px"><svg class="i" width="14" height="14" viewBox="0 0 24 24"><path d="M6 11h12v9H6z M8.5 11V8a3.5 3.5 0 0 1 7 0v3"></path></svg>Nota interna · Carlos Ramírez</strong><span style="font-size: 11px; color: #4B5874">11:40 · No visible para el estudiante</span></div>
+                  <span style="font-size: 14px">Se verificará la cuenta con el área de Sistemas. Posible bloqueo por intentos fallidos.</span>
+                </div>
+                
+              </div>
+            
+
+            
+            </div>
+
+            <form style="flex-shrink: 0; border-top: 1px solid #E4E9F1; padding: 12px 16px 14px; display: flex; flex-direction: column; gap: 10px; background: #FFFFFF">
+              <div style="display: flex; align-items: center; gap: 8px">
+                <button type="button" class="ct pub"><svg class="i" width="15" height="15" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"></path></svg>Respuesta pública</button>
+                <button type="button" class="ct"><svg class="i" width="15" height="15" viewBox="0 0 24 24"><path d="M6 11h12v9H6z M8.5 11V8a3.5 3.5 0 0 1 7 0v3"></path></svg>Nota interna</button>
+                <span style="margin-left: auto; font-size: 12px; font-weight: 700; color: #4B5874">Visible para el estudiante</span>
+              </div>
+              <label for="cmp" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Respuesta pública</label>
+              <textarea id="cmp" rows="2" placeholder="Escribe una respuesta para Juan…" style="resize: none; border: 1px solid #CBD5E4; border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 14px; background: #FFFFFF"></textarea>
+              <div style="display: flex; align-items: center; gap: 8px">
+                <button type="button" class="ib" aria-label="Adjuntar archivo"><svg class="i" width="16" height="16" viewBox="0 0 24 24"><path d="M20 11.5l-8 8a5 5 0 0 1-7-7l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7L9.7 17.2a1.7 1.7 0 0 1-2.4-2.4L15 7"></path></svg></button>
+                
+                  <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #26324D"><input type="checkbox" style="width: 16px; height: 16px; accent-color: #1A56C4">Solicitar información y cambiar a Esperando Respuesta</label>
+                
+                <button type="submit" style="margin-left: auto; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 18px; border: 0; border-radius: 10px; background: #1A56C4; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer"><svg class="i" width="16" height="16" viewBox="0 0 24 24"><path d="M4 12l16-8-6 16-2.5-6.5z M11.5 13.5L20 4"></path></svg>Enviar respuesta</button>
+              </div>
+            </form>
+          </section>
+        </div>
+
+        <aside style="display: flex; flex-direction: column; gap: 14px; min-height: 0">
+          <section class="card" style="padding: 18px 20px; display: flex; flex-direction: column; gap: 14px">
+            <h2 class="h3"><svg class="i" width="18" height="18" viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M4 12h2 M18 12h2 M12 4v2 M12 18v2 M6.3 6.3l1.4 1.4 M16.3 16.3l1.4 1.4 M6.3 17.7l1.4-1.4 M16.3 7.7l1.4-1.4"></path></svg>Gestión del ticket</h2>
+            <div style="display: flex; flex-direction: column; gap: 6px"><label class="lbl" for="g-st">Estado</label><select id="g-st" class="sel"><option>Abierto</option><option selected="">En Proceso</option><option>Esperando Respuesta</option><option>Resuelto</option><option>Cerrado</option></select></div>
+            <div style="display: flex; flex-direction: column; gap: 6px"><label class="lbl" for="g-pr">Prioridad administrativa</label><select id="g-pr" class="sel"><option>Baja</option><option>Media</option><option selected="">Alta</option><option>Crítica</option></select><span style="font-size: 12px; color: #4B5874; line-height: 1.4">Según impacto, urgencia, usuarios afectados y riesgo académico u operativo.</span></div>
+            <div style="display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px">
+              <div style="display: flex; flex-direction: column; gap: 6px"><label class="lbl" for="g-ar">Área responsable</label><select id="g-ar" class="sel"><option selected="">Soporte Técnico</option><option>Servicios Escolares</option><option>Cajas</option><option>Administración</option></select></div>
+              <div style="display: flex; flex-direction: column; gap: 6px"><label class="lbl" for="g-te">Técnico</label><select id="g-te" class="sel"><option selected="">Carlos Ramírez</option><option>Miguel Treviño</option><option>Ana Ríos</option><option>Jorge Salinas</option><option>Rosa Garza</option><option>Patricia Leal</option></select></div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 12px; background: #F4F7FC">
+              <div style="display: flex; align-items: center; justify-content: space-between"><span class="lbl" style="display: flex; align-items: center; gap: 6px"><svg class="i" width="16" height="16" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z M12 7v5l3 2"></path></svg>SLA</span><span style="font-size: 12px; font-weight: 700; color: #1D6B3A">A tiempo · 80% restante</span></div>
+              <strong style="font-size: 20px; color: #0B1F4D">6 h 25 min restantes</strong>
+              <span style="height: 8px; border-radius: 4px; background: #E4E9F1; overflow: hidden; display: flex"><span style="width: 80%; background: #1F8A4C; border-radius: 4px"></span></span>
+              <span style="font-size: 12px; color: #4B5874">Fecha límite: 21/09/2026 · 18:35</span>
+              
+            </div>
+
+            
+              <div style="display: flex; flex-direction: column; gap: 10px">
+                <button type="button" style="display: flex; align-items: center; justify-content: center; gap: 10px; height: 52px; border: 0; border-radius: 12px; background: #0B1F4D; color: #FFFFFF; font: inherit; cursor: pointer; flex-direction: column; gap: 0"><span style="display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700"><svg class="i" width="18" height="18" viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z M8 12.5l3 3 5-6"></path></svg>Resolver ticket</span><span style="font-size: 11px; color: #C9D5EE">Requiere resumen de la solución</span></button>
+                <button type="button" style="display: flex; align-items: center; justify-content: center; gap: 8px; height: 44px; border: 1px solid #0B1F4D; border-radius: 12px; background: #FFFFFF; color: #0B1F4D; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer"><svg class="i" width="18" height="18" viewBox="0 0 24 24"><path d="M4 8h14 M14 4l4 4-4 4 M20 16H6 M10 12l-4 4 4 4"></path></svg>Reasignar a otra área</button>
+              </div>
+            
+            
+          </section>
+
+          <section class="card" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 10px">
+            <h2 class="h3"><svg class="i" width="18" height="18" viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M4 20c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"></path></svg>Estudiante</h2>
+            <div style="display: flex; align-items: center; gap: 12px"><span style="width: 40px; height: 40px; border-radius: 50%; background: #0B1F4D; color: #FFFFFF; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center">JP</span><div style="display: flex; flex-direction: column"><strong style="font-size: 14px">Juan Pérez López</strong><span style="font-size: 12px; color: #4B5874">A012345 · Ingeniería en Sistemas</span></div></div>
+            <div style="display: flex; justify-content: space-between; font-size: 13px; padding-top: 8px; border-top: 1px solid #EDF1F6"><span style="color: #4B5874">Otros tickets activos</span><a href="05-admin-dashboard.html" style="font-weight: 700">2 · #00038, #00032</a></div>
+          </section>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  
+</div>
+</body>
+</html>

@@ -44,11 +44,16 @@
 - [x] Cosméticos: iconos de categoría, avatares de iniciales en burbujas, selector "N por página", % numérico en el SLA, fechas por hito en el seguimiento, card de archivo con peso/fecha.
 - [ ] **Encender la V2 por default** (`config.js v2: true`) cuando F4 esté validada — decisión de equipo antes de la demo.
 
+### 🎨 Fase de diseño High Fidelity — SIGUIENTE (ejecutar en chat nuevo)
+
+- [ ] Implementar el restyle completo según **docs/PLAN_DISENO.md** + `design-handoff/` (README con el prompt de arranque, specs, tokens, iconos, assets con la mascota real). Fases F-D0→F-D4, ~5 días, una página a la vez con comparación contra captura. Decisiones D1-D4 ya resueltas en el plan (nace-con-prioridad · Crear cuenta oculta · SLA sin pausa · Plus Jakarta Sans). Backend aprobado: solo `resueltos_semana` en la vista KPI.
+
 ### Opcionales con valor de concurso (del análisis de flujos, P3)
 
 - [x] Encuesta CSAT (1-5): rpc `calificar_ticket` (solo reportador, solo resuelto, una vez, en bitácora) + estrellas en Mis Tickets + KPI en Reportes.
 - [x] Pantalla de reportes en admin (#reportes): tickets por categoría, tiempos por prioridad y cumplimiento de SLA sobre las vistas SQL.
 - [x] Supabase Realtime: ticket/comentario/notificacion publicados; dashboard, panel y campana se refrescan solos (RLS filtra los eventos).
+- [ ] **Análisis técnico**: sesión temporal de 72 h vía QR para usuarios no dados de alta (idea del equipo en D2 de diseño; candidata: anonymous sign-in de Supabase con expiración y alcance mínimo).
 - [ ] Correo real en eventos clave — **requiere cuenta Resend del equipo** (API key como secret de función); las notificaciones in-app ya están validadas.
 - [x] Material del documento entregable listo: **docs/ANEXO_TECNICO.md** (E-R en Mermaid sin auto-traducción, las 17 migraciones como script oficial, reglas de negocio, seguridad, endpoints, SLA, operación — sin credenciales).
 

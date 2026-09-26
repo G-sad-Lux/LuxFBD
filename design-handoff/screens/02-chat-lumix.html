@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Asistente Lumix</title>
+<!-- Referencia visual estática exportada del diseño (Claude Design). No es código de producción. -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#0E1A33;background:#F2F5FA}
+*{box-sizing:border-box}
+a{color:#1A56C4}a:hover{color:#15479F}
+svg.i{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.grp{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;gap:8px;align-items:flex-end}
+.av{width:30px;height:30px;border-radius:50%;background:#DDF1F6;object-fit:cover;flex-shrink:0}
+.bot{background:#FFFFFF;border:1px solid #E1E7F0;border-radius:4px 16px 16px 16px;padding:10px 13px;font-size:14px;line-height:1.45;max-width:272px;color:#0E1A33}
+.me{align-self:flex-end;background:#1A56C4;color:#FFFFFF;border-radius:16px 4px 16px 16px;padding:10px 13px;font-size:14px;line-height:1.45;max-width:270px}
+.t{font-size:11px;color:#66728B;margin-top:4px}
+.tr{font-size:11px;color:#66728B;align-self:flex-end;margin-top:-6px;display:flex;gap:4px;align-items:center}
+.chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding-left:38px}
+.chip{min-height:44px;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 10px;border:1px solid #BFD0EE;border-radius:12px;background:#FFFFFF;color:#15479F;font:inherit;font-size:13px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none}
+.chip:hover{background:#EAF1FC}
+.chip.p{background:#1A56C4;border-color:#1A56C4;color:#FFFFFF}
+.chip.p:hover{background:#15479F;color:#FFFFFF}
+.pill{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:700}
+.kv{display:grid;grid-template-columns:84px minmax(0,1fr);gap:4px 10px;font-size:13px}
+.kv dt{color:#4B5874}.kv dd{margin:0;font-weight:600}
+</style>
+
+
+</head>
+<body>
+<div style="width: 390px; height: 844px; display: flex; flex-direction: column; background: #F2F5FA; overflow: hidden">
+  <header style="height: 68px; flex-shrink: 0; display: flex; align-items: center; gap: 10px; padding: 0 8px 0 4px; background: #FFFFFF; border-bottom: 1px solid #E1E7F0">
+    <a href="01-alumnos-login.html" aria-label="Volver al portal" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #0B1F4D"><svg class="i" width="22" height="22" viewBox="0 0 24 24"><path d="M19 12H5 M11 6l-6 6 6 6"></path></svg></a>
+    <div style="position: relative">
+      <img src="../assets/lumix-avatar.png" alt="" style="width: 42px; height: 42px; border-radius: 50%; background: #DDF1F6; object-fit: cover">
+      <span style="position: absolute; right: 0; bottom: 1px; width: 11px; height: 11px; border-radius: 50%; background: #1F8A4C; border: 2px solid #FFFFFF"></span>
+    </div>
+    <div style="display: flex; flex-direction: column; flex-grow: 1">
+      <strong style="font-size: 16px; color: #0B1F4D">Lumix</strong>
+      <span style="font-size: 12px; color: #1F7A45; font-weight: 600">En línea · Soporte Universidad Lux</span>
+    </div>
+    <button type="button" aria-label="Reiniciar conversación" style="width: 44px; height: 44px; border: 0; background: transparent; color: #4B5874; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 10px"><svg class="i" width="20" height="20" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7 M3 4v5h5"></path></svg></button>
+  </header>
+
+  <div style="flex-grow: 1; display: flex; flex-direction: column-reverse; overflow-y: auto">
+    <div style="display: flex; flex-direction: column; gap: 12px; padding: 16px 14px 18px">
+      <div style="align-self: center; font-size: 11px; font-weight: 700; color: #4B5874; background: #E4E9F1; border-radius: 999px; padding: 4px 10px">Hoy</div>
+
+      <div class="row"><img class="av" src="../assets/lumix-avatar.png" alt=""><div><div class="bot">¡Hola! Soy Lumix, tu asistente de soporte. Para identificarte, escribe tu matrícula o correo institucional.</div><div class="t">10:31</div></div></div>
+
+      <div class="grp">
+        <div class="me">A012345</div>
+        <div class="tr">10:31<svg class="i" width="14" height="14" viewBox="0 0 24 24" style="color: #1A56C4"><path d="M2 12.5l4 4 8-9 M10 16.5l1 0 8-9"></path></svg></div>
+        <div class="row"><img class="av" src="../assets/lumix-avatar.png" alt=""><div><div class="bot">Gracias, Juan. Te identifiqué como <strong>Juan Pérez López</strong> (A012345). ¿En qué puedo ayudarte hoy?</div><div class="t">10:31</div></div></div>
+      </div>
+      
+
+      
+
+      <div class="grp">
+        <div class="me">Reportar un problema</div>
+        <div class="row"><img class="av" src="../assets/lumix-avatar.png" alt=""><div><div class="bot">De acuerdo. Escribe un título breve que resuma tu problema.</div><div class="t">10:32</div></div></div>
+      </div>
+
+      <div class="grp">
+        <div class="me">No puedo ingresar a la plataforma virtual</div>
+        <div class="row"><img class="av" src="../assets/lumix-avatar.png" alt=""><div><div class="bot">¿Qué tipo de problema es?</div><div class="t">10:32</div></div></div>
+      </div>
+      
+
+      <div class="grp">
+        <div class="me">Plataforma virtual</div>
+        <div class="row"><img class="av" src="../assets/lumix-avatar.png" alt=""><div><div class="bot">Describe con detalle qué ocurre: qué intentabas hacer y qué mensaje aparece.</div><div class="t">10:33</div></div></div>
+      </div>
+
+      <div class="grp">
+        <div class="me">Desde ayer me aparece “credenciales inválidas” al entrar, aunque mi contraseña es correcta.</div>
+        <div class="row"><img class="av" src="../assets/lumix-avatar.png" alt=""><div><div class="bot">¿Con qué área crees que está relacionado? Si no estás seguro, el equipo de soporte lo definirá.</div><div class="t">10:33</div></div></div>
+      </div>
+      
+
+      <div class="grp">
+        <div class="me">Soporte Técnico</div>
+        <div class="row"><img class="av" src="../assets/lumix-avatar.png" alt=""><div><div class="bot">Puedes agregar una evidencia para ayudarnos a revisar tu caso: captura de pantalla, foto o PDF.</div><div class="t">10:34</div></div></div>
+      </div>
+      
+
+      <div class="grp">
+        <div class="grp">
+          <div class="me" style="display: flex; align-items: center; gap: 10px; padding: 8px 10px">
+            <span style="width: 40px; height: 40px; border-radius: 8px; background: rgba(255,255,255,.18); display: flex; align-items: center; justify-content: center"><svg class="i" width="20" height="20" viewBox="0 0 24 24"><path d="M4 5h16v14H4z M4 15l4-4 4 4 3-3 5 5 M15 9h.01"></path></svg></span>
+            <span style="display: flex; flex-direction: column"><strong style="font-size: 13px">captura_error.png</strong><span style="font-size: 12px; color: #D6E4FA">245 KB · PNG</span></span>
+          </div>
+        </div>
+        
+        <div class="row"><img class="av" src="../assets/lumix-avatar.png" alt=""><div><div class="bot" style="display: flex; flex-direction: column; gap: 10px; max-width: 290px">
+          <span>Revisa el resumen de tu reporte:</span>
+          <dl class="kv" style="margin: 0; padding: 10px 12px; background: #F4F7FC; border-radius: 10px">
+            <dt>Título</dt><dd>No puedo ingresar a la plataforma virtual</dd>
+            <dt>Categoría</dt><dd>Plataforma virtual</dd>
+            <dt>Área</dt><dd>Soporte Técnico</dd>
+            <dt>Evidencia</dt><dd>captura_error.png</dd>
+          </dl>
+          <span style="font-size: 12px; color: #4B5874">La prioridad la asigna el equipo de soporte según las reglas de la universidad.</span>
+        </div><div class="t">10:34</div></div></div>
+      </div>
+      
+
+      <div class="grp">
+        <div class="me">Confirmar y enviar</div>
+        <div style="background: #FFFFFF; border: 1px solid #BFE3CC; border-radius: 16px; padding: 14px; display: flex; gap: 12px; align-items: flex-start; margin-left: 38px">
+          <span style="width: 36px; height: 36px; border-radius: 50%; background: #1F8A4C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg class="i" width="20" height="20" viewBox="0 0 24 24" style="stroke-width: 2.4"><path d="M5 12.5l4.5 4.5L19 7"></path></svg></span>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <strong style="font-size: 14px; color: #0B1F4D">Reporte registrado correctamente</strong>
+            <span style="font-size: 20px; font-weight: 800; color: #0B1F4D; letter-spacing: -0.2px">Ticket #00035</span>
+            <span class="pill" style="background: #DDF1F6; color: #0B6278; align-self: flex-start">Estado: Abierto</span>
+            <span style="font-size: 13px; line-height: 1.45; color: #4B5874">Recibimos tu reporte. El equipo de soporte lo revisará y te avisaremos de cada avance aquí y en Mis Tickets.</span>
+            <span class="t" style="margin: 0">10:35</span>
+          </div>
+        </div>
+        <div class="chips">
+          <a class="chip p" href="03-alumnos-mis-tickets.html">Ver en Mis Tickets</a>
+          <button type="button" class="chip">Reportar otro problema</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <form style="flex-shrink: 0; display: flex; align-items: center; gap: 8px; padding: 10px 12px 14px; background: #FFFFFF; border-top: 1px solid #E1E7F0">
+    <div style="flex-grow: 1; display: flex; align-items: center; gap: 4px; height: 48px; padding: 0 6px 0 14px; border: 1px solid #CBD5E4; border-radius: 999px; background: #F7F9FC">
+      <label for="msg" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Mensaje para Lumix</label>
+      <input id="msg" type="text" placeholder="Escribe un mensaje…" style="flex-grow: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: 14px; color: #0E1A33">
+      <button type="button" aria-label="Adjuntar archivo" style="width: 36px; height: 36px; border: 0; background: transparent; color: #4B5874; display: flex; align-items: center; justify-content: center"><svg class="i" width="20" height="20" viewBox="0 0 24 24"><path d="M20 11.5l-8 8a5 5 0 0 1-7-7l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7L9.7 17.2a1.7 1.7 0 0 1-2.4-2.4L15 7"></path></svg></button>
+      <button type="button" aria-label="Tomar foto" style="width: 36px; height: 36px; border: 0; background: transparent; color: #4B5874; display: flex; align-items: center; justify-content: center"><svg class="i" width="20" height="20" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z M12 16.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"></path></svg></button>
+    </div>
+    <button type="submit" aria-label="Enviar mensaje" style="width: 48px; height: 48px; border-radius: 50%; border: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #FFFFFF; background: #9DB0D3"><svg class="i" width="20" height="20" viewBox="0 0 24 24"><path d="M4 12l16-8-6 16-2.5-6.5z M11.5 13.5L20 4"></path></svg></button>
+  </form>
+</div>
+</body>
+</html>
