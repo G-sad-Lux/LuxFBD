@@ -48,6 +48,8 @@
 
 - [x] Restyle completo F-D0→F-D4 según **docs/PLAN_DISENO.md** + `design-handoff/` (1ª exportación): F-D0 tokens/assets/iconos de trazo/Plus Jakarta Sans + migración 0018 `resueltos_semana` (B2, PGlite verde y aplicada al proyecto); F-D1 admin (acceso embebido 04 con banner genérico, dashboard 05 con 6 KPI/vistas rápidas/exportar CSV/tabla apilada/Clasificar, detalle 06 con pestañas Conversación-Bitácora, nota interna, checkbox "Solicitar información→Esperando", modal Resolver y gestión auto-aplicada); F-D2 alumnos (acceso 01 con QR+mascota y pestaña única por D2, Mis Tickets 03 con panel lateral de 380px, línea de tiempo de 5 estados, CSAT y respuesta por estado); F-D3 Lumix (restyle 02 completo + paso de resumen + consultar con "qué falta" + acceso embebido para el flujo QR); F-D4 QA contra capturas + regresión interruptor/v1. Commits `573388c` → `7ca5360` → `2bdf917` → `36afc37` → cierre.
 
+- [x] **Decisión de equipo (2026-09-26): UN solo login, el de la mascota (pantalla 01).** De los dos accesos del handoff se conserva solo el del portal del estudiante; `admin.html` ya no tiene vista de acceso propia (la pantalla 04 se retiró): sin sesión o sin rol de personal **redirige** al acceso del portal, y ese login detecta el rol y manda al personal directo a su panel. Cerrar sesión en la V2 regresa a ese mismo acceso (a la v1 se va con "Clásica"). El acceso en-pantalla de Lumix se conserva por ser parte del flujo QR móvil, no uno de los dos logins del documento.
+
 ### 🎨 Diseño, 2ª iteración del handoff (re-export 2026-09-26, llegó DURANTE la implementación)
 
 *El equipo re-exportó `design-handoff/` con pantallas nuevas mientras se ejecutaba la fase anterior; nada de esto estaba en PLAN_DISENO.md. Queda como backlog:*

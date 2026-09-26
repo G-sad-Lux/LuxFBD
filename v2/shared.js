@@ -67,7 +67,9 @@
 
     async function logout() {
         try { await sb().auth.signOut(); } catch (e) { /* sin red: da igual */ }
-        window.location.href = '../index.html';
+        // Login único de la V2: al salir se regresa al acceso del portal
+        // (pantalla de la mascota); a la v1 se va con el botón "Clásica".
+        window.location.href = 'alumnos.html';
     }
 
     // --- API (Edge Functions) ------------------------------------------
