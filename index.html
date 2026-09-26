@@ -1274,13 +1274,15 @@
                 if (data.prioridades) {
                     PRIORITY_MAP = {};
                     data.prioridades.forEach(p => {
-                        const CODIGO_A_CHAT = { critico: 'alta', medio: 'media', bajo: 'baja' }; // B8
+                        const CODIGO_A_CHAT = {}; // 0008: los codigos del catalogo ya coinciden con los valores del chat
                         const key = CODIGO_A_CHAT[p.codigo] || p.codigo || p.nombre.toLowerCase();
                         PRIORITY_MAP[key] = p.catalogo_id;
                     });
                 }
 
                 if (data.areas && data.areas.length > 0) {
+                    AREA_MAP = {};
+                    data.areas.forEach(a => { if (a.codigo) AREA_MAP[a.codigo] = a.catalogo_id; });
                     const soporte = data.areas.find(a => a.nombre.toLowerCase().includes('soporte'));
                     if (soporte) {
                         DEFAULT_AREA_ID = soporte.catalogo_id;
@@ -1462,10 +1464,11 @@
 
         let PRIORITY_MAP = {};
         const STATIC_PRIORITY_MAP = {
-            'baja': 8, 'media': 7, 'alta': 6
+            'baja': 8, 'media': 7, 'alta': 9 // 0008: 9=Alta; 6 ahora es Critica (solo staff)
         };
 
         let DEFAULT_AREA_ID = 38;
+        let AREA_MAP = { escolares: 39, soporte: 38 }; // fallback estatico
         const STEPS_FLOW = ['GREETING', 'TITLE', 'CATEGORY', 'DETAILS', 'ATTACHMENTS', 'PRIORITY', 'NOTIFY', 'DONE'];
 
         function toggleChat() {
@@ -1686,7 +1689,7 @@
                     categoria_id: CATEGORY_MAP[chatState.ticket.category] || 37,
                     detalles: chatState.ticket.details,
                     prioridad_id: PRIORITY_MAP[chatState.ticket.priority] || 8,
-                    area_notificada_id: DEFAULT_AREA_ID,
+                    area_notificada_id: AREA_MAP[chatState.ticket.notify] || DEFAULT_AREA_ID, // B9: el paso del chat ya cuenta
                     adjunto: chatState.ticket.attachment || null
                 };
 
