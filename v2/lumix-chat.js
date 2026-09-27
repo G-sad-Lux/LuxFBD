@@ -356,7 +356,7 @@
                     '<span class="folio">Ticket #' + esc(t.ticket_id) + '</span>' +
                     '<span class="v2-badge st-abierto" style="align-self:flex-start;">Estado: Abierto</span>' +
                     '<p>Recibimos tu reporte. El equipo de soporte lo revisará y te avisaremos de cada avance' + (modo === 'embebido' ? ' aquí mismo.' : ' aquí y en Mis Tickets.') + '</p>' +
-                    (t.eta_estimada ? '<p><strong>Atención estimada para:</strong> ' + esc(fmtFecha(t.eta_estimada)) + '</p>' : '') +
+                    (t.eta_estimada ? '<p><strong>Te atenderemos antes del:</strong> ' + esc(fmtFecha(t.eta_estimada)) + '</p>' : '') +
                     '<span class="hora" style="margin:0;">' + esc(fmtHora(new Date())) + '</span>' +
                     '</div>';
                 msgs.appendChild(card);

@@ -13,6 +13,9 @@
 
 ## 🟡 Pendientes del equipo (nadie más puede hacerlos)
 
+- [ ] **Definir política de ESCALAMIENTO por SLA** (mejora 5 del análisis 2026-09-27): ¿vencido + sin asignar por X horas → subir prioridad o notificar al Administrador? El barrido de 0020 ya deja la infraestructura lista.
+- [ ] **Decidir horas hábiles vs naturales para el SLA** (mejora 6): hoy el fin de semana cuenta contra el compromiso; cambiar requiere función de calendario hábil. Para el Premio, "horas naturales" es defendible por simplicidad.
+
 - [ ] **ROLLBACK POST-DEMO del modo invitado** (queda anotado también en `supabase/config.toml`): poner `enable_signup = false` y `enable_anonymous_sign_ins = false` en `[auth]` y correr `npx supabase config push` — eso restaura la F1 exacta (cero altas públicas). Opcional: borrar de Authentication los usuarios anónimos del demo (los perfiles `usuario` con `matricula` y `email null`).
 
 - [ ] **Prueba de humo con sesión de soporte**: entrar como `lux.soporte@universidadlux.edu.mx` (v1 o `v2/admin.html?v2=on`) y avisar a Claude → valida panel v1 + dashboard F3 completo + ciclo asignar→responder→nota interna→resolver→cerrar + recálculo de prioridad del ticket #1.
@@ -51,6 +54,15 @@
 - [x] Restyle completo F-D0→F-D4 según **docs/PLAN_DISENO.md** + `design-handoff/` (1ª exportación): F-D0 tokens/assets/iconos de trazo/Plus Jakarta Sans + migración 0018 `resueltos_semana` (B2, PGlite verde y aplicada al proyecto); F-D1 admin (acceso embebido 04 con banner genérico, dashboard 05 con 6 KPI/vistas rápidas/exportar CSV/tabla apilada/Clasificar, detalle 06 con pestañas Conversación-Bitácora, nota interna, checkbox "Solicitar información→Esperando", modal Resolver y gestión auto-aplicada); F-D2 alumnos (acceso 01 con QR+mascota y pestaña única por D2, Mis Tickets 03 con panel lateral de 380px, línea de tiempo de 5 estados, CSAT y respuesta por estado); F-D3 Lumix (restyle 02 completo + paso de resumen + consultar con "qué falta" + acceso embebido para el flujo QR); F-D4 QA contra capturas + regresión interruptor/v1. Commits `573388c` → `7ca5360` → `2bdf917` → `36afc37` → cierre.
 
 - [x] **Decisión de equipo (2026-09-26): UN solo login, el de la mascota (pantalla 01).** De los dos accesos del handoff se conserva solo el del portal del estudiante; `admin.html` ya no tiene vista de acceso propia (la pantalla 04 se retiró): sin sesión o sin rol de personal **redirige** al acceso del portal, y ese login detecta el rol y manda al personal directo a su panel. Cerrar sesión en la V2 regresa a ese mismo acceso (a la v1 se va con "Clásica"). El acceso en-pantalla de Lumix se conserva por ser parte del flujo QR móvil, no uno de los dos logins del documento.
+
+### ⏱ Mejoras de SLA — ✅ EJECUTADAS (2026-09-27, migraciones 0020/0021)
+
+- [x] **El reloj se detiene al RESOLVER** (antes: al cerrar): `fecha_cierre` se fija en estado 4 y se limpia al reabrir; "Cumplido", `resueltos_hoy/semana` y los reportes miden hasta la resolución.
+- [x] **"Por vencer" unificado al criterio relativo** (restante ≤ 25% del compromiso) en `v_kpi_resumen`; ya coincide con el semáforo/vista rápida del dashboard (antes: ventana fija de 4 h).
+- [x] **Aviso proactivo**: `fn_sla_barrido()` con `pg_cron` cada 15 min notifica UNA vez al cruzar a "por vencer" y a "vencido" (al asignado; sin asignar → a todo el staff activo); dedupe con `ticket.sla_aviso`, reset al recalcular o reabrir; ejecutable solo por autenticados (0021).
+- [x] **Recalculo desde el CAMBIO de prioridad** (`now() + horas`): subir a Crítica ya no nace vencido; la espera previa queda en bitácora.
+- [x] **Renombre de cara al alumno**: "SLA" no aparece en su portal — el bloque es **"Tiempo de atención"** ("Te atenderemos antes del …"; si vamos tarde: "Nos estamos tardando más de lo previsto" + disculpa, sin "VENCIDO"). Lumix dice "Te atenderemos antes del:". El personal conserva el término SLA (§17 del doc).
+- Suite PGlite 17/17 (resolución/reabrir, relativo 5h-de-24h, barrido con dedupe y escalada, recálculo ≈ now()+8h).
 
 ### 🎨 Diseño, 2ª iteración del handoff (re-export 2026-09-26, llegó DURANTE la implementación)
 

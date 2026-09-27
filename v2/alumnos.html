@@ -548,8 +548,25 @@
                     '<div class="cuerpo">' +
                     '<section style="display:flex; flex-direction:column; gap:10px;">' +
                     '<h3>Seguimiento</h3><ol class="v2-tl">' + pasos + '</ol>' +
+                    // "Tiempo de atención": la cara amable del SLA para el alumno
+                    // (sin jerga; si vamos tarde, sin "VENCIDO" a secas).
                     (t.eta_estimada && !cerrado
-                        ? '<div>' + slaDe(t).html + '<span style="font-size:11px; color:var(--v2-muted);">Atención estimada para: ' + esc(fmtFecha(t.eta_estimada)) + '</span></div>'
+                        ? (function () {
+                            const s = slaDe(t);
+                            const tarde = s.nivel === 'danger';
+                            const color = tarde ? '#b23a12' : (s.nivel === 'warn' ? '#9a4a00' : '#1d6b3a');
+                            const txt = tarde ? 'Nos estamos tardando más de lo previsto'
+                                : esc(LuxV2.ui.fmtRestante(s.rest));
+                            const pie = tarde
+                                ? 'Tu reporte sigue en atención; una disculpa por la espera.'
+                                : 'Te atenderemos antes del ' + esc(fmtFecha(t.eta_estimada)) + '.';
+                            return '<div>' +
+                                '<div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px; flex-wrap:wrap;">' +
+                                '<span style="font-size:12px; font-weight:700; color:var(--v2-heading);">Tiempo de atención</span>' +
+                                '<span style="font-size:12px; font-weight:700; color:' + color + ';">' + txt + '</span></div>' +
+                                '<div class="v2-sla ' + (s.nivel || '') + '" style="margin-top:4px;"><div class="barra"><div class="fill" style="width:' + (tarde ? 100 : s.pct) + '%;"></div></div></div>' +
+                                '<span style="font-size:11px; color:var(--v2-muted);">' + pie + '</span></div>';
+                        })()
                         : '') +
                     '</section>' +
                     // Lo que TÚ mandaste: el reporte original siempre releíble
