@@ -149,9 +149,16 @@
         .panel-msg .meta span { font-size: 11px; color: var(--v2-muted); white-space: nowrap; }
         .panel-msg .txt { font-size: 13px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
         @media (max-width: 1100px) {
-            .mt-panel { position: fixed; inset: 0 0 0 auto; width: 100%; max-width: 400px; height: 100vh; z-index: 70; transform: translateX(100%); transition: transform .2s ease; box-shadow: var(--v2-shadow-modal); border-left: 1px solid var(--v2-border); }
-            .mt-panel.abierta { transform: translateX(0); }
+            .mt-panel { position: fixed; inset: 0 0 0 auto; width: 100%; max-width: 400px; height: 100vh; z-index: 70; transform: translateX(100%); transition: transform .2s ease; border-left: 1px solid var(--v2-border); }
+            /* Cajón abierto: scrim que oscurece el fondo (la sombra de radio
+               100vmax cubre todo el viewport) para que la lista recortada
+               detrás no parezca un layout roto. */
+            .mt-panel.abierta { transform: translateX(0); box-shadow: 0 0 0 100vmax rgba(6, 15, 40, .45), 0 24px 60px rgba(11, 31, 77, .3); }
             .mt-panel .cerrar-panel { display: inline-flex; }
+        }
+        /* En teléfono el cajón es una hoja de ancho COMPLETO */
+        @media (max-width: 560px) {
+            .mt-panel { max-width: none; border-left: 0; }
         }
     </style>
 </head>

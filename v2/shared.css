@@ -206,6 +206,11 @@ textarea.v2-area {
     background: var(--v2-card); border-bottom: 1px solid var(--v2-border);
     position: relative; flex-wrap: wrap;
 }
+/* En escritorio el header acompaña el scroll (campana/búsqueda siempre a
+   mano), igual que el sidebar; en móvil se deja fluir para no comer alto. */
+@media (min-width: 901px) {
+    .v2-header { position: sticky; top: 0; z-index: 40; }
+}
 .v2-header .titulo strong { font-size: 18px; color: var(--v2-heading); display: block; line-height: 1.3; }
 .v2-header .titulo span { font-size: 12px; color: var(--v2-muted); }
 .v2-header .buscar {
@@ -452,6 +457,9 @@ textarea.v2-area {
 
 /* ---- Chat Lumix (compartido: lumix.html y panel embebido de alumnos) ---- */
 .lumix-msgs { flex: 1; overflow-y: auto; padding: 16px 14px 18px; display: flex; flex-direction: column; gap: 12px; min-height: 0; background: var(--v2-bg); }
+/* Un chat gravita hacia ABAJO: con pocos mensajes (o el teclado abierto en
+   el celular) la conversación se pega al campo de escritura, no al techo. */
+.lumix-msgs > :first-child { margin-top: auto; }
 .dia { align-self: center; font-size: 11px; font-weight: 700; color: var(--v2-muted); background: #e4e9f1; border-radius: 999px; padding: 4px 10px; }
 .fila-bot { display: flex; gap: 8px; align-items: flex-end; max-width: 92%; }
 .fila-bot .ava { width: 30px; height: 30px; border-radius: 50%; background: #ddf1f6; object-fit: cover; flex-shrink: 0; }
