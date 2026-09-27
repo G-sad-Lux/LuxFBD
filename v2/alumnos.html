@@ -21,17 +21,22 @@
         .acc-header nav a:hover { color: var(--v2-primary); }
         .acc-admin { margin-left: auto; display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--v2-muted); }
         .acc-admin a { display: flex; align-items: center; gap: 6px; font-weight: 700; text-decoration: none; padding: 10px 14px; border: 1px solid var(--v2-border-strong); border-radius: var(--v2-radius-sm); color: var(--v2-heading); }
-        .acc-main { flex: 1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; padding: 40px 48px; align-items: stretch; max-width: 1440px; width: 100%; margin: 0 auto; }
-        .acc-card { background: var(--v2-card); border: 1px solid var(--v2-border); border-radius: var(--v2-radius-xl); padding: 40px 48px; display: flex; flex-direction: column; gap: 20px; }
+        /* La sección NO se estira a la altura del monitor: altura natural,
+           centrada vertical y horizontalmente (margin:auto), tope de 1280px.
+           Así el layout se ve igual de compuesto a 1366, 1440 o 2560 px. */
+        .acc-main { flex: 0 0 auto; margin: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; padding: clamp(20px, 4vh, 44px) 48px; align-items: stretch; max-width: 1280px; width: 100%; }
+        .acc-card { background: var(--v2-card); border: 1px solid var(--v2-border); border-radius: var(--v2-radius-xl); padding: clamp(28px, 4.5vh, 42px) clamp(28px, 3.2vw, 50px); display: flex; flex-direction: column; gap: 20px; }
         .acc-card .barra { width: 40px; height: 4px; background: var(--v2-accent); border-radius: 2px; }
-        .acc-card h1 { margin: 6px 0 0; font-size: 34px; line-height: 1.15; font-weight: 800; color: var(--v2-heading); letter-spacing: -0.5px; }
-        .acc-card .sub { margin: 0; font-size: 16px; color: var(--v2-muted); }
+        .acc-card h1 { margin: 6px 0 0; font-size: clamp(27px, 2.3vw, 33px); line-height: 1.15; font-weight: 800; color: var(--v2-heading); letter-spacing: -0.5px; }
+        .acc-card .sub { margin: 0; font-size: 15px; color: var(--v2-muted); }
+        /* El formulario no debe medir 600px de ancho: tope ergonómico. */
+        .acc-form { display: flex; flex-direction: column; gap: 18px; width: 100%; max-width: 460px; }
         .acc-beneficios { margin-top: auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding-top: 20px; border-top: 1px solid #e4e9f1; }
         .acc-beneficios div { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: #26324d; }
         .acc-beneficios span { width: 36px; height: 36px; flex-shrink: 0; border-radius: 10px; background: #eaf1fc; color: var(--v2-primary); display: flex; align-items: center; justify-content: center; }
-        .acc-panel { position: relative; background: var(--v2-navy); color: #fff; border-radius: var(--v2-radius-xl); padding: 40px 44px; display: flex; flex-direction: column; gap: 24px; overflow: hidden; }
+        .acc-panel { position: relative; background: var(--v2-navy); color: #fff; border-radius: var(--v2-radius-xl); padding: clamp(28px, 4.5vh, 40px) clamp(26px, 3vw, 44px); display: flex; flex-direction: column; gap: 22px; overflow: hidden; }
         .acc-panel .kicker { font-size: 13px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--v2-accent-soft); }
-        .acc-panel h2 { margin: 0; font-size: 30px; line-height: 1.15; font-weight: 800; max-width: 340px; }
+        .acc-panel h2 { margin: 0; font-size: clamp(24px, 2vw, 29px); line-height: 1.15; font-weight: 800; max-width: 340px; }
         .acc-panel .texto { margin: 0; font-size: 15px; line-height: 1.5; color: var(--v2-navy-ink); max-width: 330px; }
         .acc-qr { background: #fff; border-radius: 18px; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: 0 0 0 6px rgba(255, 255, 255, .12); width: fit-content; }
         .acc-qr img { width: 172px; height: 172px; image-rendering: pixelated; }
@@ -43,21 +48,29 @@
         .acc-ventajas strong { font-size: 14px; }
         .acc-ventajas span { font-size: 12px; color: var(--v2-navy-ink); }
         .acc-ventajas .v2-ico { color: var(--v2-accent-soft); }
-        /* Entre 900 y 1279 el panel es angosto: el globo y la mascota
-           (posicionados absolutos, calibrados a 1440) chocarían con el
-           texto y el QR; se ocultan y el panel queda limpio. */
+        /* Quiebres por CONTENIDO, no por dispositivo:
+           <1280: el arte absoluto (globo/mascota) ya no cabe sin chocar → fuera.
+           <1080: dos columnas dejan de respirar → se apilan (tope 760px).
+           <900:  ergonomía táctil (16px anti-zoom iOS) y header compacto.
+           <700:  probablemente ES el celular → sin QR (se escanea a sí mismo). */
         @media (max-width: 1279px) { .acc-globo, .acc-mascota { display: none; } }
+        @media (max-width: 1080px) {
+            .acc-main { grid-template-columns: 1fr; max-width: 760px; gap: 20px; }
+            .acc-form { max-width: none; }
+            .acc-panel h2, .acc-panel .texto { max-width: none; }
+            .acc-qr { align-self: center; }
+        }
         @media (max-width: 900px) {
             .acc-header { padding: 0 16px; gap: 14px; }
             .acc-header nav { display: none; }
             .acc-admin span { display: none; }
-            .acc-main { grid-template-columns: 1fr; padding: 20px 16px; gap: 20px; }
+            .acc-main { padding: 20px 16px; }
             .acc-card { padding: 24px 20px; }
-            .acc-card h1 { font-size: 26px; }
             /* 16px/50px: evita el zoom automático de iOS al enfocar */
             .acc-card .v2-box { height: 50px; }
             .acc-card .v2-box input { font-size: 16px; }
-            /* En el celular no tiene sentido escanear el QR desde el mismo equipo */
+        }
+        @media (max-width: 700px) {
             .acc-qr { display: none; }
         }
         @media (max-width: 560px) {
@@ -172,7 +185,7 @@
                     <span data-ico="ui.alerta" data-tam="media" style="margin-top:1px;"></span>
                     <span>Credenciales incorrectas. Verifica tu correo y contraseña.</span>
                 </div>
-                <form id="auth-form" style="display:flex; flex-direction:column; gap:18px;">
+                <form id="auth-form" class="acc-form">
                     <div class="v2-field">
                         <!-- "Matrícula o correo" hasta que D5 (identificación por matrícula)
                              se resuelva: hoy el acceso es con el correo institucional. -->
