@@ -193,6 +193,11 @@
                 if (chat.enCurso() && !confirm('¿Reiniciar la conversación? Se pierde el reporte a medio llenar.')) return;
                 chat.reiniciar();
             });
+            // Salida accidental (atrás del navegador, cerrar pestaña, F5) con un
+            // reporte a medias: el navegador pide confirmación antes de perderlo.
+            window.addEventListener('beforeunload', (ev) => {
+                if (chat.enCurso()) { ev.preventDefault(); ev.returnValue = ''; }
+            });
         })();
     </script>
 </body>

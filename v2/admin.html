@@ -179,6 +179,9 @@
                 page: 1, pageSize: PAGE_SIZE,
                 tabComentario: 'externo', tabDetalle: 'conv',
                 avisoSla: false,
+                // Borrador del compositor: sobrevive a cambios de pestaña y
+                // re-renders del detalle; se limpia al enviar o cambiar de ticket.
+                borrador: '', borradorTicket: null,
             };
 
             // ---------- Vistas rápidas + filtros ----------
@@ -688,6 +691,9 @@
                     tab.addEventListener('click', () => { state.tabComentario = tab.dataset.tab; renderDetalle(id); }));
                 const composer = $('composer');
                 if (composer) {
+                    if (state.borradorTicket !== t.ticket_id) { state.borrador = ''; state.borradorTicket = t.ticket_id; }
+                    $('comentario-texto').value = state.borrador;
+                    $('comentario-texto').addEventListener('input', () => { state.borrador = $('comentario-texto').value; });
                     $('btn-adjuntar-com').addEventListener('click', () => $('archivo-com').click());
                     $('archivo-com').addEventListener('change', async () => {
                         const f = $('archivo-com').files[0];
@@ -709,6 +715,7 @@
                             if (chk && chk.checked) {
                                 await LuxV2.callFn('ticket-manager/update', { method: 'PUT', body: { ticket_id: t.ticket_id, estado_id: 3 } });
                             }
+                            state.borrador = ''; // enviado: el borrador ya no aplica
                             await Promise.all([cargarDatos(), cargarNotifs()]);
                             renderDetalle(id);
                         } catch (err) { feedback('comentario-msg', err.message, false); }

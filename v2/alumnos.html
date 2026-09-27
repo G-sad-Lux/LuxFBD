@@ -316,6 +316,9 @@
                 sel: null,          // ticket seleccionado (panel derecho)
                 detalle: null,      // cache del /details del seleccionado
                 panelTab: 'ticket', // pestaña del panel: 'ticket' | 'lumix' (03d)
+                // Borrador de la respuesta: sobrevive re-renders (p. ej. al
+                // adjuntar); se limpia al enviar o al cambiar de ticket.
+                borradorPanel: '', borradorPanelTicket: null,
             };
             let cargarNotifs = () => { };
             let chat = null; // instancia embebida de Lumix (se monta al primer uso)
@@ -529,6 +532,11 @@
                         ? '<div>' + slaDe(t).html + '<span style="font-size:11px; color:var(--v2-muted);">Atención estimada para: ' + esc(fmtFecha(t.eta_estimada)) + '</span></div>'
                         : '') +
                     '</section>' +
+                    // Lo que TÚ mandaste: el reporte original siempre releíble
+                    '<section style="display:flex; flex-direction:column; gap:8px;">' +
+                    '<h3>Tu descripción</h3>' +
+                    '<div class="v2-suave" style="font-size:13px; line-height:1.5; white-space:pre-wrap; overflow-wrap:anywhere;">' + esc(t.detalles || '—') + '</div>' +
+                    '</section>' +
                     evid +
                     '<section style="display:flex; flex-direction:column; gap:10px;">' +
                     '<h3>Conversación con soporte</h3>' +
@@ -623,7 +631,13 @@
                     }
                 }));
 
-                // Adjuntar + responder
+                // Adjuntar + responder (con borrador persistente)
+                const cajaTexto = $('p-texto');
+                if (cajaTexto) {
+                    if (state.borradorPanelTicket !== t.ticket_id) { state.borradorPanel = ''; state.borradorPanelTicket = t.ticket_id; }
+                    cajaTexto.value = state.borradorPanel;
+                    cajaTexto.addEventListener('input', () => { state.borradorPanel = cajaTexto.value; });
+                }
                 const btnAdj = $('p-adjuntar');
                 if (btnAdj) {
                     btnAdj.addEventListener('click', () => $('p-archivo').click());
@@ -646,6 +660,7 @@
                             method: 'POST',
                             body: { ticket_id: t.ticket_id, contenido: $('p-texto').value, tipo: 'externo' }
                         });
+                        state.borradorPanel = ''; // enviado
                         await cargarDatos();
                         cargarNotifs();
                         renderLista();

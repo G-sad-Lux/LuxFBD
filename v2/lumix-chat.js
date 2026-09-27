@@ -25,7 +25,10 @@
         const { svgIcono, iconoCategoria, fmtHora, fmtFecha, nombreDe } = window.LuxV2.ui;
         const modo = opts.modo || 'pantalla';
         const catalogs = opts.catalogs || null;
-        const state = { step: 'INIT', ticket: {}, subiendo: false };
+        // editando=true: el paso actual es una corrección puntual lanzada desde
+        // el RESUMEN; al capturar el campo se regresa al resumen, no al paso
+        // siguiente (es el "atrás" del flujo).
+        const state = { step: 'INIT', ticket: {}, subiendo: false, editando: false };
 
         // ---- esqueleto: mensajes + barra tipo pill ----
         opts.raiz.innerHTML =
@@ -173,12 +176,14 @@
                     break;
                 }
                 case 'EVIDENCE':
-                    burbujaBot('Puedes agregar una evidencia para ayudarnos a revisar tu caso: captura de pantalla, foto o PDF (máx. 5 MB).');
+                    burbujaBot(state.editando && state.ticket.adjunto
+                        ? 'Tu evidencia actual es "' + state.ticket.adjunto.nombre_archivo + '". Puedes reemplazarla o quitarla.'
+                        : 'Puedes agregar una evidencia para ayudarnos a revisar tu caso: captura de pantalla, foto o PDF (máx. 5 MB).');
                     habilitarTexto(false, true);
                     chips([
                         { label: 'Adjuntar archivo', value: 'adjuntar', icono: svgIcono('ui.clip', 'media') },
                         { label: 'Tomar foto', value: 'foto', icono: svgIcono('ui.camara', 'media') },
-                        { label: 'Continuar sin evidencia', value: 'sin_adjunto' },
+                        { label: (state.editando && state.ticket.adjunto) ? 'Quitar la evidencia' : 'Continuar sin evidencia', value: 'sin_adjunto' },
                     ]);
                     break;
                 case 'RESUMEN': {
@@ -198,11 +203,29 @@
                         '<span style="font-size:12px; color:var(--v2-muted);">La prioridad la asigna el equipo de soporte según las reglas de la universidad.</span>');
                     chips([
                         { label: 'Confirmar y enviar', value: 'confirmar', principal: true },
+                        { label: 'Corregir algo', value: 'corregir' },
                         { label: 'Empezar de nuevo', value: 'reiniciar' },
                     ]);
                     break;
                 }
+                case 'CORRIGE':
+                    burbujaBot('¿Qué quieres corregir?');
+                    chips([
+                        { label: 'El título', value: 'edit:TITLE' },
+                        { label: 'La categoría', value: 'edit:CATEGORY' },
+                        { label: 'Los detalles', value: 'edit:DETAILS' },
+                        { label: 'El área', value: 'edit:AREA' },
+                        { label: 'La evidencia', value: 'edit:EVIDENCE' },
+                        { label: 'Nada, volver al resumen', value: 'edit:RESUMEN' },
+                    ]);
+                    break;
             }
+        }
+        // Tras capturar un campo: al paso siguiente, o de vuelta al RESUMEN
+        // si veníamos de una corrección.
+        function avanzar(siguiente) {
+            if (state.editando) { state.editando = false; prompt('RESUMEN'); }
+            else prompt(siguiente);
         }
 
         async function manejar(valor, etiqueta) {
@@ -218,14 +241,14 @@
                     if (t.length < 5) { burbujaUser(t); texto.value = ''; burbujaBot('El título es muy corto: dame al menos 5 letras.'); habilitarTexto(true, false); return; }
                     state.ticket.titulo = t;
                     burbujaUser(t); texto.value = '';
-                    prompt('CATEGORY');
+                    avanzar('CATEGORY');
                     break;
                 }
                 case 'CATEGORY':
                     if (String(valor).startsWith('cat:')) {
                         state.ticket.categoria_id = Number(String(valor).slice(4));
                         burbujaUser(etiqueta);
-                        prompt('DETAILS');
+                        avanzar('DETAILS');
                     }
                     break;
                 case 'DETAILS': {
@@ -234,7 +257,7 @@
                     if (d.length < 15) { burbujaUser(d); texto.value = ''; burbujaBot('Necesito un poco más de detalle (mínimo 15 letras) para ayudarte mejor.'); habilitarTexto(true, false); return; }
                     state.ticket.detalles = d;
                     burbujaUser(d); texto.value = '';
-                    prompt('AREA');
+                    avanzar('AREA');
                     break;
                 }
                 case 'AREA':
@@ -242,17 +265,35 @@
                         const v = String(valor).slice(5);
                         state.ticket.area_id = v === 'auto' ? null : Number(v);
                         burbujaUser(etiqueta);
-                        prompt('EVIDENCE');
+                        avanzar('EVIDENCE');
                     }
                     break;
                 case 'EVIDENCE':
                     if (valor === 'adjuntar') { archivo.click(); }
                     else if (valor === 'foto') { camara.click(); }
-                    else if (valor === 'sin_adjunto') { burbujaUser('Continuar sin evidencia'); prompt('RESUMEN'); }
+                    else if (valor === 'sin_adjunto') {
+                        if (state.editando && state.ticket.adjunto) {
+                            state.ticket.adjunto = null; // corregir = quitar la evidencia previa
+                            burbujaUser('Quitar la evidencia');
+                        } else {
+                            burbujaUser('Continuar sin evidencia');
+                        }
+                        state.editando = false;
+                        prompt('RESUMEN');
+                    }
                     break;
                 case 'RESUMEN':
                     if (valor === 'confirmar') { burbujaUser('Confirmar y enviar'); crearTicket(); }
+                    else if (valor === 'corregir') { burbujaUser('Corregir algo'); prompt('CORRIGE'); }
                     else if (valor === 'reiniciar') { reiniciar(); }
+                    break;
+                case 'CORRIGE':
+                    if (String(valor).startsWith('edit:')) {
+                        const destino = String(valor).slice(5);
+                        burbujaUser(etiqueta);
+                        if (destino === 'RESUMEN') { prompt('RESUMEN'); }
+                        else { state.editando = true; prompt(destino); }
+                    }
                     break;
                 case 'DONE':
                     if (valor === 'report') { apagarChipsPrevios(); burbujaUser('Reportar otro problema'); state.ticket = {}; prompt('TITLE'); }
@@ -277,6 +318,7 @@
                 state.ticket.adjunto = { nombre_archivo: f.name, ruta_archivo_url: ruta, mime_type: f.type, size_bytes: f.size };
                 aviso.textContent = 'Evidencia lista: ' + f.name;
                 state.subiendo = false;
+                state.editando = false;
                 apagarChipsPrevios();
                 burbujaUser('Adjunté "' + f.name + '"');
                 prompt('RESUMEN');
@@ -410,6 +452,7 @@
             if (state.subiendo) return;
             msgs.innerHTML = '';
             state.ticket = {};
+            state.editando = false;
             texto.value = '';
             diaChip();
             prompt('GREETING');
