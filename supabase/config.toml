@@ -12,7 +12,21 @@ verify_jwt = true
 verify_jwt = true
 
 [auth]
-# F1 de la auditoria: la app no tiene registro publico; sin esto cualquiera
-# con la anon key puede crear cuentas via /auth/v1/signup.
-enable_signup = false
+# --- VENTANA DE DEMO (D5, 2026-09-26) ---
+# El modo invitado necesita el signup GLOBAL encendido (GoTrue bloquea lo
+# anonimo si esta apagado). OJO: [auth.email].enable_signup = false apaga el
+# proveedor completo (¡tambien los LOGINS!), asi que NO sirve para cerrar F1.
+# Mitigacion durante la ventana: confirmaciones de correo OBLIGATORIAS, con
+# el mailer compartido de Supabase limitado a ~2 correos/hora; un alta por
+# correo queda sin sesion hasta confirmar.
+# ROLLBACK POST-DEMO (restaura F1 exacta):
+#   enable_signup = false, enable_anonymous_sign_ins = false  ->  config push
+enable_signup = true
 minimum_password_length = 10
+enable_anonymous_sign_ins = true
+
+[auth.email]
+# true = el proveedor email queda ACTIVO (logins del personal y alumnos).
+enable_signup = true
+# Alta por correo sin confirmar no inicia sesion (mitigacion F1 del demo).
+enable_confirmations = true

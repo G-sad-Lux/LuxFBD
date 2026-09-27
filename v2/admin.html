@@ -100,7 +100,7 @@
                 <div class="buscar">
                     <span data-ico="ui.buscar" data-tam="media"></span>
                     <label for="buscar-global" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);">Búsqueda global</label>
-                    <input id="buscar-global" type="search" placeholder="Folio, correo o nombre">
+                    <input id="buscar-global" type="search" placeholder="Folio, matrícula, correo o nombre">
                 </div>
                 <button id="btn-notifs" class="v2-bell" aria-label="Notificaciones"><span data-ico="ui.campana" data-tam="grande"></span><span id="notif-punto" class="punto" hidden></span></button>
                 <div class="v2-chip-usuario">
@@ -202,7 +202,7 @@
                     if (f.hasta && t.fecha_creacion > f.hasta + 'T23:59:59') return false;
                     if (q) {
                         const pajar = ('#' + t.ticket_id + ' ' + t.titulo + ' ' + nombreDe(t.reportador) + ' '
-                            + (t.reportador && t.reportador.email ? t.reportador.email : '')).toLowerCase();
+                            + (t.reportador && t.reportador.email ? t.reportador.email : '') + ' ' + (t.reportador && t.reportador.matricula ? t.reportador.matricula : '')).toLowerCase();
                         if (!pajar.includes(q)) return false;
                     }
                     return true;
@@ -257,7 +257,7 @@
                         : '<button type="button" class="v2-clasificar" data-ir="' + t.ticket_id + '">' + svgIcono('ui.mas', 'chica') + 'Clasificar</button>';
                     return '<div role="row" class="v2-tr v2-td" data-id="' + t.ticket_id + '" tabindex="0">' +
                         '<div role="cell" class="v2-celda"><a href="#ticket=' + t.ticket_id + '" style="font-weight:800; text-decoration:none; color:var(--v2-heading);">#' + t.ticket_id + '</a><span class="sub">' + esc(fmtFechaCorta(t.fecha_creacion)) + '</span></div>' +
-                        '<div role="cell" class="v2-celda"><span class="principal">' + esc(nombreDe(rep) || '—') + '</span><span class="sub">' + esc(rep.email || rep.tipo_usuario || '') + '</span></div>' +
+                        '<div role="cell" class="v2-celda"><span class="principal">' + esc(nombreDe(rep) || '—') + '</span><span class="sub">' + esc(rep.email || (rep.matricula ? 'Matrícula ' + rep.matricula : rep.tipo_usuario) || '') + '</span></div>' +
                         '<div role="cell" class="v2-celda"><span class="principal">' + esc(t.titulo) + '</span><span class="sub">' + esc(t.catalogo ? t.catalogo.nombre : '—') + ' · ' + canal.icono + esc(canal.nombre) + '</span></div>' +
                         '<div role="cell">' + badgePrioridad(t) + '</div>' +
                         '<div role="cell">' + badgeEstado(t) + '</div>' +
@@ -307,7 +307,7 @@
                     '</div>' +
                     '<div class="tabla-filtros">' +
                     '<div class="v2-field"><label class="v2-lbl" for="f-q" style="font-size:12px; color:var(--v2-muted);">Buscar en la tabla</label>' +
-                    '<div class="v2-box compacta">' + svgIcono('ui.buscar', 'media') + '<input id="f-q" type="search" placeholder="Folio, correo o nombre" value="' + esc(state.filtro.q) + '"></div></div>' +
+                    '<div class="v2-box compacta">' + svgIcono('ui.buscar', 'media') + '<input id="f-q" type="search" placeholder="Folio, matrícula, correo o nombre" value="' + esc(state.filtro.q) + '"></div></div>' +
                     '<div class="v2-field"><label class="v2-lbl" for="f-estado" style="font-size:12px; color:var(--v2-muted);">Estado</label><select id="f-estado" class="v2-sel compacta"><option value="">Todos</option>' + opts(cat.estados, state.filtro.estado) + '</select></div>' +
                     '<div class="v2-field"><label class="v2-lbl" for="f-categoria" style="font-size:12px; color:var(--v2-muted);">Categoría</label><select id="f-categoria" class="v2-sel compacta"><option value="">Todas</option>' + opts(cat.categorias, state.filtro.categoria) + '</select></div>' +
                     '<div class="v2-field"><label class="v2-lbl" for="f-prioridad" style="font-size:12px; color:var(--v2-muted);">Prioridad</label><select id="f-prioridad" class="v2-sel compacta"><option value="">Todas</option>' + opts(cat.prioridades, state.filtro.prioridad) + '</select></div>' +
@@ -470,7 +470,7 @@
                     '</div>' +
                     '<span class="asunto">' + esc(t.titulo) + '</span>' +
                     '<div class="det-franja">' +
-                    '<div class="celda"><span class="mk">Estudiante</span><span class="mv">' + esc(nombreDe(rep) || '—') + '</span><span class="ms">' + esc(rep.email || rep.tipo_usuario || '') + '</span></div>' +
+                    '<div class="celda"><span class="mk">Estudiante</span><span class="mv">' + esc(nombreDe(rep) || '—') + '</span><span class="ms">' + esc(rep.email || (rep.matricula ? 'Matrícula ' + rep.matricula : rep.tipo_usuario) || '') + '</span></div>' +
                     '<div class="celda"><span class="mk">Categoría</span><span class="mv">' + esc(t.catalogo ? t.catalogo.nombre : '—') + '</span><span class="ms">Área indicada al crear: ' + esc(areaIndicada) + '</span></div>' +
                     '<div class="celda"><span class="mk">Creado</span><span class="mv">' + esc(fmtFecha(t.fecha_creacion)) + '</span><span class="ms">' + esc(fmtRelativo(t.fecha_creacion)) + ' · Act. ' + esc(fmtFechaCorta(t.actualizado_en)) + '</span></div>' +
                     '<div class="celda"><span class="mk">Canal</span><span class="mv">' + canal.icono + esc(canal.nombre) + '</span><span class="ms">' + (t.canal_entrada === 'portal' ? 'Portal del estudiante' : 'Asistente virtual (QR)') + '</span></div>' +
@@ -577,7 +577,7 @@
                     '<div style="display:flex; align-items:center; gap:12px;">' +
                     '<span class="v2-ava navy">' + esc(iniciales(nombreDe(rep))) + '</span>' +
                     '<div style="display:flex; flex-direction:column; min-width:0;"><strong style="font-size:14px;">' + esc(nombreDe(rep) || '—') + '</strong>' +
-                    '<span style="font-size:12px; color:var(--v2-muted); overflow:hidden; text-overflow:ellipsis;">' + esc(rep.email || '') + (rep.tipo_usuario ? ' · ' + esc(rep.tipo_usuario) : '') + '</span></div></div>' +
+                    '<span style="font-size:12px; color:var(--v2-muted); overflow:hidden; text-overflow:ellipsis;">' + esc(rep.email || (rep.matricula ? 'Matrícula ' + rep.matricula : '')) + (rep.tipo_usuario ? ' · ' + esc(rep.tipo_usuario) : '') + '</span></div></div>' +
                     '<div style="display:flex; justify-content:space-between; gap:8px; font-size:13px; padding-top:8px; border-top:1px solid #edf1f6;">' +
                     '<span style="color:var(--v2-muted);">Otros tickets activos</span>' +
                     (otros.length

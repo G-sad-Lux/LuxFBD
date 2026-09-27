@@ -679,8 +679,9 @@
                     '<span class="v2-ava navy" style="width:56px; height:56px; font-size:18px;">' + esc(iniciales(p.nombreCompleto)) + '</span>' +
                     '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; flex:1;">' +
                     '<div><span style="font-size:11px; color:var(--v2-muted); font-weight:700; text-transform:uppercase;">Nombre</span><p style="margin:2px 0 0; font-weight:600;">' + esc(p.nombreCompleto) + '</p></div>' +
+                    (p.matricula ? '<div><span style="font-size:11px; color:var(--v2-muted); font-weight:700; text-transform:uppercase;">Matrícula</span><p style="margin:2px 0 0; font-weight:600;">' + esc(p.matricula) + '</p></div>' : '') +
                     '<div><span style="font-size:11px; color:var(--v2-muted); font-weight:700; text-transform:uppercase;">Correo institucional</span><p style="margin:2px 0 0; font-weight:600;">' + esc(p.email || '—') + '</p></div>' +
-                    '<div><span style="font-size:11px; color:var(--v2-muted); font-weight:700; text-transform:uppercase;">Tipo de usuario</span><p style="margin:2px 0 0; font-weight:600;">' + esc(p.tipo_usuario) + '</p></div>' +
+                    '<div><span style="font-size:11px; color:var(--v2-muted); font-weight:700; text-transform:uppercase;">Tipo de usuario</span><p style="margin:2px 0 0; font-weight:600;">' + esc(p.esInvitado ? 'Invitado (demo)' : p.tipo_usuario) + '</p></div>' +
                     '</div></div>' +
                     '<p class="v2-nota">Para actualizar tus datos acude a Servicios Escolares; este portal toma la información de tu cuenta institucional.</p>';
             }
@@ -763,7 +764,9 @@
             $('shell').hidden = false;
             $('chip-ava').textContent = iniciales(perfil.nombreCompleto);
             $('chip-nombre').textContent = perfil.nombreCompleto;
-            $('chip-sub').textContent = perfil.tipo_usuario + (perfil.email ? ' · ' + perfil.email : '');
+            $('chip-sub').textContent = perfil.esInvitado
+                ? 'Invitado (demo)' + (perfil.matricula ? ' · Matrícula ' + perfil.matricula : '')
+                : perfil.tipo_usuario + (perfil.email ? ' · ' + perfil.email : '');
             $('btn-salir').addEventListener('click', LuxV2.logout);
             $('btn-clasica').addEventListener('click', () => {
                 if (window.luxV2Set) window.luxV2Set(false);

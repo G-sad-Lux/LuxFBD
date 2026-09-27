@@ -27,7 +27,9 @@
         .lumix-head .avatar img { width: 42px; height: 42px; border-radius: 50%; background: #ddf1f6; object-fit: cover; display: block; }
         .lumix-head .avatar .punto { position: absolute; right: 0; bottom: 1px; width: 11px; height: 11px; border-radius: 50%; background: var(--v2-ok); border: 2px solid #fff; }
         .lumix-head .quien { flex: 1; min-width: 0; line-height: 1.25; }
-        .lumix-head .quien strong { font-size: 16px; color: var(--v2-heading); display: block; }
+        .lumix-head .quien strong { font-size: 16px; color: var(--v2-heading); display: flex; align-items: center; gap: 8px; }
+        /* Etiqueta DEMO del modo invitado (spec 02a) */
+        .demo-pill { background: #fdecd8; color: #9a4a00; border-radius: 999px; padding: 1px 8px; font-size: 11px; font-weight: 800; letter-spacing: .4px; }
         .lumix-head .quien small { font-size: 12px; color: #1f7a45; font-weight: 600; }
         .lumix-head .reiniciar { width: 44px; height: 44px; border: 0; background: transparent; color: var(--v2-muted); display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 10px; font: inherit; }
         .lumix-head .reiniciar:hover { background: #eef2f8; }
@@ -76,11 +78,10 @@
                 el.innerHTML = svgIcono(el.dataset.ico, el.dataset.tam || '');
             });
             const zona = $('zona');
+            const quiereInvitado = /(?:^|[?&])invitado=/.test(location.search);
 
-            // Identificación POR SESIÓN (decisión de seguridad): sin sesión,
-            // acceso aquí mismo; nunca se pide la matrícula por chat.
-            const perfil = await LuxV2.getProfile();
-            if (!perfil) {
+            // ---- Acceso sin sesión: cuenta institucional o modo INVITADO (D5) ----
+            function pantallaLogin() {
                 zona.innerHTML =
                     '<div class="lumix-login">' +
                     '<img src="assets/lumix.png" alt="Lumix">' +
@@ -96,6 +97,7 @@
                     '<div class="v2-box">' + svgIcono('ui.candado') + '<input id="l-pwd" type="password" autocomplete="current-password" required></div></div>' +
                     '<button type="submit" id="l-entrar" class="v2-btn grande">Entrar con Lumix</button>' +
                     '</form>' +
+                    '<button type="button" id="ir-invitado" class="v2-btn secundario" style="width:100%; max-width:320px;">Entrar como invitado (demo)</button>' +
                     '<a href="alumnos.html" style="font-size:13px; font-weight:700;">Ir al Portal del Estudiante</a>' +
                     '</div>';
                 $('auth-form').addEventListener('submit', async (ev) => {
@@ -114,7 +116,69 @@
                         $('auth-error').classList.add('abierta');
                     }
                 });
+                $('ir-invitado').addEventListener('click', pantallaInvitado);
+            }
+
+            // Formulario del invitado: matrícula de 6 dígitos + nombre completo.
+            // Crea una sesión ANÓNIMA con esos datos en el metadata (el trigger
+            // 0019 los persiste en usuario); RLS lo acota a lo suyo.
+            function pantallaInvitado() {
+                zona.innerHTML =
+                    '<div class="lumix-login">' +
+                    '<img src="assets/lumix.png" alt="Lumix">' +
+                    '<h1 style="display:flex; align-items:center; gap:8px; justify-content:center;">Modo invitado <span class="demo-pill">DEMO</span></h1>' +
+                    '<p>Cuéntame quién eres para acompañarte: tu matrícula de 6 dígitos y tu nombre completo.</p>' +
+                    '<div id="inv-error" class="v2-auth-error" role="alert" style="max-width:320px; text-align:left;">' +
+                    '<span style="margin-top:1px;">' + svgIcono('ui.alerta', 'media') + '</span>' +
+                    '<span id="inv-error-txt">Revisa los datos.</span></div>' +
+                    '<form id="inv-form">' +
+                    '<div class="v2-field"><label class="v2-lbl" for="i-mat">Matrícula (6 dígitos)</label>' +
+                    '<div class="v2-box">' + svgIcono('ui.persona') + '<input id="i-mat" type="text" inputmode="numeric" autocomplete="off" maxlength="6" pattern="[0-9]{6}" placeholder="123456" required></div></div>' +
+                    '<div class="v2-field"><label class="v2-lbl" for="i-nom">Nombre completo</label>' +
+                    '<div class="v2-box">' + svgIcono('ui.persona') + '<input id="i-nom" type="text" autocomplete="name" maxlength="80" placeholder="Nombre y apellido" required></div></div>' +
+                    '<button type="submit" id="i-entrar" class="v2-btn grande">Comenzar con Lumix</button>' +
+                    '</form>' +
+                    '<p style="font-size:12px; color:var(--v2-muted); max-width:300px;">Sesión temporal solo para el demo: tus reportes quedan ligados a esta visita.</p>' +
+                    '<button type="button" id="ir-cuenta" style="background:none; border:none; padding:0; font:inherit; font-size:13px; font-weight:700; color:var(--v2-primary); cursor:pointer; text-decoration:underline;">Ya tengo cuenta: iniciar sesión</button>' +
+                    '</div>';
+                const error = (txt) => {
+                    $('inv-error-txt').textContent = txt;
+                    $('inv-error').classList.add('abierta');
+                };
+                $('inv-form').addEventListener('submit', async (ev) => {
+                    ev.preventDefault();
+                    $('inv-error').classList.remove('abierta');
+                    const mat = $('i-mat').value.trim();
+                    const nom = $('i-nom').value.trim().replace(/\s+/g, ' ');
+                    if (!/^\d{6}$/.test(mat)) return error('La matrícula debe tener exactamente 6 dígitos.');
+                    if (nom.length < 5 || nom.split(' ').length < 2) return error('Escribe tu nombre completo (nombre y apellido).');
+                    const partes = nom.split(' ');
+                    $('i-entrar').disabled = true;
+                    try {
+                        const r = await LuxV2.sb().auth.signInAnonymously({
+                            options: { data: { nombre: partes[0], apellido: partes.slice(1).join(' '), tipo_usuario: 'Alumno', matricula: mat } },
+                        });
+                        if (r.error) throw r.error;
+                        location.reload();
+                    } catch (e) {
+                        console.error(e);
+                        $('i-entrar').disabled = false;
+                        error('El modo invitado no está disponible en este momento. Intenta de nuevo o inicia sesión.');
+                    }
+                });
+                $('ir-cuenta').addEventListener('click', pantallaLogin);
+            }
+
+            // Identificación POR SESIÓN (decisión de seguridad): sin sesión,
+            // acceso aquí mismo; nunca se pide la matrícula DENTRO del chat.
+            const perfil = await LuxV2.getProfile();
+            if (!perfil) {
+                (quiereInvitado ? pantallaInvitado : pantallaLogin)();
                 return;
+            }
+            // Etiqueta DEMO en el encabezado para sesiones de invitado
+            if (perfil.esInvitado) {
+                document.querySelector('.lumix-head .quien strong').innerHTML = 'Lumix <span class="demo-pill">DEMO</span>';
             }
 
             let catalogs = null;

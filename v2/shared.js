@@ -55,12 +55,14 @@
         var session = await getSession();
         if (!session) return null;
         var r = await sb().from('usuario')
-            .select('usuario_id, nombre, apellido, tipo_usuario, email')
+            .select('usuario_id, nombre, apellido, tipo_usuario, email, matricula')
             .eq('auth_uid', session.user.id)
             .single();
         var p = r.data || { nombre: 'Usuario', apellido: '', tipo_usuario: 'Alumno' };
         p.session = session;
         p.esStaff = STAFF_ROLES.indexOf(p.tipo_usuario) !== -1;
+        // Modo invitado del demo (D5): sesion anonima de Supabase Auth.
+        p.esInvitado = !!(session.user && session.user.is_anonymous);
         p.nombreCompleto = (p.nombre + ' ' + (p.apellido || '')).trim();
         return p;
     }

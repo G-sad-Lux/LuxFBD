@@ -159,7 +159,7 @@ async function listTickets(req: Request, supabase: any, user: any) {
             prioridad:prioridad_id(nombre, codigo),
             estado:estado_id(nombre),
             area:area_notificada_id(nombre),
-            reportador:reportador_id(nombre, apellido, tipo_usuario, email),
+            reportador:reportador_id(nombre, apellido, tipo_usuario, email, matricula),
             asignado:maestro_notificado_id(nombre, apellido)
         `)
         .order('fecha_creacion', { ascending: false })
@@ -191,7 +191,7 @@ async function getTicketDetails(req: Request, url: URL, supabase: any, user: any
             prioridad:prioridad_id(nombre, codigo),
             estado:estado_id(nombre),
             area:area_notificada_id(nombre),
-            reportador:reportador_id(nombre, apellido, tipo_usuario, email),
+            reportador:reportador_id(nombre, apellido, tipo_usuario, email, matricula),
             asignado:maestro_notificado_id(nombre, apellido)
         `)
         .eq('ticket_id', ticketId)
