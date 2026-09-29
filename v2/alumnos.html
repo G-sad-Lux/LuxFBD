@@ -139,7 +139,12 @@
         .panel-tabs .v2-seg button span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .panel-hoja { flex: 1; min-height: 0; display: flex; flex-direction: column; }
         #panel-lumix .lumix-msgs { background: #f7f9fc; }
-        .mt-panel { width: 380px; flex-shrink: 0; background: var(--v2-card); border-left: 1px solid var(--v2-border); display: flex; flex-direction: column; min-height: 0; position: sticky; top: 0; align-self: flex-start; height: 100vh; }
+        /* El panel se pega DEBAJO del header (pegajoso en escritorio) y mide
+           el alto restante; con top:0/100vh nacía 72px recorrido hacia abajo
+           y el pie (textarea + Enviar) quedaba fuera de la pantalla. --hdr lo
+           fija JS con la altura real del header (aguanta que envuelva). */
+        .mt-panel { width: 380px; flex-shrink: 0; background: var(--v2-card); border-left: 1px solid var(--v2-border); display: flex; flex-direction: column; min-height: 0; position: sticky; top: var(--hdr, 72px); align-self: flex-start; height: calc(100vh - var(--hdr, 72px)); }
+        .mt-panel .cabeza, .mt-panel .pie { flex-shrink: 0; }
         .mt-panel .cabeza { padding: 20px 22px 14px; border-bottom: 1px solid #e4e9f1; display: flex; flex-direction: column; gap: 8px; }
         .mt-panel .cabeza h2 { margin: 0; font-size: 22px; font-weight: 800; color: var(--v2-heading); }
         .mt-panel .cuerpo { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 22px; display: flex; flex-direction: column; gap: 18px; }
@@ -819,6 +824,13 @@
             state.perfil = perfil;
             $('auth').hidden = true;
             $('shell').hidden = false;
+            // Altura real del header -> --hdr (el panel pegajoso mide 100vh - header)
+            const fijarAltoHeader = () => {
+                const h = document.querySelector('#shell .v2-header');
+                if (h) document.documentElement.style.setProperty('--hdr', h.offsetHeight + 'px');
+            };
+            fijarAltoHeader();
+            window.addEventListener('resize', fijarAltoHeader);
             $('chip-ava').textContent = iniciales(perfil.nombreCompleto);
             $('chip-nombre').textContent = perfil.nombreCompleto;
             $('chip-sub').textContent = perfil.esInvitado
