@@ -23,8 +23,7 @@ const corsFor = (req: Request) => {
 const httpError = (message: string, status = 400) =>
     Object.assign(new Error(message), { expose: true, status })
 
-// Las reglas de negocio viven en la DB (migracion 0010) y avisan con
-// RAISE EXCEPTION (codigo P0001): esos mensajes SI son para el usuario.
+// Las reglas de negocio de la DB avisan con RAISE EXCEPTION (P0001): esos mensajes si son para el usuario.
 const fromDb = (error: any) =>
     error?.code === 'P0001' ? httpError(String(error.message), 422) : error
 
@@ -104,8 +103,7 @@ async function createTicket(req: Request, supabase: any, user: any) {
 
     const profile = await getProfile(supabase, user)
 
-    // La DB (0010) valida tipos de catalogo, calcula la ETA y escribe la
-    // bitacora + notificacion de creacion.
+    // La DB valida catalogos, calcula la ETA y escribe bitacora + notificacion.
     const { data, error } = await supabase
         .from('ticket')
         .insert([
@@ -113,11 +111,11 @@ async function createTicket(req: Request, supabase: any, user: any) {
                 titulo,
                 categoria_id,
                 detalles,
-                prioridad_id: prioridad_id || 8,             // oficial (default Baja)
-                prioridad_reportada_id: prioridad_id || null, // lo que percibio el usuario (V2 §10)
+                prioridad_id: prioridad_id ?? null,          // null => la DB la asigna por categoria (0022)
+                prioridad_reportada_id: prioridad_id || null, // lo que percibio el usuario
                 reportador_id: profile.usuario_id,
                 estado_id: 1, // 'Abierto'
-                area_notificada_id: area_notificada_id || 38, // B9: se respeta el area elegida
+                area_notificada_id: area_notificada_id || 38, // 38 = Soporte Tecnico
                 canal_entrada: canal_entrada === 'portal' ? 'portal' : 'chatbot',
             }
         ])
@@ -181,8 +179,7 @@ async function getTicketDetails(req: Request, url: URL, supabase: any, user: any
     const ticketId = url.searchParams.get('id')
     if (!ticketId) throw httpError('Missing ticket ID')
 
-    // Todo con el JWT del usuario: RLS deniega tickets ajenos antes de
-    // tocar historial, comentarios o adjuntos. (El service role ya no se usa.)
+    // Todo con el JWT del usuario: RLS deniega tickets ajenos.
     const { data: ticket, error: tErr } = await supabase
         .from('ticket')
         .select(`
@@ -209,7 +206,7 @@ async function getTicketDetails(req: Request, url: URL, supabase: any, user: any
         if (hist) historyData = hist
     } catch (e) { console.warn('History fetch error:', e) }
 
-    // RLS oculta las notas internas a quien no es staff (0011).
+    // RLS oculta las notas internas a quien no es staff.
     let comments = []
     try {
         const { data: com } = await supabase
@@ -268,14 +265,13 @@ async function updateTicket(req: Request, supabase: any, user: any) {
     if (estado_id !== undefined) updates.estado_id = estado_id
     if (prioridad_id !== undefined) updates.prioridad_id = prioridad_id
     if (resumen_solucion !== undefined) updates.resumen_solucion = resumen_solucion
-    if (area_notificada_id !== undefined) updates.area_notificada_id = area_notificada_id // D6: reasignar departamento
+    if (area_notificada_id !== undefined) updates.area_notificada_id = area_notificada_id
 
     if (Object.keys(updates).length === 0) {
         throw httpError('No fields to update')
     }
 
-    // La DB valida transiciones/resumen/tipos, recalcula el SLA y escribe
-    // bitacora + notificaciones (0010). Sus RAISE llegan como P0001.
+    // La DB valida transiciones/resumen/tipos, recalcula el SLA y escribe bitacora + notificaciones.
     const { data, error } = await supabase
         .from('ticket')
         .update(updates)
@@ -319,9 +315,8 @@ async function createComment(req: Request, supabase: any, user: any) {
 
     const profile = await getProfile(supabase, user)
 
-    // RLS (0011) exige: autor propio, ticket visible y "interno" solo staff.
-    // El trigger (0010) escribe bitacora, notifica y aplica la transicion
-    // Esperando respuesta -> En proceso cuando responde el reportador.
+    // RLS exige autor propio, ticket visible e "interno" solo staff; el trigger
+    // escribe bitacora, notifica y aplica Esperando respuesta -> En proceso.
     const { data, error } = await supabase
         .from('comentario')
         .insert({

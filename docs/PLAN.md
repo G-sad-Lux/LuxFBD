@@ -13,6 +13,7 @@
 
 ## 🟡 Pendientes del equipo (nadie más puede hacerlos)
 
+- [ ] **Pantalla "Configuración" en el admin** (acordado 2026-10-02): editar internamente los compromisos (`prioridad_sla`) y el mapa de prioridad inicial por categoría (`categoria_prioridad_default`, creado en 0022 con RLS de escritura solo-staff justo para esto). El sidebar del diseño ya contemplaba la entrada; sería su primera pantalla real. (~½-1 d)
 - [ ] **Definir política de ESCALAMIENTO por SLA** (mejora 5 del análisis 2026-09-27): ¿vencido + sin asignar por X horas → subir prioridad o notificar al Administrador? El barrido de 0020 ya deja la infraestructura lista.
 - [ ] **Decidir horas hábiles vs naturales para el SLA** (mejora 6): hoy el fin de semana cuenta contra el compromiso; cambiar requiere función de calendario hábil. Para el Premio, "horas naturales" es defendible por simplicidad.
 
@@ -63,6 +64,7 @@
 - [x] **Recalculo desde el CAMBIO de prioridad** (`now() + horas`): subir a Crítica ya no nace vencido; la espera previa queda en bitácora.
 - [x] **Renombre de cara al alumno**: "SLA" no aparece en su portal — el bloque es **"Tiempo de atención"** ("Te atenderemos antes del …"; si vamos tarde: "Nos estamos tardando más de lo previsto" + disculpa, sin "VENCIDO"). Lumix dice "Te atenderemos antes del:". El personal conserva el término SLA (§17 del doc).
 - Suite PGlite 17/17 (resolución/reabrir, relativo 5h-de-24h, barrido con dedupe y escalada, recálculo ≈ now()+8h).
+- [x] **Prioridad inicial POR CATEGORÍA** (0022, acordado 2026-10-02): si el canal no manda prioridad (Lumix/invitado), la DB la asigna desde la tabla **editable** `categoria_prioridad_default` — Acceso→Alta(8h), Plataforma y Finanzas→Media(24h), Materias/Servicios/Otros→Baja(72h); la percibida del v1 se respeta y soporte sigue ajustando. El create del edge ya no fuerza Baja. Verificado en vivo (#17 nació Alta/8h) y en suite (23/23). *Nota:* el "ticket #1 corrupto" resultó falso positivo del sondeo (`eta` NULL = previo a las reglas, comportamiento contemplado); la migración deja de todos modos una reparación-guardia para ETAs anteriores a su creación.
 
 ### 🎨 Diseño, 2ª iteración del handoff (re-export 2026-09-26, llegó DURANTE la implementación)
 
