@@ -3,7 +3,9 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- resizes-content: con el teclado abierto el layout se encoge en vez de
+         panearse, así el header queda fijo y el campo sobre el teclado. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
     <title>Lumix | Asistente de Soporte</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b1f4d'/%3E%3Cpath d='M10 7h4v14h8v4H10z' fill='%23fff'/%3E%3C/svg%3E">
     <meta http-equiv="Content-Security-Policy"
@@ -13,11 +15,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="shared.css">
     <style>
-        /* Marco del chat a pantalla completa; el motor vive en lumix-chat.js + shared.css. */
-        html, body { height: 100%; }
-        body { display: flex; flex-direction: column; background: var(--v2-bg); }
+        /* Marco del chat a pantalla completa; el motor vive en lumix-chat.js + shared.css.
+           El header queda FIJO porque la página entera no puede scrollear
+           (overflow hidden + altura dinámica 100dvh): el único scroll es el
+           de los mensajes. Sin esto, el celular paneaba la página al abrir
+           el teclado y el header se iba por arriba. */
+        html, body { height: 100%; overflow: hidden; }
+        body { display: flex; flex-direction: column; background: var(--v2-bg); height: 100dvh; }
         .lumix-app { flex: 1; display: flex; flex-direction: column; max-width: 480px; width: 100%; margin: 0 auto; background: var(--v2-bg); min-height: 0; }
-        @media (min-width: 520px) { .lumix-app { margin: 16px auto; border-radius: 18px; overflow: hidden; border: 1px solid var(--v2-border); min-height: calc(100vh - 32px); max-height: calc(100vh - 32px); box-shadow: 0 10px 40px rgba(11, 31, 77, .08); } }
+        @media (min-width: 520px) { .lumix-app { margin: 16px auto; border-radius: 18px; overflow: hidden; border: 1px solid var(--v2-border); min-height: calc(100vh - 32px); min-height: calc(100dvh - 32px); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); box-shadow: 0 10px 40px rgba(11, 31, 77, .08); } }
 
         .lumix-head { display: flex; align-items: center; gap: 10px; padding: 10px 8px 10px 4px; background: var(--v2-card); border-bottom: 1px solid #e1e7f0; flex-shrink: 0; }
         .lumix-head .volver { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: var(--v2-heading); }

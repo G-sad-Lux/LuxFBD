@@ -488,7 +488,7 @@ textarea.v2-area {
 .mini-ticket .linea1 .v2-badge { flex-shrink: 0; }
 .mini-ticket .sub { font-size: 12px; color: var(--v2-muted); }
 .mini-ticket .falta { font-size: 12px; color: var(--v2-internal-text); background: var(--v2-internal-bg); border-radius: 8px; padding: 6px 8px; }
-.lumix-input { display: flex; align-items: center; gap: 8px; padding: 10px 12px 14px; background: var(--v2-card); border-top: 1px solid #e1e7f0; flex-shrink: 0; }
+.lumix-input { display: flex; align-items: center; gap: 8px; padding: 10px 12px calc(14px + env(safe-area-inset-bottom, 0px)); background: var(--v2-card); border-top: 1px solid #e1e7f0; flex-shrink: 0; }
 .lumix-input .pill { flex: 1; display: flex; align-items: center; gap: 4px; height: 48px; padding: 0 6px 0 14px; border: 1px solid var(--v2-border-strong); border-radius: 999px; background: #f7f9fc; min-width: 0; }
 .lumix-input .pill input[type="text"] { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: 14px; color: var(--v2-text); }
 .lumix-input .pill button { width: 36px; height: 36px; border: 0; background: transparent; color: var(--v2-muted); display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 50%; padding: 0; font: inherit; }
