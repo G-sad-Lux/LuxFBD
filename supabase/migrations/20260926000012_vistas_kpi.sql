@@ -1,10 +1,5 @@
--- ============================================================
--- LuxFBD - 0012: Vistas de indicadores (V2 §9 dashboard, objetivo 2.2 v1)
--- security_invoker = true: las vistas respetan el RLS de quien consulta
--- (un alumno solo cuenta lo suyo; staff cuenta todo). Sin esto, una vista
--- corre con los permisos del duenio y saltaria el RLS.
--- Estados semilla: 1 Abierto, 2 En proceso, 3 Esperando resp., 4 Resuelto, 5 Cerrado.
--- ============================================================
+-- 0012: Vistas de indicadores. security_invoker = true: respetan el RLS de
+-- quien consulta; sin esto correrian con los permisos del duenio.
 
 create or replace view public.v_kpi_resumen
 with (security_invoker = true) as
@@ -37,7 +32,7 @@ join public.catalogo c on c.catalogo_id = t.categoria_id
 group by c.nombre
 order by total desc;
 
--- Objetivo 2.2 del documento v1: medir el desempenio del soporte.
+-- Desempenio del soporte en tickets cerrados.
 create or replace view public.v_tiempo_resolucion
 with (security_invoker = true) as
 select

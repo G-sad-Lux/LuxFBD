@@ -1,10 +1,5 @@
--- ============================================================
--- LuxFBD - 0015: "Ultima actualizacion" (D5) + auditoria de area (D6)
--- - ticket.actualizado_en: se mantiene sola ante cualquier UPDATE del
---   ticket y ante comentarios/evidencias nuevas (fig. 5 del doc V2).
--- - El cambio de area_notificada_id queda en bitacora (§11: reasignar
---   a otro departamento con trazabilidad).
--- ============================================================
+-- 0015: ticket.actualizado_en (se refresca ante updates, comentarios y
+-- evidencias) + bitacora del cambio de area.
 
 alter table public.ticket
     add column actualizado_en timestamptz not null default now();
@@ -16,7 +11,7 @@ set actualizado_en = greatest(
     coalesce((select max(h.fecha_cambio) from public.historial h where h.ticket_id = t.ticket_id), t.fecha_creacion)
 );
 
--- ---------- BEFORE UPDATE: igual que 0010 + sello de actualizacion ----------
+-- ---------- BEFORE UPDATE: reglas previas + sello de actualizacion ----------
 create or replace function public.fn_ticket_before_update()
 returns trigger
 language plpgsql security definer
@@ -49,13 +44,13 @@ begin
         perform public.assert_catalogo(new.area_notificada_id, 'area');
     end if;
 
-    -- D5: cualquier UPDATE del ticket refresca la ultima actualizacion
+    -- Cualquier UPDATE del ticket refresca la ultima actualizacion
     new.actualizado_en := now();
     return new;
 end;
 $$;
 
--- ---------- AFTER UPDATE: igual que 0010 + bitacora del cambio de AREA ----------
+-- ---------- AFTER UPDATE: reglas previas + bitacora del cambio de AREA ----------
 create or replace function public.fn_ticket_after_update()
 returns trigger
 language plpgsql security definer
@@ -87,7 +82,7 @@ begin
                     || '" a "' || public.nombre_catalogo(new.prioridad_id) || '" (SLA recalculado)');
     end if;
 
-    -- D6 (§11): reasignacion de departamento con trazabilidad
+    -- Reasignacion de departamento con trazabilidad
     if new.area_notificada_id is distinct from old.area_notificada_id then
         insert into public.historial (ticket_id, autor_id, campo_modificado, valor_anterior, valor_nuevo, cambio)
         values (new.ticket_id, public.usuario_actual(), 'area',
@@ -160,7 +155,7 @@ begin
         end if;
     end if;
 
-    -- D5: el hilo de conversacion refresca la ultima actualizacion
+    -- El hilo de conversacion refresca la ultima actualizacion
     update public.ticket set actualizado_en = now() where ticket_id = new.ticket_id;
     return new;
 end;
@@ -176,7 +171,7 @@ begin
     values (new.ticket_id, new.subido_por_id, 'evidencia', null, new.nombre_archivo,
             '[' || public.nombre_usuario(new.subido_por_id) || '] Subió evidencia: ' || new.nombre_archivo);
 
-    -- D5: evidencia nueva = actualizacion
+    -- Evidencia nueva = actualizacion
     update public.ticket set actualizado_en = now() where ticket_id = new.ticket_id;
     return new;
 end;

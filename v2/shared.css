@@ -1,7 +1,4 @@
-/* ============================================================
-   LuxFBD v2 - tokens y componentes del diseño High Fidelity
-   (design-handoff/ 26/09/2026; specs.md §1-§2, tokens.css integrado)
-   ============================================================ */
+/* LuxFBD v2 - tokens y componentes del diseño High Fidelity */
 :root {
     /* Marca */
     --v2-primary: #1a56c4;
@@ -34,7 +31,7 @@
     --v2-shadow: none;           /* el diseño separa con borde */
     --v2-shadow-modal: 0 24px 60px rgba(11, 31, 77, 0.3);
 
-    /* Tipografía (decisión D4) */
+    /* Tipografía */
     --v2-font: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
     /* Nota interna */
@@ -91,8 +88,7 @@ a:hover { color: var(--v2-primary-dark); }
 .v2-btn.secundario:hover { background: #f7f9fc; color: var(--v2-heading); }
 .v2-btn.contorno { background: var(--v2-card); color: var(--v2-heading); border-color: var(--v2-heading); }
 .v2-btn.contorno:hover { background: #eef2f8; color: var(--v2-heading); }
-/* Naranja de BOTÓN más profundo que el acento decorativo: blanco encima
-   da ~4.8:1 (AA); el --v2-accent original queda para barras y detalles. */
+/* Naranja de botón más profundo que el acento decorativo: contraste AA con texto blanco. */
 .v2-btn.acento { background: #c2410c; }
 .v2-btn.acento:hover { background: #9a3412; }
 .v2-btn.navy { background: var(--v2-navy); }
@@ -206,8 +202,7 @@ textarea.v2-area {
     background: var(--v2-card); border-bottom: 1px solid var(--v2-border);
     position: relative; flex-wrap: wrap;
 }
-/* En escritorio el header acompaña el scroll (campana/búsqueda siempre a
-   mano), igual que el sidebar; en móvil se deja fluir para no comer alto. */
+/* Header pegajoso en escritorio; en móvil fluye para no comer alto. */
 @media (min-width: 901px) {
     .v2-header { position: sticky; top: 0; z-index: 40; }
 }
@@ -298,8 +293,7 @@ textarea.v2-area {
 
 /* ---- Tabla del dashboard (grid, columnas apiladas) ---- */
 .v2-twrap { overflow-x: auto; }
-/* El Asunto (la información principal) garantiza 230px: en anchos de laptop
-   la tabla prefiere un scroll horizontal corto a aplastar esa columna. */
+/* El Asunto garantiza 230px; en laptop se prefiere scroll horizontal a aplastar la columna. */
 .v2-tgrid { min-width: 1100px; display: flex; flex-direction: column; }
 .v2-tr {
     display: grid;
@@ -426,7 +420,7 @@ textarea.v2-area {
 .v2-lightbox img { max-width: 92%; max-height: 86%; border-radius: 10px; }
 .v2-lightbox p { color: #cbd6ee; font-size: 13px; }
 
-/* ---- Vistas de acceso (pantallas 01 y 04) ---- */
+/* ---- Vistas de acceso ---- */
 .v2-auth-nota { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: var(--v2-radius-sm); background: #eaf1fc; color: var(--v2-primary-dark); font-size: 13px; line-height: 1.45; }
 .v2-auth-error { display: none; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: var(--v2-radius-sm); background: #fce4de; color: #b42318; font-size: 13px; line-height: 1.45; font-weight: 600; }
 .v2-auth-error.abierta { display: flex; }
@@ -457,8 +451,7 @@ textarea.v2-area {
 
 /* ---- Chat Lumix (compartido: lumix.html y panel embebido de alumnos) ---- */
 .lumix-msgs { flex: 1; overflow-y: auto; padding: 16px 14px 18px; display: flex; flex-direction: column; gap: 12px; min-height: 0; background: var(--v2-bg); }
-/* Un chat gravita hacia ABAJO: con pocos mensajes (o el teclado abierto en
-   el celular) la conversación se pega al campo de escritura, no al techo. */
+/* El chat gravita hacia abajo: pocos mensajes se pegan al campo de escritura. */
 .lumix-msgs > :first-child { margin-top: auto; }
 .dia { align-self: center; font-size: 11px; font-weight: 700; color: var(--v2-muted); background: #e4e9f1; border-radius: 999px; padding: 4px 10px; }
 .fila-bot { display: flex; gap: 8px; align-items: flex-end; max-width: 92%; }

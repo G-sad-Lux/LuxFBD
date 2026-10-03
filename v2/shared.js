@@ -1,8 +1,5 @@
-// ============================================================
-// LuxFBD v2 - nucleo compartido: interruptor, sesion, API, utilidades.
-// Cargar en este orden: supabase-js (CDN) -> ../config.js -> este archivo.
-// index.html (v1) NUNCA carga este archivo: la v1 no depende de v2/.
-// ============================================================
+// Nucleo compartido de la v2: interruptor, sesion, API y utilidades.
+// Cargar despues de supabase-js y ../config.js; la v1 no lo usa.
 (function () {
     'use strict';
 
@@ -61,7 +58,7 @@
         var p = r.data || { nombre: 'Usuario', apellido: '', tipo_usuario: 'Alumno' };
         p.session = session;
         p.esStaff = STAFF_ROLES.indexOf(p.tipo_usuario) !== -1;
-        // Modo invitado del demo (D5): sesion anonima de Supabase Auth.
+        // Invitado: sesion anonima de Supabase Auth.
         p.esInvitado = !!(session.user && session.user.is_anonymous);
         p.nombreCompleto = (p.nombre + ' ' + (p.apellido || '')).trim();
         return p;
@@ -69,8 +66,7 @@
 
     async function logout() {
         try { await sb().auth.signOut(); } catch (e) { /* sin red: da igual */ }
-        // Login único de la V2: al salir se regresa al acceso del portal
-        // (pantalla de la mascota); a la v1 se va con el botón "Clásica".
+        // Al salir se regresa al acceso del portal.
         window.location.href = 'alumnos.html';
     }
 
@@ -113,9 +109,7 @@
     };
 })();
 
-// ============================================================
-// Helpers de UI compartidos por admin.html y alumnos.html (F2/F3)
-// ============================================================
+// Helpers de UI compartidos por admin.html y alumnos.html.
 (function () {
     'use strict';
     var esc = window.LuxV2.esc;
@@ -167,8 +161,7 @@
         var p = t.prioridad || {};
         return '<span class="v2-badge pr-' + esc(p.codigo || '') + '">' + esc(p.nombre || '-') + '</span>';
     };
-    // Semaforo de SLA: ok / warn (<=25% del tiempo) / danger (vencido).
-    // Resuelto/Cerrado: "Cumplido" si cerro dentro del compromiso; "—" si no aplica.
+    // Semaforo de SLA: ok / warn (<=25% restante) / danger (vencido); cerrado: "Cumplido" o "—".
     var slaDe = function (t) {
         if (t.estado_id === 4 || t.estado_id === 5) {
             if (t.eta_estimada && t.fecha_cierre && new Date(t.fecha_cierre) <= new Date(t.eta_estimada)) {
@@ -204,8 +197,7 @@
         }
         return '<svg class="v2-ico' + (clase ? ' ' + esc(clase) : '') + '" viewBox="0 0 24 24" aria-hidden="true"><path d="' + esc(d) + '"/></svg>';
     };
-    // Icono de categoria por codigo del catalogo; el embed del ticket solo trae
-    // nombre, asi que tambien se resuelve por nombre (mismas 6 del doc V2).
+    // Resuelve el codigo de categoria a partir del nombre.
     var codigoCategoria = function (nombre) {
         var n = String(nombre || '').toLowerCase();
         if (n.indexOf('acceso') !== -1) return 'acceso';
@@ -252,11 +244,7 @@
         slaDe: slaDe,
     };
 
-    // Campana de notificaciones (tabla notificacion bajo RLS de destinatario).
-    // opts: { bell, punto, panel, lista, btnLeidas, alAbrirTicket(ticketId) }
-    // Devuelve { recargar }.
-    // D3: sube una evidencia al bucket privado y la liga al ticket.
-    // La RLS exige: subido_por propio + ticket visible (0006/0011).
+    // Sube una evidencia al bucket privado y la liga al ticket (la RLS valida).
     window.LuxV2.subirEvidencia = async function (usuarioId, ticketId, file) {
         var tipos = ['image/png', 'image/jpeg', 'application/pdf'];
         if (tipos.indexOf(file.type) === -1) throw new Error('Formato no permitido: usa PNG, JPG o PDF.');
@@ -278,6 +266,7 @@
         if (ins.error) throw ins.error;
     };
 
+    // Campana de notificaciones. opts: { bell, punto, panel, lista, btnLeidas, alAbrirTicket }. Devuelve { recargar }.
     window.LuxV2.montarNotificaciones = function (opts) {
         async function recargar() {
             try {

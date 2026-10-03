@@ -13,11 +13,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="shared.css">
     <style>
-        /* Login único (decisión 2026-09-26): la vista de acceso vive en
-           alumnos.html (pantalla 01, la de la mascota); esta página redirige. */
+        /* La vista de acceso vive en alumnos.html; esta página redirige. */
 
-        /* Laptop común (≤1350px): sin el subtítulo del header y con la búsqueda
-           más angosta, "Cerrar sesión" ya no cae a una segunda línea. */
+        /* Laptop ≤1350px: sin subtítulo y búsqueda angosta para que el header quepa en una línea. */
         @media (max-width: 1350px) {
             .v2-header .titulo span { display: none; }
             .v2-header .buscar { width: 240px; }
@@ -26,7 +24,7 @@
         .v2-kpis { grid-template-columns: repeat(auto-fit, minmax(196px, 1fr)); }
         .v2-kpi .l { white-space: normal; line-height: 1.25; }
 
-        /* ---- Dashboard (pantalla 05) ---- */
+        /* ---- Dashboard ---- */
         .panel-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
         .panel-top h1 { margin: 0; font-size: 26px; font-weight: 800; color: var(--v2-heading); letter-spacing: -0.3px; }
         .panel-top p { margin: 2px 0 0; font-size: 13px; color: var(--v2-muted); }
@@ -36,7 +34,7 @@
         @media (max-width: 1200px) { .tabla-filtros { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
         @media (max-width: 700px) { .tabla-filtros { grid-template-columns: 1fr 1fr; } }
 
-        /* ---- Detalle (pantalla 06) ---- */
+        /* ---- Detalle de ticket ---- */
         .det-top { display: flex; flex-direction: column; gap: 10px; }
         .det-top .volver { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; text-decoration: none; align-self: flex-start; }
         .det-top .titular { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -76,7 +74,7 @@
 </head>
 
 <body>
-    <!-- ================= Cascarón autenticado (05/06) ================= -->
+    <!-- Cascarón autenticado -->
     <div id="shell" class="v2-shell" hidden>
         <aside class="v2-side">
             <img class="logo" src="assets/logo-lux-blanco.png" alt="Universidad Lux">
@@ -123,7 +121,7 @@
         <div id="notif-lista"></div>
     </div>
 
-    <!-- Modal "Resolver ticket" (captura 06d) -->
+    <!-- Modal "Resolver ticket" -->
     <div id="modal-resolver" class="v2-modal-overlay">
         <div class="v2-modal" role="dialog" aria-modal="true" aria-labelledby="mr-titulo">
             <h2 id="mr-titulo">Resolver ticket</h2>
@@ -166,10 +164,10 @@
                 el.innerHTML = svgIcono(el.dataset.ico, el.dataset.tam || '');
             });
 
-            // Espeja la maquina de estados de la DB (0010); el servidor manda.
+            // Espeja la maquina de estados de la DB; el servidor manda.
             const TRANSICIONES = { 1: [2, 4], 2: [3, 4], 3: [2, 4], 4: [5, 2], 5: [] };
             const ETIQUETA_ESTADO = { 2: 'En proceso', 3: 'Esperando respuesta', 4: 'Resuelto', 5: 'Cerrado' };
-            const PAGE_SIZE = 8; // "Mostrando 1–8 de N" (pantalla 05)
+            const PAGE_SIZE = 8;
 
             const state = {
                 perfil: null, catalogs: null, staff: [],
@@ -179,8 +177,7 @@
                 page: 1, pageSize: PAGE_SIZE,
                 tabComentario: 'externo', tabDetalle: 'conv',
                 avisoSla: false,
-                // Borrador del compositor: sobrevive a cambios de pestaña y
-                // re-renders del detalle; se limpia al enviar o cambiar de ticket.
+                // Borrador del compositor: sobrevive re-renders; se limpia al enviar o cambiar de ticket.
                 borrador: '', borradorTicket: null,
             };
 
@@ -233,7 +230,7 @@
                 setTimeout(() => URL.revokeObjectURL(url), 5000);
             }
 
-            // ---------- Dashboard (pantalla 05) ----------
+            // ---------- Dashboard ----------
             function renderDashboard(soloTabla) {
                 const k = state.kpi || {};
                 const cat = state.catalogs || { estados: [], categorias: [], prioridades: [] };
@@ -386,7 +383,7 @@
                 if (q && pos !== null) { q.focus(); q.setSelectionRange(pos, pos); }
             }
 
-            // ---------- Detalle (pantalla 06) ----------
+            // ---------- Detalle de ticket ----------
             async function renderDetalle(id) {
                 vista.innerHTML = '<div class="v2-card"><p class="v2-nota">Cargando ticket #' + esc(id) + '…</p></div>';
                 let data;
@@ -405,8 +402,7 @@
                 const rep = t.reportador || {};
                 const canal = canalDe(t.canal_entrada);
 
-                // Área indicada al crear: si staff la cambió (D6), el valor original
-                // es el valor_anterior del primer cambio de área en la bitácora.
+                // Área indicada al crear = valor_anterior del primer cambio de área en la bitácora.
                 const cambiosArea = historia.filter(h => h.campo_modificado === 'area')
                     .sort((a, b) => new Date(a.fecha_cambio) - new Date(b.fecha_cambio));
                 const areaIndicada = cambiosArea.length ? cambiosArea[0].valor_anterior : (t.area ? t.area.nombre : '—');
@@ -765,7 +761,7 @@
                 if (ev.target.id === 'lightbox') { $('lightbox').classList.remove('abierta'); $('lightbox-img').src = ''; }
             });
 
-            // ---------- Reportes (vistas SQL de 0012/0017) ----------
+            // ---------- Reportes (vistas SQL) ----------
             async function renderReportes() {
                 vista.innerHTML = '<div class="v2-card"><p class="v2-nota">Generando reportes…</p></div>';
                 try {
@@ -855,10 +851,7 @@
             }
 
             // ---------- Arranque ----------
-            // Login único (decisión de equipo 2026-09-26): el acceso vive en
-            // alumnos.html (pantalla 01, la de la mascota). Sin sesión, o con
-            // una cuenta sin rol de personal, esta página manda allá; ese
-            // login detecta el rol y regresa al personal a este panel.
+            // Sin sesión o sin rol de personal se redirige al acceso en alumnos.html.
             let cargarNotifs = () => {};
             const perfil = await LuxV2.getProfile();
             if (!perfil || !perfil.esStaff) {

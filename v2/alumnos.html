@@ -3,8 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <!-- resizes-content: con el teclado abierto, el layout (y el panel fijo)
-         se encogen, dejando el botón Enviar ARRIBA del teclado. -->
+    <!-- resizes-content: con el teclado abierto el layout se encoge y Enviar queda visible -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
     <title>Portal de Atención al Estudiante | Universidad Lux</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b1f4d'/%3E%3Cpath d='M10 7h4v14h8v4H10z' fill='%23fff'/%3E%3C/svg%3E">
@@ -15,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="shared.css">
     <style>
-        /* ---- Vista de acceso (pantalla 01) ---- */
+        /* ---- Vista de acceso ---- */
         .acc-header { height: 76px; display: flex; align-items: center; gap: 28px; padding: 0 48px; background: var(--v2-card); border-bottom: 1px solid var(--v2-border); }
         .acc-header .logo { width: 196px; height: auto; }
         .acc-header nav { display: flex; gap: 28px; }
@@ -23,15 +22,13 @@
         .acc-header nav a:hover { color: var(--v2-primary); }
         .acc-admin { margin-left: auto; display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--v2-muted); }
         .acc-admin a { display: flex; align-items: center; gap: 6px; font-weight: 700; text-decoration: none; padding: 10px 14px; border: 1px solid var(--v2-border-strong); border-radius: var(--v2-radius-sm); color: var(--v2-heading); }
-        /* La sección NO se estira a la altura del monitor: altura natural,
-           centrada vertical y horizontalmente (margin:auto), tope de 1280px.
-           Así el layout se ve igual de compuesto a 1366, 1440 o 2560 px. */
+        /* Altura natural centrada con margin:auto y tope de 1280px: se ve igual en cualquier monitor. */
         .acc-main { flex: 0 0 auto; margin: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; padding: clamp(20px, 4vh, 44px) 48px; align-items: stretch; max-width: 1280px; width: 100%; }
         .acc-card { background: var(--v2-card); border: 1px solid var(--v2-border); border-radius: var(--v2-radius-xl); padding: clamp(28px, 4.5vh, 42px) clamp(28px, 3.2vw, 50px); display: flex; flex-direction: column; gap: 20px; }
         .acc-card .barra { width: 40px; height: 4px; background: var(--v2-accent); border-radius: 2px; }
         .acc-card h1 { margin: 6px 0 0; font-size: clamp(27px, 2.3vw, 33px); line-height: 1.15; font-weight: 800; color: var(--v2-heading); letter-spacing: -0.5px; }
         .acc-card .sub { margin: 0; font-size: 15px; color: var(--v2-muted); }
-        /* El formulario no debe medir 600px de ancho: tope ergonómico. */
+        /* Tope ergonómico de ancho del formulario. */
         .acc-form { display: flex; flex-direction: column; gap: 18px; width: 100%; max-width: 460px; }
         .acc-beneficios { margin-top: auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding-top: 20px; border-top: 1px solid #e4e9f1; }
         .acc-beneficios div { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: #26324d; }
@@ -40,9 +37,7 @@
         .acc-panel .kicker { font-size: 13px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--v2-accent-soft); }
         .acc-panel h2 { margin: 0; font-size: clamp(24px, 2vw, 29px); line-height: 1.15; font-weight: 800; }
         .acc-panel .texto { margin: 0; font-size: 15px; line-height: 1.5; color: var(--v2-navy-ink); }
-        /* El globo y la mascota son ABSOLUTOS: en vez de confiar en que el
-           texto "no llegue" (frágil: un salto de línea y chocan, como pasó),
-           la cabecera les RESERVA la columna derecha con padding. */
+        /* El globo y la mascota son absolutos; la cabecera les reserva la columna derecha con padding. */
         .acc-cabecera { display: flex; flex-direction: column; gap: 10px; }
         @media (min-width: 1280px) { .acc-cabecera { padding-right: 240px; } }
         .acc-qr { background: #fff; border-radius: 18px; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: 0 0 0 6px rgba(255, 255, 255, .12); width: fit-content; }
@@ -55,11 +50,7 @@
         .acc-ventajas strong { font-size: 14px; }
         .acc-ventajas span { font-size: 12px; color: var(--v2-navy-ink); }
         .acc-ventajas .v2-ico { color: var(--v2-accent-soft); }
-        /* Quiebres por CONTENIDO, no por dispositivo:
-           <1280: el arte absoluto (globo/mascota) ya no cabe sin chocar → fuera.
-           <1080: dos columnas dejan de respirar → se apilan (tope 760px).
-           <900:  ergonomía táctil (16px anti-zoom iOS) y header compacto.
-           <700:  probablemente ES el celular → sin QR (se escanea a sí mismo). */
+        /* Quiebres: <1280 sin arte absoluto; <1080 columnas apiladas; <900 táctil; <700 sin QR. */
         @media (max-width: 1279px) { .acc-globo, .acc-mascota { display: none; } }
         @media (max-width: 1080px) {
             .acc-main { grid-template-columns: 1fr; max-width: 760px; gap: 20px; }
@@ -84,7 +75,7 @@
             .acc-beneficios { grid-template-columns: 1fr; gap: 8px; }
         }
 
-        /* ---- Cascarón Mis Tickets (pantalla 03) ---- */
+        /* ---- Cascarón Mis Tickets ---- */
         .v2-side.alumno { width: 216px; }
         .side-ayuda { position: relative; padding-top: 104px; margin-top: auto; }
         .side-ayuda img { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 118px; height: auto; }
@@ -132,7 +123,7 @@
             .v2-chip-usuario .quien { display: none; } /* queda el avatar con iniciales */
         }
 
-        /* ---- Panel de detalle (380px) con pestañas Ticket / Lumix (03d) ---- */
+        /* ---- Panel de detalle (380px) con pestañas Ticket / Lumix ---- */
         .panel-tabs { flex-shrink: 0; min-height: 60px; display: flex; align-items: center; padding: 10px 14px; background: #eef2f8; border-bottom: 1px solid var(--v2-border); }
         .panel-tabs .v2-seg { flex: 1; background: transparent; padding: 0; gap: 6px; }
         .panel-tabs .v2-seg button { flex: 1; background: transparent; height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 0; }
@@ -141,10 +132,7 @@
         .panel-tabs .v2-seg button span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .panel-hoja { flex: 1; min-height: 0; display: flex; flex-direction: column; }
         #panel-lumix .lumix-msgs { background: #f7f9fc; }
-        /* El panel se pega DEBAJO del header (pegajoso en escritorio) y mide
-           el alto restante; con top:0/100vh nacía 72px recorrido hacia abajo
-           y el pie (textarea + Enviar) quedaba fuera de la pantalla. --hdr lo
-           fija JS con la altura real del header (aguanta que envuelva). */
+        /* Panel pegajoso bajo el header, con el alto restante; --hdr lo fija JS con la altura real del header. */
         .mt-panel { width: 380px; flex-shrink: 0; background: var(--v2-card); border-left: 1px solid var(--v2-border); display: flex; flex-direction: column; min-height: 0; position: sticky; top: var(--hdr, 72px); align-self: flex-start; height: calc(100vh - var(--hdr, 72px)); height: calc(100dvh - var(--hdr, 72px)); }
         .mt-panel .cabeza, .mt-panel .pie { flex-shrink: 0; }
         /* Barra de gestos de los teléfonos: que Enviar no la pise */
@@ -163,13 +151,9 @@
         .panel-msg .meta span { font-size: 11px; color: var(--v2-muted); white-space: nowrap; }
         .panel-msg .txt { font-size: 13px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
         @media (max-width: 1100px) {
-            /* 100dvh: en el celular, 100vh incluye la zona tras la barra de
-               URL del navegador y el pie (clip + Enviar) quedaba fuera de la
-               pantalla; dvh mide el viewport realmente visible. */
+            /* 100dvh: 100vh incluye la zona tras la barra del navegador y el pie quedaba oculto. */
             .mt-panel { position: fixed; inset: 0 0 0 auto; width: 100%; max-width: 400px; height: 100vh; height: 100dvh; z-index: 70; transform: translateX(100%); transition: transform .2s ease; border-left: 1px solid var(--v2-border); }
-            /* Cajón abierto: scrim que oscurece el fondo (la sombra de radio
-               100vmax cubre todo el viewport) para que la lista recortada
-               detrás no parezca un layout roto. */
+            /* Cajón abierto: scrim (sombra de 100vmax) que oscurece el fondo. */
             .mt-panel.abierta { transform: translateX(0); box-shadow: 0 0 0 100vmax rgba(6, 15, 40, .45), 0 24px 60px rgba(11, 31, 77, .3); }
             .mt-panel .cerrar-panel { display: inline-flex; }
         }
@@ -181,7 +165,7 @@
 </head>
 
 <body>
-    <!-- ================= Vista de acceso (01) ================= -->
+    <!-- Vista de acceso -->
     <div id="auth" hidden style="min-height:100vh; display:flex; flex-direction:column; background:var(--v2-bg);">
         <header class="acc-header">
             <img class="logo" src="assets/logo-lux.png" alt="Universidad Lux">
@@ -190,8 +174,7 @@
                 <a href="#beneficios">Servicios</a>
                 <a href="lumix.html">Ayuda</a>
             </nav>
-            <!-- Login único (2026-09-26): el personal también entra por aquí;
-                 al iniciar sesión, su rol lo lleva directo al panel de gestión. -->
+            <!-- El personal también entra por aquí; su rol lo lleva al panel de gestión -->
             <div class="acc-admin">
                 <span>¿Eres personal de la universidad? Inicia sesión aquí mismo: tu rol te lleva a tu panel.</span>
             </div>
@@ -203,16 +186,13 @@
                     <h1 id="acc-titulo">Portal de Atención al Estudiante</h1>
                     <p class="sub">Registra, consulta y da seguimiento a tus solicitudes.</p>
                 </div>
-                <!-- D2: alta administrada. Sin pestañas: con "Crear cuenta" oculta,
-                     una pestaña única solo duplicaba al botón "Ingresar". -->
+                <!-- Alta administrada: sin pestaña de registro -->
                 <div id="auth-error" class="v2-auth-error" role="alert">
                     <span data-ico="ui.alerta" data-tam="media" style="margin-top:1px;"></span>
                     <span>Credenciales incorrectas. Verifica tu correo y contraseña.</span>
                 </div>
                 <form id="auth-form" class="acc-form">
                     <div class="v2-field">
-                        <!-- "Matrícula o correo" hasta que D5 (identificación por matrícula)
-                             se resuelva: hoy el acceso es con el correo institucional. -->
                         <label class="v2-lbl" for="l-usr">Correo institucional</label>
                         <div class="v2-box"><span data-ico="ui.persona"></span><input id="l-usr" type="text" placeholder="a012345@universidadlux.edu.mx" autocomplete="username" required></div>
                     </div>
@@ -254,7 +234,7 @@
         <p style="text-align:center; margin:0 0 18px;"><button type="button" id="clasica-login" class="v2-nota" style="background:none; border:none; cursor:pointer; font-family:inherit; text-decoration:underline;">↩ Volver a la versión clásica</button></p>
     </div>
 
-    <!-- ================= Cascarón Mis Tickets (03) ================= -->
+    <!-- Cascarón Mis Tickets -->
     <div id="shell" class="v2-shell" hidden style="flex-direction:column; min-height:100vh;">
         <header class="v2-header" style="gap:20px;">
             <img src="assets/logo-lux.png" alt="Universidad Lux" style="width:176px; height:auto;">
@@ -298,7 +278,7 @@
                 <div class="v2-card"><p class="v2-nota" style="margin:0;">Cargando…</p></div>
             </main>
             <aside class="mt-panel" id="panel" aria-label="Detalle del ticket y Lumix">
-                <!-- 03d: control segmentado Ticket / Hablar con Lumix -->
+                <!-- Control segmentado Ticket / Lumix -->
                 <div class="panel-tabs">
                     <div role="tablist" aria-label="Panel" class="v2-seg">
                         <button role="tab" id="tab-ticket" aria-selected="true" class="on"><span data-ico="ui.ticket" data-tam="media"></span><span id="tab-ticket-txt">Detalle</span></button>
@@ -352,15 +332,14 @@
                 filtro: { q: '', estado: '', categoria: '', desde: '', hasta: '' },
                 sel: null,          // ticket seleccionado (panel derecho)
                 detalle: null,      // cache del /details del seleccionado
-                panelTab: 'ticket', // pestaña del panel: 'ticket' | 'lumix' (03d)
-                // Borrador de la respuesta: sobrevive re-renders (p. ej. al
-                // adjuntar); se limpia al enviar o al cambiar de ticket.
+                panelTab: 'ticket', // pestaña del panel: 'ticket' | 'lumix'
+                // Borrador de la respuesta: sobrevive re-renders; se limpia al enviar o cambiar de ticket.
                 borradorPanel: '', borradorPanelTicket: null,
             };
             let cargarNotifs = () => { };
             let chat = null; // instancia embebida de Lumix (se monta al primer uso)
 
-            // ---------- Pestañas del panel (03d) + Lumix embebido ----------
+            // ---------- Pestañas del panel + Lumix embebido ----------
             function setPanelTab(tab) {
                 state.panelTab = tab;
                 $('tab-ticket').classList.toggle('on', tab === 'ticket');
@@ -389,8 +368,7 @@
                 setPanelTab('lumix');
             }
 
-            // El reporte de tickets es SIEMPRE con el asistente (formato chatbot):
-            // ver v2/lumix.html. Decision de producto 2026-09-26; no reintroducir formularios.
+            // El reporte de tickets es siempre vía el asistente; no reintroducir formularios.
 
             function filtrados() {
                 const f = state.filtro, q = f.q.trim().toLowerCase();
@@ -404,7 +382,7 @@
                 });
             }
 
-            // ---------- Lista de tickets (pantalla 03) ----------
+            // ---------- Lista de tickets ----------
             function renderLista() {
                 const activos = state.tickets.filter(t => [1, 2, 3].includes(t.estado_id)).length;
                 const esperando = state.tickets.filter(t => t.estado_id === 3).length;
@@ -481,7 +459,7 @@
                 if (q && pos !== null) { q.focus(); q.setSelectionRange(pos, pos); }
             }
 
-            // ---------- Panel de detalle (pantalla 03, derecha) ----------
+            // ---------- Panel de detalle ----------
             function panelVacio() {
                 $('tab-ticket-txt').textContent = 'Detalle';
                 hojaTicket.innerHTML =
@@ -565,8 +543,7 @@
                     '<div class="cuerpo">' +
                     '<section style="display:flex; flex-direction:column; gap:10px;">' +
                     '<h3>Seguimiento</h3><ol class="v2-tl">' + pasos + '</ol>' +
-                    // "Tiempo de atención": la cara amable del SLA para el alumno
-                    // (sin jerga; si vamos tarde, sin "VENCIDO" a secas).
+                    // SLA mostrado al alumno como "Tiempo de atención", sin jerga.
                     (t.eta_estimada && !cerrado
                         ? (function () {
                             const s = slaDe(t);
@@ -586,7 +563,6 @@
                         })()
                         : '') +
                     '</section>' +
-                    // Lo que TÚ mandaste: el reporte original siempre releíble
                     '<section style="display:flex; flex-direction:column; gap:8px;">' +
                     '<h3>Tu descripción</h3>' +
                     '<div class="v2-suave" style="font-size:13px; line-height:1.5; white-space:pre-wrap; overflow-wrap:anywhere;">' + esc(t.detalles || '—') + '</div>' +
@@ -725,7 +701,7 @@
                 });
             }
 
-            // ---------- Ayuda y Mi perfil (contenido mínimo; nota "Sidebar" del plan) ----------
+            // ---------- Ayuda y Mi perfil ----------
             function renderAyuda() {
                 vista.innerHTML =
                     '<div class="mt-top"><div><h1>Ayuda</h1><p>Lumix es el canal para reportar y consultar incidencias.</p></div></div>' +
@@ -791,7 +767,7 @@
                 }
             }
 
-            // ---------- Vista de acceso (01) ----------
+            // ---------- Vista de acceso ----------
             function mostrarLogin() {
                 $('auth').hidden = false;
                 $('shell').hidden = true;
@@ -849,7 +825,7 @@
                 window.location.href = '../index.html';
             });
             $('nav-tickets').addEventListener('click', (e) => { e.preventDefault(); location.hash = ''; });
-            // 03d: en PC estos CTA abren la pestaña embebida; en celular, lumix.html
+            // En PC estos CTA abren la pestaña embebida; en celular, lumix.html
             $('nav-nuevo').addEventListener('click', (e) => { if (!esMovil()) { e.preventDefault(); abrirLumix(); } });
             $('card-lumix').addEventListener('click', (e) => { if (!esMovil()) { e.preventDefault(); abrirLumix(); } });
             $('tab-ticket').addEventListener('click', () => setPanelTab('ticket'));

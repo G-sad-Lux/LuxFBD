@@ -1,11 +1,5 @@
--- ============================================================
--- LuxFBD - 0010: Reglas de negocio y bitacora EN LA BASE DE DATOS
--- (V2 §15 maquina de estados, §16 resolucion, §17 SLA/ETA, §18 auditoria,
---  RF-004/007/016/017 del documento v1)
--- Los triggers son SECURITY DEFINER: escriben historial/notificacion
--- (tablas sin politicas de cliente) y leen nombres aunque el actor sea
--- un alumno. auth.uid() sigue siendo el del actor real.
--- ============================================================
+-- 0010: Reglas de negocio y bitacora en la DB. Triggers SECURITY DEFINER:
+-- escriben historial/notificacion (tablas sin politicas de cliente).
 
 -- ---------- Utilidades ----------
 
@@ -51,7 +45,7 @@ as $$
         'Sistema');
 $$;
 
--- Maquina de estados (§15). IDs 1-5 reservados por la semilla 0002:
+-- Maquina de estados. IDs de la semilla:
 -- 1 Abierto, 2 En proceso, 3 Esperando respuesta, 4 Resuelto, 5 Cerrado.
 create or replace function public.transicion_valida(p_de bigint, p_a bigint)
 returns boolean
@@ -74,7 +68,7 @@ as $$
     select horas_compromiso from public.prioridad_sla where prioridad_id = p_prioridad;
 $$;
 
--- ---------- BEFORE INSERT: validar tipos + calcular ETA (§17) ----------
+-- ---------- BEFORE INSERT: validar tipos + calcular ETA ----------
 create or replace function public.fn_ticket_before_insert()
 returns trigger
 language plpgsql security definer
@@ -114,7 +108,7 @@ begin
                 public.nombre_catalogo(old.estado_id), public.nombre_catalogo(new.estado_id)
                 using errcode = 'P0001';
         end if;
-        -- §16: Resuelto exige resumen de la solucion
+        -- Resuelto exige resumen de la solucion
         if new.estado_id = 4 and (new.resumen_solucion is null or btrim(new.resumen_solucion) = '') then
             raise exception 'Se requiere el resumen de la solución para marcar el ticket como Resuelto'
                 using errcode = 'P0001';
@@ -124,7 +118,7 @@ begin
         end if;
     end if;
 
-    -- §10: al cambiar la prioridad oficial se recalcula el compromiso SLA
+    -- Al cambiar la prioridad oficial se recalcula el compromiso SLA
     if new.prioridad_id is distinct from old.prioridad_id then
         perform public.assert_catalogo(new.prioridad_id, 'prioridad');
         new.eta_estimada := new.fecha_creacion
@@ -143,7 +137,7 @@ create trigger trg_ticket_before_update
     before update on public.ticket
     for each row execute function public.fn_ticket_before_update();
 
--- ---------- AFTER INSERT: bitacora de creacion + confirmacion (§18, RF-016) ----------
+-- ---------- AFTER INSERT: bitacora de creacion + confirmacion ----------
 create or replace function public.fn_ticket_after_insert()
 returns trigger
 language plpgsql security definer
@@ -223,7 +217,7 @@ create trigger trg_ticket_after_update
     after update on public.ticket
     for each row execute function public.fn_ticket_after_update();
 
--- ---------- COMENTARIO: bitacora, notificaciones y auto-transicion (§13, §15) ----------
+-- ---------- COMENTARIO: bitacora, notificaciones y auto-transicion ----------
 create or replace function public.fn_comentario_after_insert()
 returns trigger
 language plpgsql security definer
@@ -253,18 +247,18 @@ begin
 
     if new.tipo = 'externo' then
         if coalesce(v_autor_es_staff, false) then
-            -- soporte escribe al alumno (RF-016)
+            -- soporte escribe al alumno
             insert into public.notificacion (destinatario_id, ticket_id, tipo, contenido)
             values (v_reportador, new.ticket_id, 'nuevo_comentario',
                     'Hay una respuesta de soporte en tu ticket #' || v_num || '.');
         else
-            -- el alumno respondio (RF-017)
+            -- el alumno respondio
             if v_asignado is not null then
                 insert into public.notificacion (destinatario_id, ticket_id, tipo, contenido)
                 values (v_asignado, new.ticket_id, 'actualizacion_usuario',
                         'El reportador respondió en el ticket #' || v_num || '.');
             end if;
-            -- §15: Esperando respuesta -> En proceso cuando el alumno responde
+            -- Esperando respuesta -> En proceso cuando el alumno responde
             if v_estado = 3 and new.autor_id = v_reportador then
                 update public.ticket set estado_id = 2 where ticket_id = new.ticket_id;
             end if;
@@ -279,7 +273,7 @@ create trigger trg_comentario_after_insert
     after insert on public.comentario
     for each row execute function public.fn_comentario_after_insert();
 
--- ---------- ADJUNTO: bitacora de evidencias (§18) ----------
+-- ---------- ADJUNTO: bitacora de evidencias ----------
 create or replace function public.fn_adjunto_after_insert()
 returns trigger
 language plpgsql security definer

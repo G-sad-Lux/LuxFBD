@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Universidad Lux | Soporte</title>
-    <!-- CSP: limita a donde pueden conectarse/exfiltrar scripts. El host de Supabase esta fijo; si cambia el proyecto, actualizar aqui y en config.js. -->
+    <!-- CSP: si cambia el proyecto Supabase, actualizar el host aqui y en config.js -->
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://aftrxnerszxjfjxegjuk.supabase.co; connect-src 'self' https://aftrxnerszxjfjxegjuk.supabase.co ws://127.0.0.1:5173 ws://localhost:5173; object-src 'none'; base-uri 'self'; form-action 'self'">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -769,7 +769,6 @@
             position: relative;
             box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
             color: #efefef;
-            /* Better default text color */
         }
 
         .detail-grid {
@@ -781,7 +780,6 @@
 
         .detail-item label {
             color: #aaa;
-            /* Lighter grey for labels */
             font-size: 0.9em;
             display: block;
             margin-bottom: 5px;
@@ -791,7 +789,6 @@
         .detail-item span {
             font-size: 1.1em;
             color: #fff;
-            /* White for values */
             font-weight: 600;
         }
 
@@ -824,7 +821,6 @@
 
         .timeline-content {
             background: rgba(255, 255, 255, 0.08);
-            /* Slightly lighter background */
             padding: 15px;
             border-radius: 8px;
             margin-top: 5px;
@@ -895,9 +891,7 @@
             cursor: pointer;
             font-size: 1.2rem;
             margin-right: auto;
-            /* Push others to right */
             display: none;
-            /* Hidden by default */
         }
 
         .chat-messages {
@@ -1197,7 +1191,7 @@
                 </div>
             </section>
 
-            <!-- Support View (Added) -->
+            <!-- Vista de soporte -->
             <section id="support-view" class="view-section" style="display:none; padding:80px 20px;">
                 <div class="container mx-auto max-w-6xl">
                     <h2 class="text-3xl font-bold mb-6 text-white border-l-4 border-yellow-500 pl-4">Soporte LuxIA</h2>
@@ -1247,9 +1241,7 @@
             <h3 style="margin-left: 0.5rem;">Lux-IA</h3>
             <button id="chat-close" class="chat-close" style="margin-left: auto;">×</button>
         </div>
-        <div id="chat-messages" class="chat-messages">
-            <!-- Messages will appear here -->
-        </div>
+        <div id="chat-messages" class="chat-messages"></div>
         <div class="chat-input-area">
             <button id="chat-attach" class="chat-attach-btn" title="Adjuntar evidencia" disabled>📎</button>
             <input type="file" id="chat-file" accept="image/*,.pdf" hidden>
@@ -1280,8 +1272,7 @@
         const studentDashboard = document.getElementById('student-dashboard');
         const navLinks = document.querySelectorAll('.nav-link');
 
-        // Initialize Supabase (Safe Mode)
-        // supabase (global del bundle UMD) se reemplaza por el cliente en el init de abajo.
+        // supabase (global del bundle UMD) se reemplaza aqui por el cliente.
         try {
             if (window.supabaseConfig && window.supabase) {
                 supabase = window.supabase.createClient(window.supabaseConfig.url, window.supabaseConfig.key);
@@ -1293,8 +1284,7 @@
             console.error('Critical error initializing Supabase:', err);
         }
 
-        // Ref del proyecto Supabase derivado de config.js:
-        // al migrar de proyecto solo se edita config.js.
+        // Ref del proyecto Supabase, derivado de config.js.
         const projectRef = window.supabaseConfig
             ? new URL(window.supabaseConfig.url).hostname.split('.')[0]
             : '';
@@ -1304,7 +1294,7 @@
             '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
         })[c]);
 
-        // --- Edge Function Integration: Catalog Service ---
+        // --- Catalogos (Edge Function catalog-service) ---
         async function loadCatalogs() {
             try {
                 const { data: { session } } = await supabase.auth.getSession();
@@ -1319,18 +1309,17 @@
                 const data = await resp.json();
                 console.log('Catalogs loaded via Edge Function:', data);
 
-                // Populate Maps
                 if (data.categorias) {
-                    CATEGORY_MAP = {}; // Reset
+                    CATEGORY_MAP = {};
                     data.categorias.forEach(c => {
                         const key = c.nombre.toLowerCase().replace(/\s+/g, '_').replace(/[^\w]/g, '');
-                        CATEGORY_MAP[c.codigo || key] = c.catalogo_id; // B8: codigo sembrado = valor del chat
+                        CATEGORY_MAP[c.codigo || key] = c.catalogo_id; // codigo sembrado = valor del chat
                     });
                 }
                 if (data.prioridades) {
                     PRIORITY_MAP = {};
                     data.prioridades.forEach(p => {
-                        const CODIGO_A_CHAT = {}; // 0008: los codigos del catalogo ya coinciden con los valores del chat
+                        const CODIGO_A_CHAT = {}; // los codigos ya coinciden con los valores del chat
                         const key = CODIGO_A_CHAT[p.codigo] || p.codigo || p.nombre.toLowerCase();
                         PRIORITY_MAP[key] = p.catalogo_id;
                     });
@@ -1363,8 +1352,7 @@
             });
         }
 
-        // Roles con permisos de gestión (única fuente en el frontend; el
-        // backend valida por su cuenta con RLS + es_staff()).
+        // Roles con permisos de gestión; el backend valida con RLS + es_staff().
         const STAFF_ROLES = ['Soporte', 'Administrativo', 'Administrador'];
 
         function updateProfileChip() {
@@ -1399,8 +1387,7 @@
             updateProfileChip();
         }
 
-        // Router de vistas: ÚNICA función que muestra/oculta secciones.
-        // Sin sesión solo se permite 'login'; siempre restaura lo que oculta.
+        // Router de vistas: única función que muestra/oculta secciones; sin sesión solo 'login'.
         function showView(route) {
             const logged = !!chatState.user;
             const isStaff = logged && STAFF_ROLES.includes(chatState.user.role);
@@ -1484,8 +1471,7 @@
 
                     await hydrateUser(data.user);
 
-                    // D2: login único. Si venías de una página V2 (?volver=v2) y el
-                    // interruptor está encendido, te regresa al portal según tu rol.
+                    // Si venías de una página V2 (?volver=) con el switch activo, regresa al portal según rol.
                     const volver = new URL(window.location.href).searchParams.get('volver');
                     if ((volver === 'v2' || volver === 'lumix') && window.luxV2Enabled && window.luxV2Enabled()) {
                         window.location.href = volver === 'lumix'
@@ -1525,13 +1511,13 @@
 
         let CATEGORY_MAP = {};
         const STATIC_CATEGORY_MAP = {
-            // 0014 (D8): categorias del doc V2; codigos = valores del chat
+            // codigos = valores del chat
             'acceso': 37, 'plataforma': 34, 'materias': 36, 'servicios_escolares': 42, 'finanzas': 33, 'otros': 35
         };
 
         let PRIORITY_MAP = {};
         const STATIC_PRIORITY_MAP = {
-            'baja': 8, 'media': 7, 'alta': 9 // 0008: 9=Alta; 6 ahora es Critica (solo staff)
+            'baja': 8, 'media': 7, 'alta': 9 // 9=Alta; 6=Critica (solo staff)
         };
 
         let DEFAULT_AREA_ID = 38;
@@ -1757,7 +1743,7 @@
                     categoria_id: CATEGORY_MAP[chatState.ticket.category] || 35, // 35 = Otros
                     detalles: chatState.ticket.details,
                     prioridad_id: PRIORITY_MAP[chatState.ticket.priority] || 8,
-                    area_notificada_id: AREA_MAP[chatState.ticket.notify] || DEFAULT_AREA_ID, // B9: el paso del chat ya cuenta
+                    area_notificada_id: AREA_MAP[chatState.ticket.notify] || DEFAULT_AREA_ID,
                     adjunto: chatState.ticket.attachment || null
                 };
 
@@ -1796,7 +1782,7 @@
             chatState.step = 'GREETING';
         }
 
-        // RF-005 / doc v1 §8: consulta de estado desde el chat
+        // Consulta de estado de tickets desde el chat
         async function checkTicketStatus() {
             addMessage('Consultando tus tickets...', 'bot');
             try {
@@ -1882,7 +1868,6 @@
             }
         });
 
-        // Initial check
         if (chatTrigger) chatTrigger.setAttribute('hidden', '');
         setActiveNav('login');
         document.getElementById('logout-btn').addEventListener('click', logout);
@@ -1895,14 +1880,14 @@
                 }
             });
             restoreSession();
-            // Acceso a la experiencia V2 (docs/PLAN_V2.md); apagada por defecto.
+            // Acceso a la experiencia V2; apagada por defecto.
             const v2Access = document.getElementById("v2-access");
             if (v2Access && window.luxV2Enabled && window.luxV2Enabled()) {
                 v2Access.removeAttribute("hidden");
                 const v2Qr = document.getElementById("v2-qr");
                 if (v2Qr) v2Qr.removeAttribute("hidden");
             }
-            // Switch del header: escribe la preferencia del usuario y aplica al instante.
+            // Switch del header: guarda la preferencia del usuario y aplica.
             const v2Switch = document.getElementById("v2-switch");
             if (v2Switch && window.luxV2Enabled) {
                 v2Switch.checked = window.luxV2Enabled();
@@ -1919,7 +1904,7 @@
             }
         }
 
-        // --- Support Dashboard Logic (las vistas las maneja showView) ---
+        // --- Panel de soporte ---
 
         async function loadTickets() {
             const tbody = document.getElementById('ticket-list-body');
@@ -1945,10 +1930,8 @@
                 tickets.forEach(t => {
                     const row = document.createElement('tr');
                     const date = new Date(t.fecha_creacion).toLocaleDateString();
-                    // Optional safety check on related objects
                     const statusName = t.estado ? t.estado.nombre : 'Desconocido';
                     const prioName = t.prioridad ? t.prioridad.nombre : '-';
-                    // Show "Pendiente" if not assigned
                     const assignedName = t.asignado ? `${t.asignado.nombre} ${t.asignado.apellido}` : 'Pendiente';
                     const statusClass = statusName === 'Abierto' ? 'status-open' : (statusName === 'Cerrado' ? 'status-closed' : 'status-badge');
 
@@ -1988,7 +1971,6 @@
             content.innerHTML = '<p style="color:white;">Cargando detalles...</p>';
             modal.classList.add('open');
 
-            // Load staff list in background only if admin/support
             if (STAFF_ROLES.includes(chatState.user.role)) {
                 await loadStaffList();
             }
@@ -2011,12 +1993,10 @@
                 const reporterName = esc(ticket.reportador ? `${ticket.reportador.nombre} ${ticket.reportador.apellido} (${ticket.reportador.tipo_usuario})` : 'Unknown');
                 const assignedName = esc(ticket.asignado ? `${ticket.asignado.nombre} ${ticket.asignado.apellido}` : 'Sin Asignar');
 
-                // Build Actions
                 let actionHTML = '';
                 const canManage = STAFF_ROLES.includes(chatState.user.role);
 
                 if (canManage) {
-                    // Dropdown for Assignment
                     let staffOptions = '<option value="">-- Sin Asignar --</option>';
                     STAFF_LIST.forEach(s => {
                         const selected = (ticket.maestro_notificado_id === s.usuario_id) ? 'selected' : '';
@@ -2155,7 +2135,7 @@
             }
         }
 
-        // Hook up navigation: router con guard de sesión
+        // Navegación
         navLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -2163,7 +2143,7 @@
             });
         });
 
-        // --- Image Viewer Logic ---
+        // --- Visor de imágenes ---
         function openImageViewer(url) {
             const modal = document.getElementById('image-viewer-modal');
             const img = document.getElementById('image-viewer-img');
@@ -2177,7 +2157,6 @@
             document.getElementById('image-viewer-img').src = '';
         }
 
-        // Close on background click
         document.getElementById('image-viewer-modal').addEventListener('click', (e) => {
             if (e.target.id === 'image-viewer-modal') closeImageViewer();
         });

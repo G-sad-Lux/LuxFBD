@@ -3,12 +3,8 @@ window.supabaseConfig = {
     key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmdHJ4bmVyc3p4amZqeGVnanVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzODQyNDgsImV4cCI6MjEwNTk2MDI0OH0.8u7DJqvblTLRr2AdRtY3WNLVo0MaUzWV6hKmB8L0xCk'
 };
 
-// ============================================================
-// Interruptor maestro de la experiencia V2 (docs/PLAN_V2.md).
-// Cascada: ?v2=on|off (URL) > preferencia del usuario (switch del header)
-// > flag remoto en DB (tabla app_flag, sin redeploy) > este default.
-// Kill-switch en demo: agregar ?v2=off a la URL y recargar.
-// ============================================================
+// Interruptor maestro de la V2.
+// Cascada: ?v2=on|off (URL) > preferencia local > flag remoto (app_flag) > este default.
 window.appConfig = { v2: false };
 
 // Setter del switch del header (capa: preferencia del usuario)
@@ -31,8 +27,7 @@ window.luxV2Enabled = function () {
     return !!(window.appConfig && window.appConfig.v2);
 };
 
-// Capa remota: consulta app_flag en segundo plano y guarda el resultado
-// para la SIGUIENTE carga. Permite prender/apagar para todos sin deploy.
+// Capa remota: consulta app_flag y guarda el resultado para la siguiente carga.
 (function () {
     try {
         fetch(window.supabaseConfig.url + '/rest/v1/app_flag?clave=eq.v2&select=valor', {

@@ -1,12 +1,6 @@
-/* ============================================================
-   Iconos de trazo del diseño v2. Uso:
-   '<svg class="v2-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="' + LuxIconos.categoria.acceso + '"/></svg>'
-   CSS sugerido:
-   .v2-ico { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8;
-             stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
-   ============================================================ */
+/* Iconos de trazo de la v2 (paths SVG 24x24); se renderizan con svgIcono() de shared.js. */
 window.LuxIconos = {
-    // Por codigo de catalogo (migracion 0014)
+    // Por codigo de catalogo
     categoria: {
         acceso: 'M8 15a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M11.5 11H21 M17 11v3 M20 11v2',
         plataforma: 'M3 4h18v12H3z M8 20h8 M12 16v4',

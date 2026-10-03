@@ -1,10 +1,5 @@
--- ============================================================
--- LuxFBD - 0017: Encuesta CSAT (1-5) + Realtime
--- CSAT: solo el reportador, solo con el ticket Resuelto/Cerrado,
--- una sola vez; queda en bitacora y alimenta el KPI.
--- Realtime: ticket, comentario y notificacion publican cambios
--- (los suscriptores solo reciben filas que su RLS les permite ver).
--- ============================================================
+-- 0017: Encuesta CSAT (solo el reportador, ticket resuelto/cerrado, una vez)
+-- + publicacion Realtime de ticket, comentario y notificacion.
 
 alter table public.ticket
     add column calificacion smallint
@@ -15,8 +10,7 @@ alter table public.ticket
 comment on column public.ticket.calificacion is
     'CSAT 1-5 del reportador al resolverse/cerrarse; se escribe SOLO via calificar_ticket().';
 
--- La politica de UPDATE de ticket es solo-staff; la calificacion del alumno
--- entra por esta funcion (SECURITY DEFINER) que valida todas las reglas.
+-- El UPDATE de ticket es solo-staff; la calificacion del alumno entra por esta funcion.
 create or replace function public.calificar_ticket(
     p_ticket_id bigint,
     p_calificacion smallint,

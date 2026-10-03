@@ -1,10 +1,5 @@
-// ============================================================
-// Motor del asistente Lumix, compartido por las DOS superficies:
-//  - modo 'pantalla':  v2/lumix.html (celular / flujo QR, pantalla completa)
-//  - modo 'embebido':  panel derecho de v2/alumnos.html en PC (captura 03d)
-// Misma máquina de estados (§5.3 + resumen); cambian saludo y destinos.
-// Cargar después de shared.js e iconos.js. Requiere sesión iniciada.
-// ============================================================
+// Motor del asistente Lumix: modo 'pantalla' (lumix.html) y modo 'embebido'
+// (panel de alumnos.html). Cargar después de shared.js e iconos.js; requiere sesión.
 (function () {
     'use strict';
     const esc = window.LuxV2.esc;
@@ -25,9 +20,7 @@
         const { svgIcono, iconoCategoria, fmtHora, fmtFecha, nombreDe } = window.LuxV2.ui;
         const modo = opts.modo || 'pantalla';
         const catalogs = opts.catalogs || null;
-        // editando=true: el paso actual es una corrección puntual lanzada desde
-        // el RESUMEN; al capturar el campo se regresa al resumen, no al paso
-        // siguiente (es el "atrás" del flujo).
+        // editando=true: corrección lanzada desde el RESUMEN; al capturar se vuelve al resumen.
         const state = { step: 'INIT', ticket: {}, subiendo: false, editando: false };
 
         // ---- esqueleto: mensajes + barra tipo pill ----
@@ -134,7 +127,7 @@
         }
         const verTicket = (id) => { if (opts.alVerTicket) opts.alVerTicket(id); };
 
-        // ---- pasos (máquina §5.3 + resumen del diseño) ----
+        // ---- pasos del flujo ----
         function prompt(step) {
             state.step = step;
             habilitarTexto(false, false);
@@ -221,8 +214,7 @@
                     break;
             }
         }
-        // Tras capturar un campo: al paso siguiente, o de vuelta al RESUMEN
-        // si veníamos de una corrección.
+        // Al paso siguiente, o de vuelta al RESUMEN si era una corrección.
         function avanzar(siguiente) {
             if (state.editando) { state.editando = false; prompt('RESUMEN'); }
             else prompt(siguiente);
@@ -383,7 +375,7 @@
             }
         }
 
-        // ---- consultar estado (02d) ----
+        // ---- consultar estado ----
         async function consultarEstado() {
             state.step = 'DONE';
             burbujaBot('Déjame revisar tus tickets…');

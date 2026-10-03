@@ -1,9 +1,4 @@
--- ============================================================
--- LuxFBD - 0018: KPI "Resueltos hoy" con secundario "de la semana"
--- (B2 del plan de diseño High Fidelity, docs/PLAN_DISENO.md).
--- CREATE OR REPLACE de vista: la columna nueva va AL FINAL.
--- Semana = la semana calendario en curso (lunes a hoy).
--- ============================================================
+-- 0018: Agrega resueltos_semana al KPI (CREATE OR REPLACE: la columna nueva va al final).
 
 create or replace view public.v_kpi_resumen
 with (security_invoker = true) as

@@ -1,9 +1,4 @@
--- ============================================================
--- LuxFBD - 0002: Semilla del catalogo con IDs EXACTOS
--- Los IDs 1, 6-8, 33-38 NO son negociables: el frontend v1 los
--- hardcodea (STATIC_CATEGORY_MAP / STATIC_PRIORITY_MAP / DEFAULT_AREA_ID)
--- y el backend fija estado_id=1 y area_notificada_id=38.
--- ============================================================
+-- 0002: Semilla del catalogo. IDs 1, 6-8, 33-38 fijos: frontend y backend los hardcodean.
 
 insert into public.catalogo (catalogo_id, tipo, nombre, codigo, orden) values
     -- Estados (1 = Abierto, exigido por ticket-manager /create)
@@ -29,7 +24,7 @@ insert into public.catalogo (catalogo_id, tipo, nombre, codigo, orden) values
 -- Dejar la secuencia por encima de los IDs reservados
 select setval(pg_get_serial_sequence('public.catalogo','catalogo_id'), 100, true);
 
--- SLA por prioridad (lo usara la fase 2; valores provisionales en horas)
+-- SLA por prioridad (horas)
 insert into public.prioridad_sla (prioridad_id, horas_compromiso) values
     (6, 4),    -- Critico
     (7, 24),   -- Medio

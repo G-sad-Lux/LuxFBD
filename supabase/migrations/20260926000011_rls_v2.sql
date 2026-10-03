@@ -1,12 +1,6 @@
--- ============================================================
--- LuxFBD - 0011: RLS para comentarios, historial y notificaciones
--- (V2 §13 comunicacion, §18 trazabilidad; RF-003/008/014/016)
--- Con la politica de historial, ticket-manager deja de necesitar el
--- service role por completo: todo pasa por el JWT del usuario.
--- ============================================================
+-- 0011: RLS para comentarios, historial y notificaciones; todo pasa por el JWT del usuario.
 
--- COMENTARIO: los "externo" los ven duenio del ticket y staff;
--- los "interno" SOLO staff (§13: nunca llegan al portal del estudiante).
+-- COMENTARIO: los "externo" los ven duenio del ticket y staff; los "interno" solo staff.
 create policy comentario_select_visible on public.comentario
     for select to authenticated
     using (

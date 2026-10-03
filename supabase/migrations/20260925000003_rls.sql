@@ -1,15 +1,7 @@
--- ============================================================
--- LuxFBD - 0003: Row Level Security
--- Las Edge Functions consultan con el JWT del usuario (rol authenticated),
--- salvo historial, que solo toca el service role (ignora RLS).
--- Estas politicas ademas cierran los 3 huecos de la API v1 sin tocar codigo:
--- /details deniega tickets ajenos, /list queda acotado y /staff devuelve
--- vacio a los alumnos (docs/REACTIVACION.md 2.3).
--- ============================================================
+-- 0003: Row Level Security. Las Edge Functions consultan con el JWT del usuario.
 
 -- Funciones auxiliares ----------------------------------------
--- SECURITY DEFINER: evita recursion de RLS al consultar usuario
--- desde una politica de la propia tabla usuario.
+-- SECURITY DEFINER: evita recursion de RLS sobre la tabla usuario.
 create or replace function public.usuario_actual()
 returns bigint
 language sql stable security definer
@@ -18,8 +10,7 @@ as $$
     select usuario_id from public.usuario where auth_uid = auth.uid();
 $$;
 
--- Staff = quienes gestionan tickets. Maestro queda FUERA: es reportador
--- (documento v1); el codigo igual le filtra /list a "solo propios".
+-- Staff = quienes gestionan tickets; Maestro queda fuera (es reportador).
 create or replace function public.es_staff()
 returns boolean
 language sql stable security definer
@@ -88,6 +79,5 @@ create policy adjunto_insert_propio on public.adjunto
     for insert to authenticated
     with check (subido_por_id = public.usuario_actual());
 
--- HISTORIAL / COMENTARIO / ASIGNACION / NOTIFICACION:
--- RLS activo y SIN politicas => denegado para clientes.
--- El service role (v1) y los triggers SECURITY DEFINER (fase 2) las manejan.
+-- HISTORIAL / COMENTARIO / ASIGNACION / NOTIFICACION: RLS sin politicas =>
+-- denegado para clientes; las manejan los triggers SECURITY DEFINER.

@@ -1,10 +1,4 @@
--- ============================================================
--- LuxFBD - 0004: Sincronizacion auth.users -> public.usuario
--- El codigo busca el perfil por auth_uid en 4 lugares y truena si
--- no existe ("User profile not found"). Este trigger crea el perfil
--- automaticamente al dar de alta un usuario en Authentication.
--- Sustituye al placeholder user-admin/sync y al alta manual.
--- ============================================================
+-- 0004: Trigger que crea el perfil en public.usuario al dar de alta en Auth.
 
 create or replace function public.handle_new_auth_user()
 returns trigger

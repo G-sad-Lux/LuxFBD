@@ -1,11 +1,5 @@
--- ============================================================
--- LuxFBD - 0019: Modo INVITADO del demo (D5 resuelta 2026-09-26)
--- El QR del demo abre Lumix con sesion ANONIMA de Supabase Auth:
--- el invitado captura matricula (6 digitos) + nombre completo antes
--- de entrar al chat. RLS lo trata como un alumno normal (solo ve lo
--- suyo); es_staff() = false. La matricula viaja en el metadata del
--- alta anonima y el trigger la persiste aqui.
--- ============================================================
+-- 0019: Modo invitado del demo: sesion anonima de Supabase Auth; la matricula
+-- viaja en el metadata del alta y el trigger la persiste en usuario.
 
 alter table public.usuario
     add column matricula varchar(10);
@@ -13,7 +7,7 @@ alter table public.usuario
 comment on column public.usuario.matricula is
     'Identificador capturado por el modo invitado del demo (6 digitos). Null en cuentas normales mientras no se pueble.';
 
--- Mismo trigger de 0004 + matricula desde el metadata.
+-- Mismo trigger de alta + matricula desde el metadata.
 create or replace function public.handle_new_auth_user()
 returns trigger
 language plpgsql security definer

@@ -27,7 +27,6 @@ serve(async (req) => {
             { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
         )
 
-        // Fetch all Catalogs in parallel for speed
         const [cats, prios, estados, areas] = await Promise.all([
             supabaseClient.from('catalogo').select('catalogo_id, nombre, codigo').eq('tipo', 'categoria').order('orden'),
             supabaseClient.from('catalogo').select('catalogo_id, nombre, codigo').eq('tipo', 'prioridad').order('orden'),

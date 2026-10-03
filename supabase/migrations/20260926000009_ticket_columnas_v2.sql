@@ -1,10 +1,5 @@
--- ============================================================
--- LuxFBD - 0009: Columnas nuevas de ticket (additive-only, la v1 no las lee)
--- canal_entrada          -> §9 V2: por donde llego el reporte (Lumix vs Portal)
--- prioridad_reportada_id -> §5.3/§10 V2: lo que percibio el usuario; la oficial
---                           (prioridad_id) la gobierna soporte
--- resumen_solucion       -> §16 V2: obligatorio para marcar Resuelto (regla en 0010)
--- ============================================================
+-- 0009: Columnas nuevas de ticket (additive-only, la v1 no las lee):
+-- canal_entrada, prioridad_reportada_id y resumen_solucion.
 
 alter table public.ticket
     add column canal_entrada varchar(20) not null default 'chatbot'

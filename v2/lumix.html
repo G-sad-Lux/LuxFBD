@@ -13,9 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="shared.css">
     <style>
-        /* Marco del chat a pantalla completa (celular / flujo QR). El motor y
-           sus estilos viven en lumix-chat.js + shared.css; en PC el mismo
-           motor va embebido en el panel de Mis Tickets (captura 03d). */
+        /* Marco del chat a pantalla completa; el motor vive en lumix-chat.js + shared.css. */
         html, body { height: 100%; }
         body { display: flex; flex-direction: column; background: var(--v2-bg); }
         .lumix-app { flex: 1; display: flex; flex-direction: column; max-width: 480px; width: 100%; margin: 0 auto; background: var(--v2-bg); min-height: 0; }
@@ -28,7 +26,7 @@
         .lumix-head .avatar .punto { position: absolute; right: 0; bottom: 1px; width: 11px; height: 11px; border-radius: 50%; background: var(--v2-ok); border: 2px solid #fff; }
         .lumix-head .quien { flex: 1; min-width: 0; line-height: 1.25; }
         .lumix-head .quien strong { font-size: 16px; color: var(--v2-heading); display: flex; align-items: center; gap: 8px; }
-        /* Etiqueta DEMO del modo invitado (spec 02a) */
+        /* Etiqueta DEMO del modo invitado */
         .demo-pill { background: #fdecd8; color: #9a4a00; border-radius: 999px; padding: 1px 8px; font-size: 11px; font-weight: 800; letter-spacing: .4px; }
         .lumix-head .quien small { font-size: 12px; color: #1f7a45; font-weight: 600; }
         .lumix-head .reiniciar { width: 44px; height: 44px; border: 0; background: transparent; color: var(--v2-muted); display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 10px; font: inherit; }
@@ -80,7 +78,7 @@
             const zona = $('zona');
             const quiereInvitado = /(?:^|[?&])invitado=/.test(location.search);
 
-            // ---- Acceso sin sesión: cuenta institucional o modo INVITADO (D5) ----
+            // ---- Acceso sin sesión: cuenta institucional o modo invitado ----
             function pantallaLogin() {
                 zona.innerHTML =
                     '<div class="lumix-login">' +
@@ -119,9 +117,7 @@
                 $('ir-invitado').addEventListener('click', pantallaInvitado);
             }
 
-            // Formulario del invitado: matrícula de 6 dígitos + nombre completo.
-            // Crea una sesión ANÓNIMA con esos datos en el metadata (el trigger
-            // 0019 los persiste en usuario); RLS lo acota a lo suyo.
+            // Invitado: sesión anónima con matrícula y nombre en el metadata; un trigger los persiste en usuario.
             function pantallaInvitado() {
                 zona.innerHTML =
                     '<div class="lumix-login">' +
@@ -169,8 +165,7 @@
                 $('ir-cuenta').addEventListener('click', pantallaLogin);
             }
 
-            // Identificación POR SESIÓN (decisión de seguridad): sin sesión,
-            // acceso aquí mismo; nunca se pide la matrícula DENTRO del chat.
+            // Identificación por sesión: nunca se pide la matrícula dentro del chat.
             const perfil = await LuxV2.getProfile();
             if (!perfil) {
                 (quiereInvitado ? pantallaInvitado : pantallaLogin)();
@@ -193,8 +188,7 @@
                 if (chat.enCurso() && !confirm('¿Reiniciar la conversación? Se pierde el reporte a medio llenar.')) return;
                 chat.reiniciar();
             });
-            // Salida accidental (atrás del navegador, cerrar pestaña, F5) con un
-            // reporte a medias: el navegador pide confirmación antes de perderlo.
+            // Confirmación del navegador antes de perder un reporte a medias.
             window.addEventListener('beforeunload', (ev) => {
                 if (chat.enCurso()) { ev.preventDefault(); ev.returnValue = ''; }
             });

@@ -1,22 +1,6 @@
--- ============================================================
--- LuxFBD - 0020: Mejoras de SLA (decisión de equipo 2026-09-27)
--- 1) El reloj se detiene al RESOLVER: fecha_cierre se fija al entrar a
---    Resuelto (antes solo al Cerrar), y se limpia al reabrir. Así
---    "Cumplido", resueltos_hoy/semana y v_tiempo_resolucion miden hasta
---    la resolución, no hasta el trámite de cierre.
--- 2) "Por vencer" UNIFICADO al criterio relativo del semáforo del
---    cliente: restante <= 25% del compromiso (antes: ventana fija 4 h,
---    que divergía de las filas naranjas).
--- 3) Aviso PROACTIVO: fn_sla_barrido() notifica una sola vez al cruzar
---    a "por vencer" y a "vencido" (al asignado; si no hay, a todo el
---    staff). pg_cron lo corre cada 15 min (guardado: en entornos sin
---    pg_cron la migración no truena).
--- 4) Al cambiar la prioridad, el compromiso corre DESDE EL CAMBIO
---    (now() + horas), no desde la creación: subir a Crítica ya no nace
---    vencido; la espera previa queda testificada en la bitácora.
--- De cara al ALUMNO esto se presenta como "Tiempo de atención" (el
--- término SLA queda solo en las pantallas del personal).
--- ============================================================
+-- 0020: Mejoras de SLA: (1) fecha_cierre se fija al Resolver, (2) "por vencer"
+-- = restante <= 25%, (3) barrido proactivo via pg_cron, (4) cambio de
+-- prioridad reinicia el compromiso desde now().
 
 -- ---------- Marca de aviso (dedupe del barrido) ----------
 alter table public.ticket
@@ -35,7 +19,7 @@ update public.ticket
    set fecha_cierre = coalesce(fecha_cierre, actualizado_en, now())
  where estado_id = 4 and fecha_cierre is null;
 
--- ---------- BEFORE UPDATE: mismas reglas de 0010 + puntos 1 y 4 ----------
+-- ---------- BEFORE UPDATE: mismas reglas previas + puntos 1 y 4 ----------
 create or replace function public.fn_ticket_before_update()
 returns trigger
 language plpgsql security definer
@@ -49,7 +33,7 @@ begin
                 public.nombre_catalogo(old.estado_id), public.nombre_catalogo(new.estado_id)
                 using errcode = 'P0001';
         end if;
-        -- §16: Resuelto exige resumen de la solucion
+        -- Resuelto exige resumen de la solucion
         if new.estado_id = 4 and (new.resumen_solucion is null or btrim(new.resumen_solucion) = '') then
             raise exception 'Se requiere el resumen de la solución para marcar el ticket como Resuelto'
                 using errcode = 'P0001';
@@ -81,7 +65,7 @@ end;
 $$;
 
 -- ---------- (2) v_kpi_resumen: "por vencer" relativo (25% del compromiso) ----------
--- CREATE OR REPLACE: mismas columnas, mismo orden (0018).
+-- CREATE OR REPLACE: mismas columnas, mismo orden.
 create or replace view public.v_kpi_resumen
 with (security_invoker = true) as
 select

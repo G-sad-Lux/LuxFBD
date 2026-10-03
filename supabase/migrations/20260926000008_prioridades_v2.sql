@@ -1,11 +1,5 @@
--- ============================================================
--- LuxFBD - 0008: Catalogo de prioridades unificado a 4 niveles (V2 §10)
--- Decision del equipo 2026-09-26: Baja / Media / Alta / Crítica para
--- AMBAS versiones. Los codigos pasan a coincidir 1:1 con los valores
--- que envia el chat v1 (baja/media/alta), asi el mapeo B8 queda directo.
--- IDs conservados: 8=Baja, 7=Media, 6=Crítica (antes Bajo/Medio/Crítico);
--- se agrega 9=Alta con SLA de 8 horas.
--- ============================================================
+-- 0008: Prioridades unificadas a 4 niveles. IDs conservados: 8=Baja, 7=Media,
+-- 6=Critica; se agrega 9=Alta. Los codigos coinciden con los valores del chat.
 
 update public.catalogo set nombre = 'Baja',    codigo = 'baja'    where catalogo_id = 8 and tipo = 'prioridad';
 update public.catalogo set nombre = 'Media',   codigo = 'media'   where catalogo_id = 7 and tipo = 'prioridad';

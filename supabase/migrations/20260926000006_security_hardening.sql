@@ -1,17 +1,7 @@
--- ============================================================
--- LuxFBD - 0006: Endurecimiento de seguridad (auditoria 2026-09-26)
--- F1: el trigger ya NO lee el rol desde raw_user_meta_data (un
---     atacante podia autoregistrarse como 'Administrador' pasando
---     options.data.tipo_usuario en signUp). Todo alta = 'Alumno';
---     los roles de staff se promueven solo por SQL/service role.
--- F4: la politica de INSERT de adjunto ahora exige que el ticket
---     sea visible para quien inserta (antes se podia colgar un
---     adjunto con URL arbitraria a cualquier ticket).
--- Privacidad: bucket 'tickets' pasa a PRIVADO; la lectura es via
---     URLs firmadas generadas en /details (politica SELECT abajo).
--- ============================================================
+-- 0006: Endurecimiento: rol nunca viene del cliente, adjuntos solo
+-- sobre tickets visibles y bucket 'tickets' privado (URLs firmadas).
 
--- F1: rol nunca viene del cliente + saneo de nombre/apellido
+-- El rol nunca viene del cliente; saneo de nombre/apellido.
 create or replace function public.handle_new_auth_user()
 returns trigger
 language plpgsql security definer
@@ -35,7 +25,7 @@ exception when others then
 end;
 $$;
 
--- F4: adjunto solo sobre tickets visibles para quien inserta
+-- Adjunto solo sobre tickets visibles para quien inserta.
 drop policy adjunto_insert_propio on public.adjunto;
 create policy adjunto_insert_propio on public.adjunto
     for insert to authenticated
@@ -51,8 +41,7 @@ create policy adjunto_insert_propio on public.adjunto
 -- Bucket privado: las evidencias dejan de ser publicas por URL
 update storage.buckets set public = false where id = 'tickets';
 
--- Lectura para firmar URLs (createSignedUrl corre con el JWT del
--- usuario): dueño de la carpeta o staff.
+-- Lectura para firmar URLs: dueño de la carpeta o staff.
 create policy tickets_lectura_propia_o_staff on storage.objects
     for select to authenticated
     using (
