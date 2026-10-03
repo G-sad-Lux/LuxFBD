@@ -300,7 +300,9 @@
 
         // ---- evidencia (bucket privado; el servidor también valida) ----
         async function procesarArchivo(original) {
-            const f = await window.LuxV2.comprimirImagen(original);
+            // Guard: con un shared.js viejo en cache, comprimirImagen puede no existir.
+            let f = original;
+            try { if (window.LuxV2.comprimirImagen) f = await window.LuxV2.comprimirImagen(original); } catch (_) { }
             const tipos = ['image/png', 'image/jpeg', 'application/pdf'];
             if (!tipos.includes(f.type)) { burbujaBot('Ese formato no está permitido: usa PNG, JPG o PDF.'); apagarChipsPrevios(); chipsEvidencia(); return; }
             if (f.size > 5 * 1024 * 1024) { burbujaBot('El archivo pesa más de 5 MB. Comprime la imagen o recorta el PDF.'); apagarChipsPrevios(); chipsEvidencia(); return; }
