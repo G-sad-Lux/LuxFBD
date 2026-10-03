@@ -306,13 +306,21 @@
             const tipos = ['image/png', 'image/jpeg', 'application/pdf'];
             if (!tipos.includes(f.type)) { burbujaBot('Ese formato no está permitido: usa PNG, JPG o PDF.'); apagarChipsPrevios(); chipsEvidencia(); return; }
             if (f.size > 5 * 1024 * 1024) { burbujaBot('El archivo pesa más de 5 MB. Comprime la imagen o recorta el PDF.'); apagarChipsPrevios(); chipsEvidencia(); return; }
+            // Leer a memoria antes de enviar: un archivo en la nube (Drive/OneDrive)
+            // falla al leerse a mitad del fetch con un "Failed to fetch" criptico.
+            let bytes;
+            try { bytes = await f.arrayBuffer(); }
+            catch (_) {
+                burbujaBot('No pude leer el archivo. Si está en la nube (Drive/OneDrive), descárgalo a tu dispositivo e inténtalo de nuevo.');
+                apagarChipsPrevios(); chipsEvidencia(); return;
+            }
             state.subiendo = true;
             const aviso = burbujaBot('Subiendo ' + f.name + '…');
             try {
                 const session = await window.LuxV2.getSession();
                 const limpio = f.name.replace(/[^\w.-]/g, '');
                 const ruta = session.user.id + '/' + Date.now() + '_' + limpio;
-                const { error } = await window.LuxV2.sb().storage.from('tickets').upload(ruta, f);
+                const { error } = await window.LuxV2.sb().storage.from('tickets').upload(ruta, new Blob([bytes], { type: f.type }), { contentType: f.type });
                 if (error) throw error;
                 state.ticket.adjunto = { nombre_archivo: f.name, ruta_archivo_url: ruta, mime_type: f.type, size_bytes: f.size };
                 aviso.textContent = 'Evidencia lista: ' + f.name;

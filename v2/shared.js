@@ -277,8 +277,13 @@
         var r = await window.LuxV2.sb().auth.getSession();
         var session = r.data.session;
         if (!session) throw new Error('Sesión no disponible');
+        // Leer a memoria antes de enviar: un archivo en la nube (Drive/OneDrive)
+        // falla al leerse a mitad del fetch con un "Failed to fetch" criptico.
+        var bytes;
+        try { bytes = await file.arrayBuffer(); }
+        catch (e) { throw new Error('No pude leer el archivo. Si está en la nube (Drive/OneDrive), descárgalo al dispositivo e inténtalo de nuevo.'); }
         var ruta = session.user.id + '/' + Date.now() + '_' + file.name.replace(/[^\w.-]/g, '');
-        var up = await window.LuxV2.sb().storage.from('tickets').upload(ruta, file);
+        var up = await window.LuxV2.sb().storage.from('tickets').upload(ruta, new Blob([bytes], { type: file.type }), { contentType: file.type });
         if (up.error) throw up.error;
         var ins = await window.LuxV2.sb().from('adjunto').insert({
             ticket_id: ticketId,
