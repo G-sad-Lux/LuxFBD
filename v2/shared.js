@@ -95,6 +95,29 @@
         return catalogsCache;
     }
 
+    // Comprime imagenes antes de subirlas (fotos de celular pesan 3-8 MB y
+    // truenan en redes moviles): redimensiona a 1600px y exporta JPEG.
+    // PDFs, imagenes ya ligeras o navegadores sin soporte: archivo original.
+    async function comprimirImagen(file) {
+        if (!file.type || !file.type.startsWith('image/')) return file;
+        if (file.size <= 600 * 1024) return file;
+        try {
+            var bmp = await createImageBitmap(file);
+            var MAX = 1600;
+            var escala = Math.min(1, MAX / Math.max(bmp.width, bmp.height));
+            var w = Math.max(1, Math.round(bmp.width * escala));
+            var h = Math.max(1, Math.round(bmp.height * escala));
+            var canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(bmp, 0, 0, w, h);
+            if (bmp.close) bmp.close();
+            var blob = await new Promise(function (res) { canvas.toBlob(res, 'image/jpeg', 0.82); });
+            if (!blob || blob.size >= file.size) return file;
+            var nombre = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+            return new File([blob], nombre, { type: 'image/jpeg' });
+        } catch (e) { return file; }
+    }
+
     window.LuxV2 = {
         v2On: v2On,
         requireV2: requireV2,
@@ -105,7 +128,8 @@
         getProfile: getProfile,
         logout: logout,
         callFn: callFn,
-        getCatalogs: getCatalogs
+        getCatalogs: getCatalogs,
+        comprimirImagen: comprimirImagen
     };
 })();
 
@@ -246,6 +270,7 @@
 
     // Sube una evidencia al bucket privado y la liga al ticket (la RLS valida).
     window.LuxV2.subirEvidencia = async function (usuarioId, ticketId, file) {
+        file = await window.LuxV2.comprimirImagen(file);
         var tipos = ['image/png', 'image/jpeg', 'application/pdf'];
         if (tipos.indexOf(file.type) === -1) throw new Error('Formato no permitido: usa PNG, JPG o PDF.');
         if (file.size > 5 * 1024 * 1024) throw new Error('El archivo excede 5 MB.');
