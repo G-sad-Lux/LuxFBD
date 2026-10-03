@@ -126,6 +126,14 @@
             msgs.appendChild(d);
         }
         const verTicket = (id) => { if (opts.alVerTicket) opts.alVerTicket(id); };
+        // Opciones del paso de evidencia; tambien se reponen cuando una subida falla.
+        function chipsEvidencia() {
+            chips([
+                { label: 'Adjuntar archivo', value: 'adjuntar', icono: svgIcono('ui.clip', 'media') },
+                { label: 'Tomar foto', value: 'foto', icono: svgIcono('ui.camara', 'media') },
+                { label: (state.editando && state.ticket.adjunto) ? 'Quitar la evidencia' : 'Continuar sin evidencia', value: 'sin_adjunto' },
+            ]);
+        }
 
         // ---- pasos del flujo ----
         function prompt(step) {
@@ -173,11 +181,7 @@
                         ? 'Tu evidencia actual es "' + state.ticket.adjunto.nombre_archivo + '". Puedes reemplazarla o quitarla.'
                         : 'Puedes agregar una evidencia para ayudarnos a revisar tu caso: captura de pantalla, foto o PDF (máx. 5 MB).');
                     habilitarTexto(false, true);
-                    chips([
-                        { label: 'Adjuntar archivo', value: 'adjuntar', icono: svgIcono('ui.clip', 'media') },
-                        { label: 'Tomar foto', value: 'foto', icono: svgIcono('ui.camara', 'media') },
-                        { label: (state.editando && state.ticket.adjunto) ? 'Quitar la evidencia' : 'Continuar sin evidencia', value: 'sin_adjunto' },
-                    ]);
+                    chipsEvidencia();
                     break;
                 case 'RESUMEN': {
                     const t = state.ticket;
@@ -297,8 +301,8 @@
         // ---- evidencia (bucket privado; el servidor también valida) ----
         async function procesarArchivo(f) {
             const tipos = ['image/png', 'image/jpeg', 'application/pdf'];
-            if (!tipos.includes(f.type)) { burbujaBot('Ese formato no está permitido: usa PNG, JPG o PDF.'); return; }
-            if (f.size > 5 * 1024 * 1024) { burbujaBot('El archivo pesa más de 5 MB. Comprime la imagen o recorta el PDF.'); return; }
+            if (!tipos.includes(f.type)) { burbujaBot('Ese formato no está permitido: usa PNG, JPG o PDF.'); apagarChipsPrevios(); chipsEvidencia(); return; }
+            if (f.size > 5 * 1024 * 1024) { burbujaBot('El archivo pesa más de 5 MB. Comprime la imagen o recorta el PDF.'); apagarChipsPrevios(); chipsEvidencia(); return; }
             state.subiendo = true;
             const aviso = burbujaBot('Subiendo ' + f.name + '…');
             try {
@@ -318,6 +322,8 @@
                 console.error(e);
                 state.subiendo = false;
                 aviso.textContent = 'No pude subir el archivo. Intenta de nuevo o continúa sin evidencia.';
+                apagarChipsPrevios();
+                chipsEvidencia();
             }
         }
         archivo.addEventListener('change', () => { if (archivo.files.length) { const f = archivo.files[0]; archivo.value = ''; procesarArchivo(f); } });
