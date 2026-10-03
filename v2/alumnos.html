@@ -3,7 +3,9 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- resizes-content: con el teclado abierto, el layout (y el panel fijo)
+         se encogen, dejando el botón Enviar ARRIBA del teclado. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
     <title>Portal de Atención al Estudiante | Universidad Lux</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b1f4d'/%3E%3Cpath d='M10 7h4v14h8v4H10z' fill='%23fff'/%3E%3C/svg%3E">
     <meta http-equiv="Content-Security-Policy"
@@ -143,8 +145,10 @@
            el alto restante; con top:0/100vh nacía 72px recorrido hacia abajo
            y el pie (textarea + Enviar) quedaba fuera de la pantalla. --hdr lo
            fija JS con la altura real del header (aguanta que envuelva). */
-        .mt-panel { width: 380px; flex-shrink: 0; background: var(--v2-card); border-left: 1px solid var(--v2-border); display: flex; flex-direction: column; min-height: 0; position: sticky; top: var(--hdr, 72px); align-self: flex-start; height: calc(100vh - var(--hdr, 72px)); }
+        .mt-panel { width: 380px; flex-shrink: 0; background: var(--v2-card); border-left: 1px solid var(--v2-border); display: flex; flex-direction: column; min-height: 0; position: sticky; top: var(--hdr, 72px); align-self: flex-start; height: calc(100vh - var(--hdr, 72px)); height: calc(100dvh - var(--hdr, 72px)); }
         .mt-panel .cabeza, .mt-panel .pie { flex-shrink: 0; }
+        /* Barra de gestos de los teléfonos: que Enviar no la pise */
+        .mt-panel .pie { padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
         .mt-panel .cabeza { padding: 20px 22px 14px; border-bottom: 1px solid #e4e9f1; display: flex; flex-direction: column; gap: 8px; }
         .mt-panel .cabeza h2 { margin: 0; font-size: 22px; font-weight: 800; color: var(--v2-heading); }
         .mt-panel .cuerpo { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 22px; display: flex; flex-direction: column; gap: 18px; }
@@ -159,7 +163,10 @@
         .panel-msg .meta span { font-size: 11px; color: var(--v2-muted); white-space: nowrap; }
         .panel-msg .txt { font-size: 13px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
         @media (max-width: 1100px) {
-            .mt-panel { position: fixed; inset: 0 0 0 auto; width: 100%; max-width: 400px; height: 100vh; z-index: 70; transform: translateX(100%); transition: transform .2s ease; border-left: 1px solid var(--v2-border); }
+            /* 100dvh: en el celular, 100vh incluye la zona tras la barra de
+               URL del navegador y el pie (clip + Enviar) quedaba fuera de la
+               pantalla; dvh mide el viewport realmente visible. */
+            .mt-panel { position: fixed; inset: 0 0 0 auto; width: 100%; max-width: 400px; height: 100vh; height: 100dvh; z-index: 70; transform: translateX(100%); transition: transform .2s ease; border-left: 1px solid var(--v2-border); }
             /* Cajón abierto: scrim que oscurece el fondo (la sombra de radio
                100vmax cubre todo el viewport) para que la lista recortada
                detrás no parezca un layout roto. */
