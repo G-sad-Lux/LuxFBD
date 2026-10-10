@@ -1,24 +1,7 @@
-// Nucleo compartido de la v2: interruptor, sesion, API y utilidades.
-// Cargar despues de supabase-js y ../config.js; la v1 no lo usa.
+// Nucleo compartido del portal: sesion, API y utilidades.
+// Cargar despues de supabase-js y config.js.
 (function () {
     'use strict';
-
-    // --- Interruptor -------------------------------------------------
-    function v2On() {
-        return window.luxV2Enabled ? window.luxV2Enabled() : false;
-    }
-
-    // Corta la pagina si la V2 esta apagada. Primera llamada de toda pagina v2.
-    function requireV2() {
-        if (v2On()) return true;
-        document.body.innerHTML =
-            '<div class="v2-off">' +
-            '<h1>Esta versión está desactivada</h1>' +
-            '<p>La nueva experiencia no está disponible por ahora.</p>' +
-            '<p><a class="v2-btn" href="../index.html">Ir al Campus Lux</a></p>' +
-            '</div>';
-        return false;
-    }
 
     // --- Cliente Supabase (instancia propia de la pagina) --------------
     var client = null;
@@ -88,7 +71,7 @@
     async function logout() {
         try { await sb().auth.signOut(); } catch (e) { /* sin red: da igual */ }
         // Al salir se regresa al acceso del portal.
-        window.location.href = 'alumnos.html';
+        window.location.href = 'index.html';
     }
 
     // --- API (Edge Functions) ------------------------------------------
@@ -144,9 +127,7 @@
         } catch (e) { return file; }
     }
 
-    window.LuxV2 = {
-        v2On: v2On,
-        requireV2: requireV2,
+    window.Lux = {
         sb: sb,
         esc: esc,
         STAFF_ROLES: STAFF_ROLES,
@@ -161,10 +142,10 @@
     };
 })();
 
-// Helpers de UI compartidos por admin.html y alumnos.html.
+// Helpers de UI compartidos por index.html y admin.html.
 (function () {
     'use strict';
-    var esc = window.LuxV2.esc;
+    var esc = window.Lux.esc;
 
     var nombreDe = function (u) {
         return u ? ((u.nombre || '') + ' ' + (u.apellido || '')).trim() : '';
@@ -277,7 +258,7 @@
         return (b / 1048576).toFixed(1) + ' MB';
     };
 
-    window.LuxV2.ui = {
+    window.Lux.ui = {
         nombreDe: nombreDe,
         iniciales: iniciales,
         svgIcono: svgIcono,
@@ -297,23 +278,23 @@
     };
 
     // Sube una evidencia al bucket privado y la liga al ticket (la RLS valida).
-    window.LuxV2.subirEvidencia = async function (usuarioId, ticketId, file) {
-        file = await window.LuxV2.comprimirImagen(file);
+    window.Lux.subirEvidencia = async function (usuarioId, ticketId, file) {
+        file = await window.Lux.comprimirImagen(file);
         var tipos = ['image/png', 'image/jpeg', 'application/pdf'];
-        if (tipos.indexOf(file.type) === -1) throw window.LuxV2.errUsuario('Formato no permitido: usa PNG, JPG o PDF.');
-        if (file.size > 5 * 1024 * 1024) throw window.LuxV2.errUsuario('El archivo pesa más de 5 MB. Comprime la imagen o recorta el PDF.');
-        var r = await window.LuxV2.sb().auth.getSession();
+        if (tipos.indexOf(file.type) === -1) throw window.Lux.errUsuario('Formato no permitido: usa PNG, JPG o PDF.');
+        if (file.size > 5 * 1024 * 1024) throw window.Lux.errUsuario('El archivo pesa más de 5 MB. Comprime la imagen o recorta el PDF.');
+        var r = await window.Lux.sb().auth.getSession();
         var session = r.data.session;
-        if (!session) throw window.LuxV2.errUsuario('Tu sesión expiró. Vuelve a iniciar sesión e inténtalo de nuevo.');
+        if (!session) throw window.Lux.errUsuario('Tu sesión expiró. Vuelve a iniciar sesión e inténtalo de nuevo.');
         // Leer a memoria antes de enviar: un archivo en la nube (Drive/OneDrive)
         // falla al leerse a mitad del fetch con un "Failed to fetch" criptico.
         var bytes;
         try { bytes = await file.arrayBuffer(); }
-        catch (e) { throw window.LuxV2.errUsuario('No pude leer el archivo. Si está en la nube (Drive/OneDrive), descárgalo al dispositivo e inténtalo de nuevo.'); }
+        catch (e) { throw window.Lux.errUsuario('No pude leer el archivo. Si está en la nube (Drive/OneDrive), descárgalo al dispositivo e inténtalo de nuevo.'); }
         var ruta = session.user.id + '/' + Date.now() + '_' + file.name.replace(/[^\w.-]/g, '');
-        var up = await window.LuxV2.sb().storage.from('tickets').upload(ruta, new Blob([bytes], { type: file.type }), { contentType: file.type });
+        var up = await window.Lux.sb().storage.from('tickets').upload(ruta, new Blob([bytes], { type: file.type }), { contentType: file.type });
         if (up.error) throw up.error;
-        var ins = await window.LuxV2.sb().from('adjunto').insert({
+        var ins = await window.Lux.sb().from('adjunto').insert({
             ticket_id: ticketId,
             subido_por_id: usuarioId,
             nombre_archivo: file.name,
@@ -325,10 +306,10 @@
     };
 
     // Campana de notificaciones. opts: { bell, punto, panel, lista, btnLeidas, alAbrirTicket }. Devuelve { recargar }.
-    window.LuxV2.montarNotificaciones = function (opts) {
+    window.Lux.montarNotificaciones = function (opts) {
         async function recargar() {
             try {
-                var r = await window.LuxV2.sb().from('notificacion')
+                var r = await window.Lux.sb().from('notificacion')
                     .select('notificacion_id, ticket_id, tipo, contenido, leida, creado_at')
                     .order('creado_at', { ascending: false }).limit(12);
                 var notifs = r.data || [];
@@ -346,7 +327,7 @@
         opts.bell.addEventListener('click', function () { opts.panel.hidden = !opts.panel.hidden; });
         opts.btnLeidas.addEventListener('click', async function () {
             try {
-                await window.LuxV2.sb().from('notificacion').update({ leida: true }).eq('leida', false);
+                await window.Lux.sb().from('notificacion').update({ leida: true }).eq('leida', false);
                 recargar();
             } catch (e) { console.warn(e); }
         });
@@ -361,9 +342,9 @@
     };
 
     // Realtime: refresco en vivo. Devuelve el canal (o null si falla).
-    window.LuxV2.montarRealtime = function (tablas, alCambiar) {
+    window.Lux.montarRealtime = function (tablas, alCambiar) {
         try {
-            var ch = window.LuxV2.sb().channel('lux-cambios');
+            var ch = window.Lux.sb().channel('lux-cambios');
             tablas.forEach(function (t) {
                 ch = ch.on('postgres_changes', { event: '*', schema: 'public', table: t }, function (payload) {
                     console.debug('realtime:', t, payload.eventType);

@@ -54,7 +54,7 @@
 <body>
     <div class="lumix-app">
         <header class="lumix-head">
-            <a class="volver" href="alumnos.html" aria-label="Volver al portal"><span data-ico="ui.atras" data-tam="grande"></span></a>
+            <a class="volver" href="index.html" aria-label="Volver al portal"><span data-ico="ui.atras" data-tam="grande"></span></a>
             <div class="avatar">
                 <img src="assets/lumix-avatar.png" alt="">
                 <span class="punto"></span>
@@ -68,16 +68,14 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2"
         integrity="sha384-WgXwGL6fUsYJWNaKJgVbrJKGRQwc1vieh2oy4kw9nXqpNDz3tdSsqEYUgeHD/NuF"
         crossorigin="anonymous"></script>
-    <script src="../config.js"></script>
+    <script src="config.js"></script>
     <script src="iconos.js"></script>
     <script src="shared.js"></script>
     <script src="lumix-chat.js"></script>
     <script>
         (async function () {
-            if (!LuxV2.requireV2()) return;
-
             const $ = (id) => document.getElementById(id);
-            const { svgIcono } = LuxV2.ui;
+            const { svgIcono } = Lux.ui;
             document.querySelectorAll('[data-ico]').forEach(el => {
                 el.innerHTML = svgIcono(el.dataset.ico, el.dataset.tam || '');
             });
@@ -102,14 +100,14 @@
                     '<button type="submit" id="l-entrar" class="v2-btn grande">Entrar con Lumix</button>' +
                     '</form>' +
                     '<button type="button" id="ir-invitado" class="v2-btn secundario" style="width:100%; max-width:320px;">Entrar como invitado (demo)</button>' +
-                    '<a href="alumnos.html" style="font-size:13px; font-weight:700;">Ir al Portal del Estudiante</a>' +
+                    '<a href="index.html" style="font-size:13px; font-weight:700;">Ir al Portal del Estudiante</a>' +
                     '</div>';
                 $('auth-form').addEventListener('submit', async (ev) => {
                     ev.preventDefault();
                     $('auth-error').classList.remove('abierta');
                     $('l-entrar').disabled = true;
                     try {
-                        const r = await LuxV2.sb().auth.signInWithPassword({
+                        const r = await Lux.sb().auth.signInWithPassword({
                             email: $('l-usr').value.trim(),
                             password: $('l-pwd').value,
                         });
@@ -157,7 +155,7 @@
                     const partes = nom.split(' ');
                     $('i-entrar').disabled = true;
                     try {
-                        const r = await LuxV2.sb().auth.signInAnonymously({
+                        const r = await Lux.sb().auth.signInAnonymously({
                             options: { data: { nombre: partes[0], apellido: partes.slice(1).join(' '), tipo_usuario: 'Alumno', matricula: mat } },
                         });
                         if (r.error) throw r.error;
@@ -172,7 +170,7 @@
             }
 
             // Identificación por sesión: nunca se pide la matrícula dentro del chat.
-            const perfil = await LuxV2.getProfile();
+            const perfil = await Lux.getProfile();
             if (!perfil) {
                 (quiereInvitado ? pantallaInvitado : pantallaLogin)();
                 return;
@@ -183,11 +181,11 @@
             }
 
             let catalogs = null;
-            try { catalogs = await LuxV2.getCatalogs(); } catch (e) { console.warn('catalogos:', e); }
+            try { catalogs = await Lux.getCatalogs(); } catch (e) { console.warn('catalogos:', e); }
 
             const chat = LuxLumixChat.montar({
                 raiz: zona, perfil, catalogs, modo: 'pantalla',
-                alVerTicket: (id) => { window.location.href = 'alumnos.html' + (id ? '#ticket=' + id : ''); },
+                alVerTicket: (id) => { window.location.href = 'index.html' + (id ? '#ticket=' + id : ''); },
             });
             $('btn-reiniciar').hidden = false;
             $('btn-reiniciar').addEventListener('click', () => {

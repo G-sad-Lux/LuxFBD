@@ -1,8 +1,8 @@
 // Motor del asistente Lumix: modo 'pantalla' (lumix.html) y modo 'embebido'
-// (panel de alumnos.html). Cargar después de shared.js e iconos.js; requiere sesión.
+// (panel de index.html). Cargar después de shared.js e iconos.js; requiere sesión.
 (function () {
     'use strict';
-    const esc = window.LuxV2.esc;
+    const esc = window.Lux.esc;
 
     // Respaldo estático por si catalog-service no responde (IDs de la semilla)
     const CATS_FALLBACK = [
@@ -17,7 +17,7 @@
 
     // opts: { raiz, perfil, catalogs, modo, alVerTicket(id), alCrear(ticket) }
     function montar(opts) {
-        const { svgIcono, iconoCategoria, fmtHora, fmtFecha, nombreDe } = window.LuxV2.ui;
+        const { svgIcono, iconoCategoria, fmtHora, fmtFecha, nombreDe } = window.Lux.ui;
         const modo = opts.modo || 'pantalla';
         const catalogs = opts.catalogs || null;
         // editando=true: corrección lanzada desde el RESUMEN; al capturar se vuelve al resumen.
@@ -302,7 +302,7 @@
         async function procesarArchivo(original) {
             // Guard: con un shared.js viejo en cache, comprimirImagen puede no existir.
             let f = original;
-            try { if (window.LuxV2.comprimirImagen) f = await window.LuxV2.comprimirImagen(original); } catch (_) { }
+            try { if (window.Lux.comprimirImagen) f = await window.Lux.comprimirImagen(original); } catch (_) { }
             const tipos = ['image/png', 'image/jpeg', 'application/pdf'];
             if (!tipos.includes(f.type)) { burbujaBot('Ese formato no está permitido: usa PNG, JPG o PDF.'); apagarChipsPrevios(); chipsEvidencia(); return; }
             if (f.size > 5 * 1024 * 1024) { burbujaBot('El archivo pesa más de 5 MB. Comprime la imagen o recorta el PDF.'); apagarChipsPrevios(); chipsEvidencia(); return; }
@@ -317,10 +317,10 @@
             state.subiendo = true;
             const aviso = burbujaBot('Subiendo ' + f.name + '…');
             try {
-                const session = await window.LuxV2.getSession();
+                const session = await window.Lux.getSession();
                 const limpio = f.name.replace(/[^\w.-]/g, '');
                 const ruta = session.user.id + '/' + Date.now() + '_' + limpio;
-                const { error } = await window.LuxV2.sb().storage.from('tickets').upload(ruta, new Blob([bytes], { type: f.type }), { contentType: f.type });
+                const { error } = await window.Lux.sb().storage.from('tickets').upload(ruta, new Blob([bytes], { type: f.type }), { contentType: f.type });
                 if (error) throw error;
                 state.ticket.adjunto = { nombre_archivo: f.name, ruta_archivo_url: ruta, mime_type: f.type, size_bytes: f.size };
                 aviso.textContent = 'Evidencia lista: ' + f.name;
@@ -354,7 +354,7 @@
                     adjunto: state.ticket.adjunto || null,
                 };
                 if (state.ticket.area_id) body.area_notificada_id = state.ticket.area_id;
-                const t = await window.LuxV2.callFn('ticket-manager/create', { method: 'POST', body });
+                const t = await window.Lux.callFn('ticket-manager/create', { method: 'POST', body });
 
                 const card = document.createElement('div');
                 card.className = 'card-exito';
@@ -376,18 +376,18 @@
                 chips([
                     (modo === 'embebido'
                         ? { label: 'Ver en mi lista', principal: true, accion: () => verTicket(t.ticket_id) }
-                        : { label: 'Ver en Mis Tickets', href: 'alumnos.html#ticket=' + t.ticket_id, principal: true }),
+                        : { label: 'Ver en Mis Tickets', href: 'index.html#ticket=' + t.ticket_id, principal: true }),
                     { label: 'Reportar otro problema', value: 'report' },
                 ]);
             } catch (err) {
                 console.error(err);
-                burbujaBot(window.LuxV2.mensajeError(err, 'No pude registrar el ticket. Revisa tu conexión e inténtalo de nuevo.'));
+                burbujaBot(window.Lux.mensajeError(err, 'No pude registrar el ticket. Revisa tu conexión e inténtalo de nuevo.'));
                 state.step = 'RESUMEN';
                 chips([
                     { label: 'Reintentar', value: 'confirmar', principal: true },
                     (modo === 'embebido'
                         ? { label: 'Cerrar', accion: () => { } }
-                        : { label: 'Ir a Mis Tickets', href: 'alumnos.html' }),
+                        : { label: 'Ir a Mis Tickets', href: 'index.html' }),
                 ]);
             }
         }
@@ -397,7 +397,7 @@
             state.step = 'DONE';
             burbujaBot('Déjame revisar tus tickets…');
             try {
-                const tickets = await window.LuxV2.callFn('ticket-manager/list');
+                const tickets = await window.Lux.callFn('ticket-manager/list');
                 if (tickets.length === 0) {
                     burbujaBot('Aún no tienes tickets registrados. ¿Reportamos tu primer problema?');
                 } else {
@@ -411,9 +411,9 @@
                     const faltantes = {};
                     await Promise.all(lista.filter(t => t.estado_id === 3).slice(0, 3).map(async t => {
                         try {
-                            const det = await window.LuxV2.callFn('ticket-manager/details?id=' + t.ticket_id);
+                            const det = await window.Lux.callFn('ticket-manager/details?id=' + t.ticket_id);
                             const staffMsgs = (det.comments || [])
-                                .filter(c => c.autor && window.LuxV2.STAFF_ROLES.includes(c.autor.tipo_usuario))
+                                .filter(c => c.autor && window.Lux.STAFF_ROLES.includes(c.autor.tipo_usuario))
                                 .sort((a, b) => new Date(a.fecha_creacion) - new Date(b.fecha_creacion));
                             if (staffMsgs.length) faltantes[t.ticket_id] = staffMsgs[staffMsgs.length - 1].contenido;
                         } catch (_) { /* sin detalle: la tarjeta sale sin la línea */ }
@@ -424,7 +424,7 @@
                         const a = document.createElement(esBoton ? 'button' : 'a');
                         a.className = 'mini-ticket' + (t.estado_id === 3 ? ' esperando' : '');
                         if (esBoton) { a.type = 'button'; a.addEventListener('click', () => verTicket(t.ticket_id)); }
-                        else a.href = 'alumnos.html#ticket=' + t.ticket_id;
+                        else a.href = 'index.html#ticket=' + t.ticket_id;
                         const estadoNombre = t.estado ? t.estado.nombre : '—';
                         const codigo = estadoNombre.toLowerCase().replace(/\s+/g, '_');
                         a.innerHTML =
@@ -452,7 +452,7 @@
                 { label: 'Reportar un problema', value: 'report', principal: true },
                 (modo === 'embebido'
                     ? { label: 'Ver mi lista', accion: () => verTicket(null) }
-                    : { label: 'Ver Mis Tickets', href: 'alumnos.html' }),
+                    : { label: 'Ver Mis Tickets', href: 'index.html' }),
             ]);
         }
 

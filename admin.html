@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="shared.css">
     <style>
-        /* La vista de acceso vive en alumnos.html; esta página redirige. */
+        /* La vista de acceso vive en index.html; esta página redirige. */
 
         /* Laptop ≤1350px: sin subtítulo y búsqueda angosta para que el header quepa en una línea. */
         @media (max-width: 1350px) {
@@ -84,7 +84,6 @@
                 <a href="#reportes" id="nav-reportes"><span data-ico="ui.reportes"></span>Reportes</a>
             </nav>
             <div class="abajo">
-                <button type="button" id="btn-clasica" class="clasica" title="Volver a la versión clásica">↩ Versión clásica</button>
                 <span class="v2-lema">Tu universidad<br>siempre contigo</span>
                 <span class="v2-lema-barra"></span>
             </div>
@@ -146,18 +145,16 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2"
         integrity="sha384-WgXwGL6fUsYJWNaKJgVbrJKGRQwc1vieh2oy4kw9nXqpNDz3tdSsqEYUgeHD/NuF"
         crossorigin="anonymous"></script>
-    <script src="../config.js"></script>
+    <script src="config.js"></script>
     <script src="iconos.js"></script>
     <script src="shared.js"></script>
     <script>
         (async function () {
-            if (!LuxV2.requireV2()) return;
-
-            const esc = LuxV2.esc;
+            const esc = Lux.esc;
             const vista = document.getElementById('vista');
             const $ = (id) => document.getElementById(id);
             const { badgeEstado, badgePrioridad, fmtFecha, fmtFechaCorta, fmtHora, fmtRelativo, slaDe,
-                nombreDe, iniciales, fmtBytes, svgIcono, iconoCategoria, canalDe } = LuxV2.ui;
+                nombreDe, iniciales, fmtBytes, svgIcono, iconoCategoria, canalDe } = Lux.ui;
 
             // Los <span data-ico> del HTML estático se rellenan una sola vez.
             document.querySelectorAll('[data-ico]').forEach(el => {
@@ -388,9 +385,9 @@
                 vista.innerHTML = '<div class="v2-card"><p class="v2-nota">Cargando ticket #' + esc(id) + '…</p></div>';
                 let data;
                 try {
-                    data = await LuxV2.callFn('ticket-manager/details?id=' + encodeURIComponent(id));
+                    data = await Lux.callFn('ticket-manager/details?id=' + encodeURIComponent(id));
                 } catch (err) {
-                    vista.innerHTML = '<div class="v2-card"><h2 style="margin:0 0 6px;">No se pudo abrir el ticket</h2><p class="v2-nota">' + esc(LuxV2.mensajeError(err, 'Inténtalo de nuevo en un momento.')) + '</p>' +
+                    vista.innerHTML = '<div class="v2-card"><h2 style="margin:0 0 6px;">No se pudo abrir el ticket</h2><p class="v2-nota">' + esc(Lux.mensajeError(err, 'Inténtalo de nuevo en un momento.')) + '</p>' +
                         '<p style="margin-bottom:0;"><a class="v2-btn secundario" href="#">← Volver al panel</a></p></div>';
                     return;
                 }
@@ -422,7 +419,7 @@
                         return '<div class="v2-ev">' + esc(fmtFechaCorta(it.h.fecha_cambio)) + ' · ' + esc(it.h.cambio || it.h.campo_modificado || '') + '</div>';
                     }
                     const c = it.c;
-                    const autorStaff = c.autor && LuxV2.STAFF_ROLES.includes(c.autor.tipo_usuario);
+                    const autorStaff = c.autor && Lux.STAFF_ROLES.includes(c.autor.tipo_usuario);
                     const quien = nombreDe(c.autor) || 'Usuario';
                     if (c.tipo === 'interno') {
                         return '<div class="v2-msg-fila interno"><div class="v2-msg interno" style="flex:1;">' +
@@ -547,7 +544,7 @@
                     '</div>' +
                     (t.eta_estimada
                         ? (activo
-                            ? '<strong class="grande">' + esc(LuxV2.ui.fmtRestante(sla.rest ?? 0)) + '</strong>' +
+                            ? '<strong class="grande">' + esc(Lux.ui.fmtRestante(sla.rest ?? 0)) + '</strong>' +
                             '<span class="barra"><span class="fill" style="width:' + (sla.pct ?? 0) + '%;"></span></span>' +
                             '<span style="font-size:12px; color:var(--v2-muted);">Fecha límite: ' + esc(fmtFecha(t.eta_estimada)) + '</span>'
                             : '<strong class="grande" style="font-size:16px;">' + (sla.html.includes('Cumplido') ? 'Cumplido dentro del compromiso' : 'Ticket finalizado') + '</strong>' +
@@ -632,11 +629,11 @@
 
                 async function actualizar(payload, msgId, tras) {
                     try {
-                        await LuxV2.callFn('ticket-manager/update', { method: 'PUT', body: Object.assign({ ticket_id: t.ticket_id }, payload) });
+                        await Lux.callFn('ticket-manager/update', { method: 'PUT', body: Object.assign({ ticket_id: t.ticket_id }, payload) });
                         if (tras) tras();
                         await Promise.all([cargarDatos(), cargarNotifs()]);
                         renderDetalle(id);
-                    } catch (err) { feedback(msgId, LuxV2.mensajeError(err, 'No se pudo aplicar el cambio. Inténtalo de nuevo.'), false); }
+                    } catch (err) { feedback(msgId, Lux.mensajeError(err, 'No se pudo aplicar el cambio. Inténtalo de nuevo.'), false); }
                 }
 
                 // ---- Gestión: los selects aplican al cambiar ----
@@ -696,25 +693,25 @@
                         $('archivo-com').value = '';
                         if (!f) return;
                         try {
-                            await LuxV2.subirEvidencia(state.perfil.usuario_id, t.ticket_id, f);
+                            await Lux.subirEvidencia(state.perfil.usuario_id, t.ticket_id, f);
                             renderDetalle(id);
-                        } catch (err) { feedback('comentario-msg', LuxV2.mensajeError(err, 'No se pudo subir el archivo. Inténtalo de nuevo.'), false); }
+                        } catch (err) { feedback('comentario-msg', Lux.mensajeError(err, 'No se pudo subir el archivo. Inténtalo de nuevo.'), false); }
                     });
                     composer.addEventListener('submit', async (ev) => {
                         ev.preventDefault();
                         const chk = $('chk-esperar');
                         try {
-                            await LuxV2.callFn('ticket-manager/comments', {
+                            await Lux.callFn('ticket-manager/comments', {
                                 method: 'POST',
                                 body: { ticket_id: t.ticket_id, contenido: $('comentario-texto').value, tipo: state.tabComentario }
                             });
                             if (chk && chk.checked) {
-                                await LuxV2.callFn('ticket-manager/update', { method: 'PUT', body: { ticket_id: t.ticket_id, estado_id: 3 } });
+                                await Lux.callFn('ticket-manager/update', { method: 'PUT', body: { ticket_id: t.ticket_id, estado_id: 3 } });
                             }
                             state.borrador = ''; // enviado: el borrador ya no aplica
                             await Promise.all([cargarDatos(), cargarNotifs()]);
                             renderDetalle(id);
-                        } catch (err) { feedback('comentario-msg', LuxV2.mensajeError(err, 'No se pudo enviar el comentario. Revisa tu conexión e inténtalo de nuevo.'), false); }
+                        } catch (err) { feedback('comentario-msg', Lux.mensajeError(err, 'No se pudo enviar el comentario. Revisa tu conexión e inténtalo de nuevo.'), false); }
                     });
                 }
             }
@@ -742,7 +739,7 @@
                     if (!state.modalTicket) return;
                     confirmar.disabled = true;
                     try {
-                        await LuxV2.callFn('ticket-manager/update', {
+                        await Lux.callFn('ticket-manager/update', {
                             method: 'PUT',
                             body: { ticket_id: state.modalTicket, estado_id: 4, resumen_solucion: texto.value }
                         });
@@ -752,7 +749,7 @@
                     } catch (err) {
                         confirmar.disabled = false;
                         $('mr-obligatorio').hidden = false;
-                        $('mr-obligatorio').textContent = LuxV2.mensajeError(err, 'No se pudo resolver el ticket. Inténtalo de nuevo.');
+                        $('mr-obligatorio').textContent = Lux.mensajeError(err, 'No se pudo resolver el ticket. Inténtalo de nuevo.');
                     }
                 });
             })();
@@ -766,9 +763,9 @@
                 vista.innerHTML = '<div class="v2-card"><p class="v2-nota">Generando reportes…</p></div>';
                 try {
                     const [kpiR, catR, tiemposR] = await Promise.all([
-                        LuxV2.sb().from('v_kpi_resumen').select('*').single(),
-                        LuxV2.sb().from('v_tickets_por_categoria').select('*'),
-                        LuxV2.sb().from('v_tiempo_resolucion').select('*'),
+                        Lux.sb().from('v_kpi_resumen').select('*').single(),
+                        Lux.sb().from('v_tickets_por_categoria').select('*'),
+                        Lux.sb().from('v_tiempo_resolucion').select('*'),
                     ]);
                     const k = kpiR.data || {};
                     const cats = catR.data || [];
@@ -807,15 +804,15 @@
                         '</div>';
                 } catch (err) {
                     console.error(err);
-                    vista.innerHTML = '<div class="v2-card"><h2 style="margin:0 0 6px;">No se pudieron generar los reportes</h2><p class="v2-nota">' + esc(LuxV2.mensajeError(err, 'Revisa tu conexión e inténtalo de nuevo.')) + '</p></div>';
+                    vista.innerHTML = '<div class="v2-card"><h2 style="margin:0 0 6px;">No se pudieron generar los reportes</h2><p class="v2-nota">' + esc(Lux.mensajeError(err, 'Revisa tu conexión e inténtalo de nuevo.')) + '</p></div>';
                 }
             }
 
             // ---------- Datos + enrutamiento ----------
             async function cargarDatos() {
                 const [tickets, kpiRes] = await Promise.all([
-                    LuxV2.callFn('ticket-manager/list'),
-                    LuxV2.sb().from('v_kpi_resumen').select('*').single(),
+                    Lux.callFn('ticket-manager/list'),
+                    Lux.sb().from('v_kpi_resumen').select('*').single(),
                 ]);
                 state.tickets = tickets;
                 state.kpi = kpiRes.data || null;
@@ -839,7 +836,7 @@
                 if (m) {
                     marcarNav('nav-tickets');
                     headerTitulo('<nav aria-label="Ruta" style="display:flex; align-items:center; gap:8px; font-size:14px; color:var(--v2-muted);">' +
-                        '<a href="#tickets" style="font-weight:600; text-decoration:none;">Tickets</a>' + LuxV2.ui.svgIcono('ui.siguiente', 'chica') +
+                        '<a href="#tickets" style="font-weight:600; text-decoration:none;">Tickets</a>' + Lux.ui.svgIcono('ui.siguiente', 'chica') +
                         '<span style="font-weight:700; color:var(--v2-text);">#' + m[1] + '</span></nav>');
                     return renderDetalle(Number(m[1]));
                 }
@@ -851,11 +848,11 @@
             }
 
             // ---------- Arranque ----------
-            // Sin sesión o sin rol de personal se redirige al acceso en alumnos.html.
+            // Sin sesión o sin rol de personal se redirige al acceso en index.html.
             let cargarNotifs = () => {};
-            const perfil = await LuxV2.getProfile();
+            const perfil = await Lux.getProfile();
             if (!perfil || !perfil.esStaff) {
-                window.location.replace('alumnos.html');
+                window.location.replace('index.html');
                 return;
             }
             state.perfil = perfil;
@@ -863,11 +860,7 @@
             $('chip-ava').textContent = iniciales(perfil.nombreCompleto);
             $('chip-nombre').textContent = perfil.nombreCompleto;
             $('chip-rol').textContent = perfil.tipo_usuario === 'Administrador' ? 'Administrador' : perfil.tipo_usuario;
-            $('btn-salir').addEventListener('click', LuxV2.logout);
-            $('btn-clasica').addEventListener('click', () => {
-                if (window.luxV2Set) window.luxV2Set(false);
-                window.location.href = '../index.html';
-            });
+            $('btn-salir').addEventListener('click', Lux.logout);
             $('buscar-global').addEventListener('input', () => {
                 state.filtro.q = $('buscar-global').value;
                 state.page = 1;
@@ -876,14 +869,14 @@
                 $('buscar-global').focus();
             });
 
-            cargarNotifs = LuxV2.montarNotificaciones({
+            cargarNotifs = Lux.montarNotificaciones({
                 bell: $('btn-notifs'), punto: $('notif-punto'), panel: $('notif-panel'),
                 lista: $('notif-lista'), btnLeidas: $('btn-leidas'),
                 alAbrirTicket: (tid) => { location.hash = 'ticket=' + tid; },
             }).recargar;
 
             try {
-                const [catalogs, staff] = await Promise.all([LuxV2.getCatalogs(), LuxV2.callFn('ticket-manager/staff')]);
+                const [catalogs, staff] = await Promise.all([Lux.getCatalogs(), Lux.callFn('ticket-manager/staff')]);
                 state.catalogs = catalogs;
                 state.staff = staff;
                 await cargarDatos();
@@ -893,7 +886,7 @@
 
                 // Refresco en vivo (Supabase Realtime; RLS filtra los eventos)
                 let rtTimer = null;
-                LuxV2.montarRealtime(['ticket', 'comentario', 'notificacion'], () => {
+                Lux.montarRealtime(['ticket', 'comentario', 'notificacion'], () => {
                     clearTimeout(rtTimer);
                     rtTimer = setTimeout(async () => {
                         await cargarDatos();
@@ -905,7 +898,7 @@
                 });
             } catch (err) {
                 console.error(err);
-                vista.innerHTML = '<div class="v2-card"><h2 style="margin:0 0 6px;">No se pudo cargar el panel</h2><p class="v2-nota">' + esc(LuxV2.mensajeError(err, 'Revisa tu conexión a internet y recarga la página.')) + '</p></div>';
+                vista.innerHTML = '<div class="v2-card"><h2 style="margin:0 0 6px;">No se pudo cargar el panel</h2><p class="v2-nota">' + esc(Lux.mensajeError(err, 'Revisa tu conexión a internet y recarga la página.')) + '</p></div>';
             }
         })();
     </script>

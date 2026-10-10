@@ -3,2185 +3,863 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Universidad Lux | Soporte</title>
-    <!-- CSP: si cambia el proyecto Supabase, actualizar el host aqui y en config.js -->
+    <!-- resizes-content: con el teclado abierto el layout se encoge y Enviar queda visible -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
+    <title>Portal de Atención al Estudiante | Universidad Lux</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b1f4d'/%3E%3Cpath d='M10 7h4v14h8v4H10z' fill='%23fff'/%3E%3C/svg%3E">
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://aftrxnerszxjfjxegjuk.supabase.co; connect-src 'self' https://aftrxnerszxjfjxegjuk.supabase.co ws://127.0.0.1:5173 ws://localhost:5173; object-src 'none'; base-uri 'self'; form-action 'self'">
+        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://aftrxnerszxjfjxegjuk.supabase.co; connect-src 'self' https://aftrxnerszxjfjxegjuk.supabase.co wss://aftrxnerszxjfjxegjuk.supabase.co ws://127.0.0.1:5173 ws://localhost:5173; object-src 'none'; base-uri 'self'; form-action 'self'">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="shared.css">
     <style>
-        :root {
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --primary: #4c6ef5;
-            --primary-dark: #364fc7;
-            --text: #0f172a;
-            --muted: #475569;
-            --radius: 18px;
-            --shadow: 0 12px 35px rgba(79, 70, 229, 0.08);
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-        }
-
-        img {
-            max-width: 100%;
-            display: block;
-        }
-
-        header {
-            position: sticky;
-            top: 0;
-            background: #fff;
-            z-index: 15;
-            border-bottom: 1px solid rgba(15, 23, 42, 0.08);
-            box-shadow: 0 12px 25px rgba(15, 23, 42, 0.04);
-        }
-
-        .app-header {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.85rem 1.5rem;
-            gap: 1rem;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-        }
-
-        .brand img {
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            background: rgba(76, 110, 245, 0.1);
-            padding: 0.3rem;
-        }
-
-        .brand-name {
-            font-weight: 600;
-            display: block;
-        }
-
-        .brand small {
-            color: var(--muted);
-            font-size: 0.8rem;
-        }
-
-        .nav-links {
-            list-style: none;
-            display: flex;
-            gap: 1.2rem;
-            margin: 0;
-            padding: 0;
-        }
-
-        .nav-link {
-            text-decoration: none;
-            color: var(--muted);
-            font-weight: 500;
-            position: relative;
-            padding: 0.35rem 0.2rem;
-        }
-
-        .nav-link.active,
-        .nav-link:hover {
-            color: var(--text);
-        }
-
-        .nav-link.active::after {
-            content: "";
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: -0.35rem;
-            height: 3px;
-            border-radius: 999px;
-            background: var(--primary);
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-        }
-
-        .icon-button {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border: 1px solid rgba(15, 23, 42, 0.12);
-            background: #fff;
-            display: grid;
-            place-items: center;
-            cursor: pointer;
-            color: var(--muted);
-        }
-
-        .profile-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.45rem;
-            padding: 0.35rem 0.8rem;
-            border-radius: 999px;
-            border: 1px solid rgba(15, 23, 42, 0.12);
-            font-weight: 600;
-        }
-
-        main {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem 1.5rem 4rem;
-            display: flex;
-            flex-direction: column;
-            gap: 3rem;
-        }
-
-        .hero {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            align-items: center;
-        }
-
-        .hero-card {
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: clamp(1.5rem, 4vw, 2.5rem);
-            box-shadow: var(--shadow);
-        }
-
-        .hero-card small {
-            display: inline-flex;
-            padding: 0.35rem 0.8rem;
-            border-radius: 999px;
-            border: 1px solid rgba(76, 110, 245, 0.25);
-            color: var(--primary-dark);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            font-weight: 600;
-            font-size: 0.7rem;
-        }
-
-        .hero h1 {
-            font-size: clamp(2rem, 6vw, 3.4rem);
-            margin: 1rem 0 0.75rem;
-            line-height: 1.15;
-        }
-
-        .hero p {
-            color: var(--muted);
-            margin-bottom: 1.5rem;
-        }
-
-        .hero-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .btn {
-            border: none;
-            border-radius: 999px;
-            padding: 0.95rem 1.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: #fff;
-            box-shadow: 0 12px 25px rgba(76, 110, 245, 0.3);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            border: 1px solid rgba(15, 23, 42, 0.18);
-            color: var(--text);
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .feature {
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            box-shadow: var(--shadow);
-        }
-
-        .feature h3 {
-            margin-top: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .feature p {
-            color: var(--muted);
-            font-size: 0.95rem;
-        }
-
-        .showcase {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.25rem;
-        }
-
-        .showcase figure {
-            margin: 0;
-            border-radius: var(--radius);
-            overflow: hidden;
-            background: #0f172a;
-            color: #fff;
-            position: relative;
-            min-height: 220px;
-            display: flex;
-            align-items: flex-end;
-            padding: 1.25rem;
-        }
-
-        .showcase span {
-            font-weight: 600;
-        }
-
-        .contact {
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: clamp(1.5rem, 5vw, 2.5rem);
-            box-shadow: var(--shadow);
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 2rem;
-        }
-
-        .login-page {
-            background: linear-gradient(135deg, rgba(76, 110, 245, 0.08), rgba(54, 79, 199, 0.05));
-            border-radius: var(--radius);
-            padding: clamp(2rem, 6vw, 3rem);
-            display: flex;
-            justify-content: center;
-        }
-
-        .login-card {
-            width: min(480px, 100%);
-            background: #fff;
-            border-radius: 26px;
-            padding: clamp(1.75rem, 4vw, 2.5rem);
-            box-shadow: 0 25px 55px rgba(15, 23, 42, 0.12);
-            border: 1px solid rgba(76, 110, 245, 0.12);
-        }
-
-        .login-card img {
-            width: 120px;
-            margin: 0 auto 1rem;
-            display: block;
-        }
-
-        .login-card h2 {
-            text-align: center;
-            margin-bottom: 0.25rem;
-        }
-
-        .login-subtitle {
-            text-align: center;
-            color: var(--muted);
-            margin-bottom: 1.5rem;
-        }
-
-        .login-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .login-form label {
-            font-weight: 600;
-            color: var(--muted);
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
-        }
-
-        .login-form input {
-            border-radius: 10px;
-        }
-
-        .login-alert {
-            border-radius: 12px;
-            padding: 0.9rem 1rem;
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
-
-        .login-alert.error {
-            background: rgba(244, 63, 94, 0.1);
-            color: #b91c1c;
-            border: 1px solid rgba(244, 63, 94, 0.3);
-        }
-
-        .login-alert.success {
-            background: rgba(34, 197, 94, 0.12);
-            color: #15803d;
-            border: 1px solid rgba(34, 197, 94, 0.35);
-        }
-
-        .login-actions {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-        }
-
-        .login-links {
-            margin-top: 1.25rem;
-            border-top: 1px solid rgba(15, 23, 42, 0.08);
-            padding-top: 1.25rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.6rem;
-        }
-
-        .login-links a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .login-guest {
-            border-radius: 12px;
-            padding: 0.85rem 1rem;
-            background: rgba(15, 23, 42, 0.04);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .login-guest button {
-            border-radius: 8px;
-            padding: 0.5rem 1rem;
-            border: none;
-            background: var(--text);
-            color: #fff;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .student-dashboard {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-            padding-top: 1rem;
-        }
-
-        .student-dashboard[hidden] {
-            display: none;
-        }
-
-        .courses-layout {
-            background: #fff;
-            border-radius: 26px;
-            padding: clamp(1.5rem, 4vw, 2.5rem);
-            box-shadow: var(--shadow);
-        }
-
-        .courses-header {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .eyebrow {
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            font-size: 0.75rem;
-            color: var(--muted);
-            margin: 0;
-        }
-
-        .filters {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 0.75rem;
-            width: min(520px, 100%);
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.3rem;
-            font-size: 0.85rem;
-            color: var(--muted);
-        }
-
-        .filter-group select,
-        .filter-group input {
-            border-radius: 12px;
-            border: 1px solid rgba(15, 23, 42, 0.18);
-            padding: 0.65rem 0.85rem;
-            font: inherit;
-        }
-
-        .course-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.2rem;
-        }
-
-        .course-card {
-            border-radius: 18px;
-            padding: 1rem;
-            color: #fff;
-            min-height: 150px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .course-card::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.25));
-            mix-blend-mode: soft-light;
-            pointer-events: none;
-        }
-
-        .course-card>* {
-            position: relative;
-            z-index: 1;
-        }
-
-        .course-body {
-            margin-bottom: 2rem;
-        }
-
-        .course-title {
-            font-weight: 600;
-            font-size: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 0.02em;
-        }
-
-        .course-format {
-            font-size: 0.85rem;
-            opacity: 0.85;
-        }
-
-        .course-footer {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 0.9rem;
-        }
-
-        .course-progress {
-            font-weight: 600;
-        }
-
-        .course-menu {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            border-radius: 50%;
-            width: 34px;
-            height: 34px;
-            color: #fff;
-            font-size: 1.1rem;
-            cursor: pointer;
-        }
-
-        .courses-view {
-            display: inline-flex;
-            gap: 0.4rem;
-            align-items: center;
-        }
-
-        .pill-button {
-            border: 1px solid rgba(15, 23, 42, 0.2);
-            background: transparent;
-            color: var(--text);
-            border-radius: 999px;
-            padding: 0.35rem 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .pill-button.active {
-            background: var(--text);
-            color: #fff;
-            border-color: var(--text);
-        }
-
-        .courses-footer {
-            margin-top: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            color: var(--muted);
-        }
-
-        .courses-footer select {
-            border-radius: 10px;
-            border: 1px solid rgba(15, 23, 42, 0.18);
-            padding: 0.4rem 0.8rem;
-            font: inherit;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        /* El atributo hidden debe ganar a cualquier display de clase */
-        [hidden] {
-            display: none !important;
-        }
-
-        /* Switch de la nueva experiencia (V2) en el header */
-        .v2-switch {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            user-select: none;
-        }
-        .v2-switch input {
-            position: absolute;
-            opacity: 0;
-            pointer-events: none;
-        }
-        .v2-switch .pista {
-            width: 38px;
-            height: 20px;
-            border-radius: 999px;
-            background: #cbd5e1;
-            position: relative;
-            transition: background 0.15s;
-            flex: none;
-        }
-        .v2-switch .pista::after {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #fff;
-            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.3);
-            transition: left 0.15s;
-        }
-        .v2-switch input:checked + .pista {
-            background: var(--primary);
-        }
-        .v2-switch input:checked + .pista::after {
-            left: 20px;
-        }
-        .v2-switch small {
-            font-size: 0.66rem;
-            line-height: 1.15;
-            color: var(--muted);
-            font-weight: 600;
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        input,
-        textarea {
-            border: 1px solid rgba(15, 23, 42, 0.15);
-            border-radius: 12px;
-            padding: 0.85rem 1rem;
-            font: inherit;
-            resize: vertical;
-        }
-
-        textarea {
-            min-height: 140px;
-        }
-
-        footer {
-            text-align: center;
-            padding: 2rem 1rem 3rem;
-            color: var(--muted);
-            font-size: 0.9rem;
-        }
-
-        @media (max-width: 640px) {
-            .app-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .nav-links {
-                flex-wrap: wrap;
-            }
-
-            .hero-actions {
-                flex-direction: column;
-                width: 100%;
-            }
-
-            .btn {
-                width: 100%;
-                text-align: center;
-            }
-
-            .login-actions {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .login-guest {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.75rem;
-            }
-        }
-
-        /* Chatbot Widget */
-        .chat-widget-btn {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: white;
-            border: none;
-            box-shadow: 0 4px 12px rgba(76, 110, 245, 0.4);
-            cursor: pointer;
-            display: grid;
-            place-items: center;
-            font-size: 1.5rem;
-            z-index: 1000;
-            transition: transform 0.2s ease;
-        }
-
-        .chat-widget-btn:hover {
-            transform: scale(1.05);
-        }
-
-        /* --- Support View Styles --- */
-        .ticket-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .ticket-table th,
-        .ticket-table td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .ticket-table th {
-            background: rgba(0, 0, 0, 0.3);
-            color: var(--gold);
-            font-weight: 600;
-        }
-
-        .ticket-table tr:hover {
-            background: rgba(255, 255, 255, 0.05);
-            cursor: pointer;
-        }
-
-        .status-badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .status-open {
-            background: rgba(0, 255, 0, 0.1);
-            color: #00ff00;
-        }
-
-        .status-closed {
-            background: rgba(255, 255, 255, 0.1);
-            color: #888;
-        }
-
-        /* Detail Modal */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-
-        .modal.open {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .modal-content {
-            background: #1a1a1a;
-            border: 1px solid var(--gold);
-            width: 90%;
-            max-width: 800px;
-            max-height: 90vh;
-            overflow-y: auto;
-            border-radius: 16px;
-            padding: 30px;
-            position: relative;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
-            color: #efefef;
-        }
-
-        .detail-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .detail-item label {
-            color: #aaa;
-            font-size: 0.9em;
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-
-        .detail-item span {
-            font-size: 1.1em;
-            color: #fff;
-            font-weight: 600;
-        }
-
-        .timeline {
-            border-left: 2px solid var(--gold-dim);
-            padding-left: 20px;
-            margin-top: 20px;
-        }
-
-        .timeline-item {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: -26px;
-            top: 5px;
-            width: 10px;
-            height: 10px;
-            background: var(--gold);
-            border-radius: 50%;
-        }
-
-        .timeline-date {
-            font-size: 0.8em;
-            color: #888;
-        }
-
-        .timeline-content {
-            background: rgba(255, 255, 255, 0.08);
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 5px;
-            border: 1px solid #333;
-            color: #ddd;
-        }
-
-        .timeline-content strong {
-            color: var(--gold);
-        }
-
-        .chat-widget-btn[hidden] {
-            display: none !important;
-        }
-
-        .chat-window {
-            position: fixed;
-            bottom: 6rem;
-            right: 2rem;
-            width: 350px;
-            height: 500px;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-            display: flex;
-            flex-direction: column;
-            z-index: 1000;
-            overflow: hidden;
-            transform-origin: bottom right;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            opacity: 0;
-            transform: scale(0.9);
-            pointer-events: none;
-        }
-
-        .chat-window.open {
-            opacity: 1;
-            transform: scale(1);
-            pointer-events: all;
-        }
-
-        .chat-header {
-            background: var(--primary);
-            color: white;
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .chat-header h3 {
-            margin: 0;
-            font-size: 1rem;
-        }
-
-        .chat-close {
-            background: transparent;
-            border: none;
-            color: white;
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
-
-        .chat-back {
-            background: transparent;
-            border: none;
-            color: white;
-            cursor: pointer;
-            font-size: 1.2rem;
-            margin-right: auto;
-            display: none;
-        }
-
-        .chat-messages {
-            flex: 1;
-            padding: 1rem;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-            background: #f8fafc;
-        }
-
-        .message {
-            max-width: 80%;
-            padding: 0.8rem 1rem;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-
-        .message.bot {
-            background: white;
-            border: 1px solid #e2e8f0;
-            align-self: flex-start;
-            border-bottom-left-radius: 2px;
-        }
-
-        .message.user {
-            background: var(--primary);
-            color: white;
-            align-self: flex-end;
-            border-bottom-right-radius: 2px;
-        }
-
-        .chat-input-area {
-            padding: 1rem;
-            background: white;
-            border-top: 1px solid #e2e8f0;
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .chat-input-area input {
-            flex: 1;
-            padding: 0.6rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 0.9rem;
-        }
-
-        .chat-send {
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            width: 40px;
-            cursor: pointer;
-            display: grid;
-            place-items: center;
-        }
-
-        .chat-attach-btn {
-            background: transparent;
-            color: var(--muted);
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            width: 40px;
-            cursor: pointer;
-            display: grid;
-            place-items: center;
-            font-size: 1.2rem;
-        }
-
-        .chat-attach-btn:hover {
-            background: #f1f5f9;
-            color: var(--primary);
-        }
-
-        .chat-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-
-        .chat-option-btn {
-            background: white;
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            padding: 0.4rem 0.8rem;
-            border-radius: 16px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .chat-option-btn:hover {
-            background: var(--primary);
-            color: white;
+        /* ---- Vista de acceso ---- */
+        .acc-header { height: 76px; display: flex; align-items: center; gap: 28px; padding: 0 48px; background: var(--v2-card); border-bottom: 1px solid var(--v2-border); }
+        .acc-header .logo { width: 196px; height: auto; }
+        .acc-header nav { display: flex; gap: 28px; }
+        .acc-header nav a { color: #26324d; text-decoration: none; font-size: 14px; font-weight: 600; }
+        .acc-header nav a:hover { color: var(--v2-primary); }
+        .acc-admin { margin-left: auto; display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--v2-muted); }
+        .acc-admin a { display: flex; align-items: center; gap: 6px; font-weight: 700; text-decoration: none; padding: 10px 14px; border: 1px solid var(--v2-border-strong); border-radius: var(--v2-radius-sm); color: var(--v2-heading); }
+        /* Altura natural centrada con margin:auto y tope de 1280px: se ve igual en cualquier monitor. */
+        .acc-main { flex: 0 0 auto; margin: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; padding: clamp(20px, 4vh, 44px) 48px; align-items: stretch; max-width: 1280px; width: 100%; }
+        .acc-card { background: var(--v2-card); border: 1px solid var(--v2-border); border-radius: var(--v2-radius-xl); padding: clamp(28px, 4.5vh, 42px) clamp(28px, 3.2vw, 50px); display: flex; flex-direction: column; gap: 20px; }
+        .acc-card .barra { width: 40px; height: 4px; background: var(--v2-accent); border-radius: 2px; }
+        .acc-card h1 { margin: 6px 0 0; font-size: clamp(27px, 2.3vw, 33px); line-height: 1.15; font-weight: 800; color: var(--v2-heading); letter-spacing: -0.5px; }
+        .acc-card .sub { margin: 0; font-size: 15px; color: var(--v2-muted); }
+        /* Tope ergonómico de ancho del formulario. */
+        .acc-form { display: flex; flex-direction: column; gap: 18px; width: 100%; max-width: 460px; }
+        .acc-beneficios { margin-top: auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding-top: 20px; border-top: 1px solid #e4e9f1; }
+        .acc-beneficios div { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; color: #26324d; }
+        .acc-beneficios span { width: 36px; height: 36px; flex-shrink: 0; border-radius: 10px; background: #eaf1fc; color: var(--v2-primary); display: flex; align-items: center; justify-content: center; }
+        .acc-panel { position: relative; background: var(--v2-navy); color: #fff; border-radius: var(--v2-radius-xl); padding: clamp(28px, 4.5vh, 40px) clamp(26px, 3vw, 44px); display: flex; flex-direction: column; gap: 22px; overflow: hidden; }
+        .acc-panel .kicker { font-size: 13px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--v2-accent-soft); }
+        .acc-panel h2 { margin: 0; font-size: clamp(24px, 2vw, 29px); line-height: 1.15; font-weight: 800; }
+        .acc-panel .texto { margin: 0; font-size: 15px; line-height: 1.5; color: var(--v2-navy-ink); }
+        /* El globo y la mascota son absolutos; la cabecera les reserva la columna derecha con padding. */
+        .acc-cabecera { display: flex; flex-direction: column; gap: 10px; }
+        @media (min-width: 1280px) { .acc-cabecera { padding-right: 240px; } }
+        .acc-qr { background: #fff; border-radius: 18px; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: 0 0 0 6px rgba(255, 255, 255, .12); width: fit-content; }
+        .acc-qr img { width: 172px; height: 172px; image-rendering: pixelated; }
+        .acc-qr span { font-size: 12px; font-weight: 700; color: var(--v2-heading); display: flex; align-items: center; gap: 6px; }
+        .acc-globo { position: absolute; right: 32px; top: 148px; background: #fff; color: var(--v2-heading); border-radius: 16px 16px 4px 16px; padding: 12px 16px; font-size: 14px; font-weight: 700; line-height: 1.35; max-width: 200px; }
+        .acc-mascota { position: absolute; right: 18px; top: 226px; width: 215px; height: auto; }
+        .acc-ventajas { margin-top: auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: rgba(255, 255, 255, .14); border-radius: 14px; overflow: hidden; position: relative; }
+        .acc-ventajas div { background: var(--v2-navy-2); padding: 14px; display: flex; flex-direction: column; gap: 6px; }
+        .acc-ventajas strong { font-size: 14px; }
+        .acc-ventajas span { font-size: 12px; color: var(--v2-navy-ink); }
+        .acc-ventajas .v2-ico { color: var(--v2-accent-soft); }
+        /* Quiebres: <1280 sin arte absoluto; <1080 columnas apiladas; <900 táctil; <700 sin QR. */
+        @media (max-width: 1279px) { .acc-globo, .acc-mascota { display: none; } }
+        @media (max-width: 1080px) {
+            .acc-main { grid-template-columns: 1fr; max-width: 760px; gap: 20px; }
+            .acc-form { max-width: none; }
+            .acc-panel h2, .acc-panel .texto { max-width: none; }
+            .acc-qr { align-self: center; }
+        }
+        @media (max-width: 900px) {
+            .acc-header { padding: 0 16px; gap: 14px; }
+            .acc-header nav { display: none; }
+            .acc-admin span { display: none; }
+            .acc-main { padding: 20px 16px; }
+            .acc-card { padding: 24px 20px; }
+            /* 16px/50px: evita el zoom automático de iOS al enfocar */
+            .acc-card .v2-box { height: 50px; }
+            .acc-card .v2-box input { font-size: 16px; }
+        }
+        @media (max-width: 700px) {
+            .acc-qr { display: none; }
+        }
+        @media (max-width: 560px) {
+            .acc-beneficios { grid-template-columns: 1fr; gap: 8px; }
+        }
+
+        /* ---- Cascarón Mis Tickets ---- */
+        .v2-side.alumno { width: 216px; }
+        .side-ayuda { position: relative; padding-top: 104px; margin-top: auto; }
+        .side-ayuda img { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 118px; height: auto; }
+        .side-ayuda .caja { position: relative; background: #fff; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; text-align: center; }
+        .side-ayuda strong { font-size: 14px; color: var(--v2-heading); }
+        .side-ayuda small { font-size: 12px; color: var(--v2-muted); }
+        .mt-zona { flex: 1; display: flex; min-height: 0; align-items: stretch; }
+        .mt-main { flex: 1; min-width: 0; padding: 24px 28px; display: flex; flex-direction: column; gap: 18px; }
+        .mt-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+        .mt-top h1 { margin: 0; font-size: 30px; font-weight: 800; color: var(--v2-heading); letter-spacing: -0.5px; }
+        .mt-top p { margin: 4px 0 0; font-size: 14px; color: var(--v2-muted); }
+        .mt-contadores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+        .mt-filtros { display: grid; grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr)); gap: 12px; align-items: end; padding: 14px 16px; background: var(--v2-card); border: 1px solid var(--v2-border); border-radius: 14px; }
+        @media (max-width: 1100px) { .mt-filtros { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        .tk-card { display: grid; grid-template-columns: 44px minmax(0, 1fr) 150px 132px; gap: 16px; align-items: center; padding: 14px 18px; background: var(--v2-card); border: 1px solid var(--v2-border); border-radius: 14px; cursor: pointer; text-align: left; font: inherit; color: inherit; width: 100%; }
+        .tk-card.on { border-color: var(--v2-primary); box-shadow: 0 0 0 1px var(--v2-primary); }
+        .tk-card .cat { width: 44px; height: 44px; border-radius: 12px; background: #eef2f8; color: var(--v2-heading); display: flex; align-items: center; justify-content: center; }
+        .tk-card .linea1 { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+        .tk-card .linea1 strong { font-size: 15px; color: var(--v2-heading); flex-shrink: 0; }
+        .tk-card .linea1 span { font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tk-card .metas { display: flex; gap: 14px; overflow: hidden; margin-top: 6px; }
+        .tk-card .meta { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--v2-muted); white-space: nowrap; }
+        .tk-card .lado { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+        .tk-card .act { font-size: 12px; color: var(--v2-muted); }
+        @media (max-width: 760px) {
+            .tk-card { grid-template-columns: 44px minmax(0, 1fr); }
+            .tk-card .lado { grid-column: 2; }
+            .tk-card .accion { grid-column: 1 / -1; }
+        }
+
+        /* ---- Responsivo del cascarón ---- */
+        @media (max-width: 760px) {
+            .mt-main { padding: 16px; }
+            .mt-contadores { grid-template-columns: 1fr; gap: 10px; }
+            .mt-contadores .v2-kpi { padding: 10px 14px; }
+        }
+        @media (max-width: 620px) {
+            .v2-header .titulo, .v2-header .divisor { display: none; }
+            .v2-header > img { width: 140px; }
+            #chip-sub { display: none; }
+            #btn-salir .txt { display: none; } /* queda el icono con aria-label */
+            #btn-salir { padding: 0 10px; }
+        }
+        @media (max-width: 480px) {
+            .v2-chip-usuario .quien { display: none; } /* queda el avatar con iniciales */
+        }
+
+        /* ---- Panel de detalle (380px) con pestañas Ticket / Lumix ---- */
+        .panel-tabs { flex-shrink: 0; min-height: 60px; display: flex; align-items: center; padding: 10px 14px; background: #eef2f8; border-bottom: 1px solid var(--v2-border); }
+        .panel-tabs .v2-seg { flex: 1; background: transparent; padding: 0; gap: 6px; }
+        .panel-tabs .v2-seg button { flex: 1; background: transparent; height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 0; }
+        .panel-tabs .v2-seg button.on { background: #fff; color: var(--v2-heading); box-shadow: 0 1px 3px rgba(14, 26, 51, .12); }
+        .panel-tabs .v2-seg button img { width: 22px; height: 22px; border-radius: 50%; background: #ddf1f6; flex-shrink: 0; }
+        .panel-tabs .v2-seg button span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .panel-hoja { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+        #panel-lumix .lumix-msgs { background: #f7f9fc; }
+        /* Panel pegajoso bajo el header, con el alto restante; --hdr lo fija JS con la altura real del header. */
+        .mt-panel { width: 380px; flex-shrink: 0; background: var(--v2-card); border-left: 1px solid var(--v2-border); display: flex; flex-direction: column; min-height: 0; position: sticky; top: var(--hdr, 72px); align-self: flex-start; height: calc(100vh - var(--hdr, 72px)); height: calc(100dvh - var(--hdr, 72px)); }
+        .mt-panel .cabeza, .mt-panel .pie { flex-shrink: 0; }
+        /* Barra de gestos de los teléfonos: que Enviar no la pise */
+        .mt-panel .pie { padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+        .mt-panel .cabeza { padding: 20px 22px 14px; border-bottom: 1px solid #e4e9f1; display: flex; flex-direction: column; gap: 8px; }
+        .mt-panel .cabeza h2 { margin: 0; font-size: 22px; font-weight: 800; color: var(--v2-heading); }
+        .mt-panel .cuerpo { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 22px; display: flex; flex-direction: column; gap: 18px; }
+        .mt-panel h3 { margin: 0; font-size: 14px; font-weight: 700; color: var(--v2-heading); }
+        .mt-panel .pie { padding: 12px 22px 16px; border-top: 1px solid #e4e9f1; display: flex; flex-direction: column; gap: 8px; }
+        .mt-panel .cerrar-panel { display: none; }
+        .panel-msg { display: flex; gap: 10px; }
+        .panel-msg .burb { flex: 1; min-width: 0; border-radius: 4px 12px 12px 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; background: #f2f5fa; }
+        .panel-msg.staff .burb { background: #eaf1fc; }
+        .panel-msg .meta { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+        .panel-msg .meta strong { font-size: 12px; }
+        .panel-msg .meta span { font-size: 11px; color: var(--v2-muted); white-space: nowrap; }
+        .panel-msg .txt { font-size: 13px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+        @media (max-width: 1100px) {
+            /* 100dvh: 100vh incluye la zona tras la barra del navegador y el pie quedaba oculto. */
+            .mt-panel { position: fixed; inset: 0 0 0 auto; width: 100%; max-width: 400px; height: 100vh; height: 100dvh; z-index: 70; transform: translateX(100%); transition: transform .2s ease; border-left: 1px solid var(--v2-border); }
+            /* Cajón abierto: scrim (sombra de 100vmax) que oscurece el fondo. */
+            .mt-panel.abierta { transform: translateX(0); box-shadow: 0 0 0 100vmax rgba(6, 15, 40, .45), 0 24px 60px rgba(11, 31, 77, .3); }
+            .mt-panel .cerrar-panel { display: inline-flex; }
+        }
+        /* En teléfono el cajón es una hoja de ancho COMPLETO */
+        @media (max-width: 560px) {
+            .mt-panel { max-width: none; border-left: 0; }
         }
     </style>
 </head>
 
 <body>
-    <header>
-        <div class="app-header">
-            <div class="brand">
-                <img src="assets/images/lux-logo.svg" alt="Logo Universidad Lux" />
-                <div>
-                    <span class="brand-name">Universidad Lux</span>
-                    <small>Campus Digital</small>
-                </div>
-            </div>
-            <nav aria-label="Navegación principal">
-                <ul class="nav-links">
-                    <li><a href="#login" class="nav-link" data-route="login">Inicio</a></li>
-                    <li><a href="#mis-cursos" class="nav-link" data-route="tablero">Tablero</a></li>
-                    <li><a href="#mis-cursos" class="nav-link" data-route="mis-cursos">Mis cursos</a></li>
-                    <li><a href="#soporte" class="nav-link" data-route="soporte-luxia">Soporte LuxIA</a></li>
-
-                </ul>
+    <!-- Vista de acceso -->
+    <div id="auth" hidden style="min-height:100vh; display:flex; flex-direction:column; background:var(--v2-bg);">
+        <header class="acc-header">
+            <img class="logo" src="assets/logo-lux.png" alt="Universidad Lux">
+            <nav aria-label="Principal">
+                <a href="index.html">Inicio</a>
+                <a href="#beneficios">Servicios</a>
+                <a href="lumix.html">Ayuda</a>
             </nav>
-            <div class="header-actions">
-                <label class="v2-switch" title="Activar o desactivar la nueva experiencia (V2)">
-                    <input type="checkbox" id="v2-switch">
-                    <span class="pista"></span>
-                    <small>Nueva<br>experiencia</small>
-                </label>
-                <button class="icon-button" aria-label="Notificaciones">🔔</button>
-                <button class="icon-button" aria-label="Mensajes">✉️</button>
-                <div class="profile-chip">
-                    <span id="profile-initials">AT</span>
-                    <small id="profile-name">Perfil</small>
-                </div>
-                <button class="icon-button" id="logout-btn" aria-label="Cerrar sesión" title="Cerrar sesión" hidden>🚪</button>
+            <!-- El personal también entra por aquí; su rol lo lleva al panel de gestión -->
+            <div class="acc-admin">
+                <span>¿Eres personal de la universidad? Inicia sesión aquí mismo: tu rol te lleva a tu panel.</span>
             </div>
-        </div>
-    </header>
-
-    <main>
-        <section id="login" class="login-page">
-            <div class="login-card">
-                <img src="assets/images/lux-logo.svg" alt="Logo Universidad Lux" />
-                <h2>Ingreso a Campus Lux</h2>
-                <p class="login-subtitle">Ingresa con tu correo institucional y contraseña.</p>
-                <hr />
-                <div id="login-alert" class="login-alert error" hidden>
-                    Credenciales inválidas. Intenta nuevamente.
+        </header>
+        <main class="acc-main">
+            <section class="acc-card" aria-labelledby="acc-titulo">
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    <div class="barra"></div>
+                    <h1 id="acc-titulo">Portal de Atención al Estudiante</h1>
+                    <p class="sub">Registra, consulta y da seguimiento a tus solicitudes.</p>
                 </div>
-                <form id="login-form" class="login-form">
-                    <label>
-                        Correo Electrónico
-                        <input type="email" name="email" autocomplete="email" required placeholder="ejemplo@lux.edu">
-                    </label>
-                    <label>
-                        Contraseña
-                        <input type="password" name="password" autocomplete="current-password" required>
-                    </label>
-                    <div class="login-actions">
-                        <button type="submit" class="btn btn-primary">Iniciar sesión</button>
-                        <button type="button" class="btn btn-secondary">¿Olvidaste tu contraseña?</button>
+                <!-- Alta administrada: sin pestaña de registro -->
+                <div id="auth-error" class="v2-auth-error" role="alert">
+                    <span data-ico="ui.alerta" data-tam="media" style="margin-top:1px;"></span>
+                    <span>Credenciales incorrectas. Verifica tu correo y contraseña.</span>
+                </div>
+                <form id="auth-form" class="acc-form">
+                    <div class="v2-field">
+                        <label class="v2-lbl" for="l-usr">Correo institucional</label>
+                        <div class="v2-box"><span data-ico="ui.persona"></span><input id="l-usr" type="text" placeholder="a012345@universidadlux.edu.mx" autocomplete="username" required></div>
                     </div>
+                    <div class="v2-field">
+                        <label class="v2-lbl" for="l-pwd">Contraseña</label>
+                        <div class="v2-box"><span data-ico="ui.candado"></span><input id="l-pwd" type="password" placeholder="Tu contraseña" autocomplete="current-password" required>
+                            <button type="button" class="pelar" id="l-ojo" aria-label="Mostrar contraseña"><span data-ico="ui.ojo"></span></button>
+                        </div>
+                    </div>
+                    <button type="submit" id="l-entrar" class="v2-btn grande" style="margin-top:6px;">Ingresar<span data-ico="ui.siguiente" data-tam="media"></span></button>
+                    <p style="margin:0; text-align:center; font-size:13px; color:var(--v2-muted);">El alta de cuentas la gestiona la universidad. ¿No tienes acceso? Acude a Servicios Escolares.</p>
                 </form>
-                <div class="login-links">
-                    <span>Algunos cursos permiten acceso invitado</span>
-                    <div class="login-guest">
-                        <div>
-                            <strong>Visitante</strong>
-                            <p style="margin: 0; color: var(--muted); font-size: 0.9rem;">Explora contenido limitado sin
-                                credenciales.</p>
-                        </div>
-                        <button type="button">Entrar como invitado</button>
-                    </div>
-                    <a id="v2-access" href="v2/alumnos.html" hidden style="display:block; text-align:center; padding:10px; border-radius:10px; background:#eef3ff; color:#1652c0; font-weight:600; text-decoration:none;">✨ Probar la nueva experiencia <small>(beta)</small></a>
-                    <div id="v2-qr" hidden style="display:flex; align-items:center; gap:12px; background:#f4f8ff; border:1px solid #dfe6f3; border-radius:12px; padding:10px;">
-                        <img src="v2/assets/qr-lumix.svg" alt="Código QR para abrir Lumix" width="88" height="88" style="border-radius:8px; background:#fff; padding:4px;">
-                        <div style="font-size:0.85rem; line-height:1.35;">¿Necesitas reportar un problema?<br><strong style="color:#1652c0;">Escanea y habla con Lumix</strong> desde tu celular.</div>
-                    </div>
-                    <a href="#">Aviso de cookies</a>
+                <div id="beneficios" class="acc-beneficios">
+                    <div><span data-ico="ui.reloj" data-tam="media"></span>Atención más rápida</div>
+                    <div><span data-ico="ui.escudo" data-tam="media"></span>Seguimiento en tiempo real</div>
+                    <div><span data-ico="canal.lumix" data-tam="media"></span>Un solo canal de comunicación</div>
                 </div>
+            </section>
+            <section class="acc-panel" aria-labelledby="qr-titulo">
+                <div class="acc-cabecera">
+                    <span class="kicker">Asistente virtual</span>
+                    <h2 id="qr-titulo">¿Necesitas reportar un problema?</h2>
+                    <p class="texto">Escanea el código QR con tu celular y Lumix te guiará paso a paso para registrar tu incidencia.</p>
+                </div>
+                <div class="acc-qr">
+                    <img src="assets/qr-lumix.svg" alt="Código QR para abrir Lumix en tu celular">
+                    <span><span data-ico="ui.qr" data-tam="chica"></span>Escanea para abrir Lumix</span>
+                </div>
+                <div class="acc-globo">¡Hola! Soy Lumix, tu asistente de soporte.</div>
+                <img class="acc-mascota" src="assets/lumix.png" alt="">
+                <div class="acc-ventajas">
+                    <div><span data-ico="ui.rayo" data-tam="grande"></span><strong>Rápido</strong><span>Reporta en pocos pasos</span></div>
+                    <div><span data-ico="canal.lumix" data-tam="grande"></span><strong>Guiado</strong><span>Lumix te pregunta lo necesario</span></div>
+                    <div><span data-ico="ui.celular" data-tam="grande"></span><strong>Desde tu celular</strong><span>Adjunta fotos al momento</span></div>
+                </div>
+                <a class="v2-btn acento" href="lumix.html" style="position:relative; min-height:48px;">¿Ya estás en tu celular? Abrir Lumix<span data-ico="ui.siguiente" data-tam="media"></span></a>
+            </section>
+        </main>
+    </div>
+
+    <!-- Cascarón Mis Tickets -->
+    <div id="shell" class="v2-shell" hidden style="flex-direction:column; min-height:100vh;">
+        <header class="v2-header" style="gap:20px;">
+            <img src="assets/logo-lux.png" alt="Universidad Lux" style="width:176px; height:auto;">
+            <div class="divisor" style="width:1px; height:36px; background:var(--v2-border);"></div>
+            <div class="titulo">
+                <strong>Portal de Atención al Estudiante</strong>
+                <span>Tu espacio de soporte, siempre contigo</span>
             </div>
-        </section>
-        <div id="student-dashboard" class="student-dashboard" hidden>
-            <section id="mis-cursos" class="courses-layout">
-                <div class="courses-header">
-                    <div>
-                        <p class="eyebrow">Vista general del curso</p>
-                        <h1>Mis cursos</h1>
-                    </div>
-                    <div class="courses-view">
-                        <button type="button" class="pill-button active">Tarjeta</button>
-                        <button type="button" class="pill-button">Lista</button>
-                    </div>
+            <div style="margin-left:auto; display:flex; align-items:center; gap:14px;">
+                <button id="btn-notifs" class="v2-bell" aria-label="Notificaciones"><span data-ico="ui.campana" data-tam="grande"></span><span id="notif-punto" class="punto" hidden></span></button>
+                <div class="v2-chip-usuario">
+                    <span class="v2-ava navy" id="chip-ava"></span>
+                    <div class="quien"><strong id="chip-nombre"></strong><span id="chip-sub"></span></div>
                 </div>
-
-                <div class="filters">
-                    <label class="filter-group">
-                        <span>Categoría</span>
-                        <select>
-                            <option>Todos</option>
-                            <option>Virtual</option>
-                            <option>Presencial</option>
-                            <option>Licenciatura</option>
-                        </select>
-                    </label>
-                    <label class="filter-group">
-                        <span>Buscar</span>
-                        <input type="search" placeholder="Nombre del curso" />
-                    </label>
-                    <label class="filter-group">
-                        <span>Ordenar por</span>
-                        <select>
-                            <option>Nombre de curso</option>
-                            <option>Fecha de inicio</option>
-                            <option>Progreso</option>
-                        </select>
-                    </label>
-                    <label class="filter-group">
-                        <span>Vista</span>
-                        <select>
-                            <option>Tarjeta</option>
-                            <option>Lista</option>
-                        </select>
-                    </label>
-                </div>
-
-                <div class="course-grid">
-                    <article class="course-card" style="background: linear-gradient(135deg, #7c5bff, #5d34f3);">
-                        <div class="course-body">
-                            <p class="course-format">Virtual</p>
-                            <p class="course-title">Competencias comunicativas (virtual) 2025-3</p>
-                        </div>
-                        <div class="course-footer">
-                            <span class="course-progress">14% completado</span>
-                            <button class="course-menu" aria-label="Opciones">⋮</button>
-                        </div>
-                    </article>
-                    <article class="course-card" style="background: linear-gradient(135deg, #5d9ff3, #1877d2);">
-                        <div class="course-body">
-                            <p class="course-format">Virtual</p>
-                            <p class="course-title">Desarrollo humano (virtual) 2025-3</p>
-                        </div>
-                        <div class="course-footer">
-                            <span class="course-progress">Unidad 3</span>
-                            <button class="course-menu" aria-label="Opciones">⋮</button>
-                        </div>
-                    </article>
-                    <article class="course-card" style="background: linear-gradient(135deg, #1fa675, #0d7f57);">
-                        <div class="course-body">
-                            <p class="course-format">Licenciatura</p>
-                            <p class="course-title">Estructura de datos (sáb. 8:00 a 11:00)</p>
-                        </div>
-                        <div class="course-footer">
-                            <span class="course-progress">Nuevo contenido</span>
-                            <button class="course-menu" aria-label="Opciones">⋮</button>
-                        </div>
-                    </article>
-                    <article class="course-card" style="background: linear-gradient(135deg, #7f6cf3, #8460d9);">
-                        <div class="course-body">
-                            <p class="course-format">Licenciatura</p>
-                            <p class="course-title">Fundamentos de base de datos (sab.)</p>
-                        </div>
-                        <div class="course-footer">
-                            <span class="course-progress">Semana 5</span>
-                            <button class="course-menu" aria-label="Opciones">⋮</button>
-                        </div>
-                    </article>
-                    <article class="course-card" style="background: linear-gradient(135deg, #2d9cca, #16658c);">
-                        <div class="course-body">
-                            <p class="course-format">Licenciatura</p>
-                            <p class="course-title">Fundamentos de redes (sab. 4:00 pm)</p>
-                        </div>
-                        <div class="course-footer">
-                            <span class="course-progress">Proyecto abierto</span>
-                            <button class="course-menu" aria-label="Opciones">⋮</button>
-                        </div>
-                    </article>
-                    <article class="course-card" style="background: linear-gradient(135deg, #5648c7, #40289b);">
-                        <div class="course-body">
-                            <p class="course-format">Licenciatura</p>
-                            <p class="course-title">Integrales y aplicaciones (sab. horario)</p>
-                        </div>
-                        <div class="course-footer">
-                            <span class="course-progress">Examen pronto</span>
-                            <button class="course-menu" aria-label="Opciones">⋮</button>
-                        </div>
-                    </article>
-                </div>
-
-                <div class="courses-footer">
-                    <span>Mostrar</span>
-                    <select>
-                        <option>Todos</option>
-                        <option>5</option>
-                        <option>10</option>
-                    </select>
-                </div>
-            </section>
-
-            <!-- Vista de soporte -->
-            <section id="support-view" class="view-section" style="display:none; padding:80px 20px;">
-                <div class="container mx-auto max-w-6xl">
-                    <h2 class="text-3xl font-bold mb-6 text-white border-l-4 border-yellow-500 pl-4">Soporte LuxIA</h2>
-                    <p class="text-white/60 mb-8 max-w-2xl">Consulta el estado de tus tickets y el historial de
-                        atención.</p>
-
-                    <table class="ticket-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Título</th>
-                                <th>Estado</th>
-                                <th>Prioridad</th>
-                                <th>Asignado</th>
-                                <th>Fecha</th>
-                            </tr>
-                        </thead>
-                        <tbody id="ticket-list-body">
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Modal de detalle -->
-                <div id="ticket-detail-modal" class="modal">
-                    <div class="modal-content">
-                        <button onclick="closeTicketModal()"
-                            style="position:absolute; top:15px; right:15px; background:none; border:none; color:white; font-size:1.5em; cursor:pointer;">&times;</button>
-                        <div id="ticket-detail-content"></div>
+                <button id="btn-salir" class="v2-btn secundario" style="min-height:40px;"><span data-ico="ui.salir" data-tam="media"></span><span class="txt">Cerrar sesión</span></button>
+            </div>
+        </header>
+        <div class="mt-zona">
+            <aside class="v2-side alumno">
+                <nav aria-label="Secciones" style="margin-top:6px;">
+                    <a href="#" id="nav-tickets"><span data-ico="ui.ticket"></span>Mis Tickets</a>
+                    <a href="lumix.html" id="nav-nuevo"><span data-ico="ui.mas"></span>Nuevo reporte</a>
+                    <a href="#ayuda" id="nav-ayuda"><span data-ico="ui.info"></span>Ayuda</a>
+                    <a href="#perfil" id="nav-perfil"><span data-ico="ui.persona"></span>Mi perfil</a>
+                </nav>
+                <div class="side-ayuda">
+                    <img src="assets/lumix.png" alt="">
+                    <div class="caja">
+                        <strong>¿Necesitas ayuda?</strong>
+                        <a class="v2-btn" href="lumix.html" id="card-lumix" style="min-height:42px;">Hablar con Lumix</a>
+                        <small>También desde tu celular</small>
                     </div>
                 </div>
-            </section>
-        </div>
-    </main>
-
-    <footer>
-        © <span id="year"></span> Universidad Lux. Todos los derechos reservados.
-    </footer>
-
-    <!-- Widget del chat Lux-IA -->
-    <button id="chat-trigger" class="chat-widget-btn" aria-label="Abrir chat de soporte" hidden>
-        💬
-    </button>
-
-    <div id="chat-window" class="chat-window">
-        <div class="chat-header">
-            <button id="chat-back" class="chat-back" aria-label="Atrás">⬅</button>
-            <h3 style="margin-left: 0.5rem;">Lux-IA</h3>
-            <button id="chat-close" class="chat-close" style="margin-left: auto;">×</button>
-        </div>
-        <div id="chat-messages" class="chat-messages"></div>
-        <div class="chat-input-area">
-            <button id="chat-attach" class="chat-attach-btn" title="Adjuntar evidencia" disabled>📎</button>
-            <input type="file" id="chat-file" accept="image/*,.pdf" hidden>
-            <input type="text" id="chat-input" placeholder="Escribe un mensaje..." disabled>
-            <button id="chat-send" class="chat-send" disabled>➤</button>
+                <div class="abajo" style="margin-top:18px;">
+                    <span class="v2-lema">Tu universidad<br>siempre contigo</span>
+                    <span class="v2-lema-barra"></span>
+                </div>
+            </aside>
+            <main class="mt-main" id="vista">
+                <div class="v2-card"><p class="v2-nota" style="margin:0;">Cargando…</p></div>
+            </main>
+            <aside class="mt-panel" id="panel" aria-label="Detalle del ticket y Lumix">
+                <!-- Control segmentado Ticket / Lumix -->
+                <div class="panel-tabs">
+                    <div role="tablist" aria-label="Panel" class="v2-seg">
+                        <button role="tab" id="tab-ticket" aria-selected="true" class="on"><span data-ico="ui.ticket" data-tam="media"></span><span id="tab-ticket-txt">Detalle</span></button>
+                        <button role="tab" id="tab-lumix" aria-selected="false"><img src="assets/lumix-avatar.png" alt=""><span>Hablar con Lumix</span></button>
+                    </div>
+                    <button type="button" class="v2-ib cerrar-panel" id="p-cerrar-tabs" aria-label="Cerrar panel" style="margin-left:8px;"><span data-ico="ui.cerrar" data-tam="media"></span></button>
+                </div>
+                <div id="panel-ticket" class="panel-hoja"></div>
+                <div id="panel-lumix" class="panel-hoja" hidden></div>
+            </aside>
         </div>
     </div>
 
-    <!-- Visor de imágenes -->
-    <div id="image-viewer-modal"
-        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10000; align-items:center; justify-content:center; flex-direction:column;">
-        <button onclick="closeImageViewer()"
-            style="position:absolute; top:20px; right:30px; background:none; border:none; color:white; font-size:40px; cursor:pointer;">×</button>
-        <img id="image-viewer-img" src=""
-            style="max-width:90%; max-height:85%; border-radius:8px; box-shadow:0 0 20px rgba(0,0,0,0.5);">
-        <p style="color:#aaa; margin-top:10px;">Clic fuera de la imagen para cerrar</p>
+    <div id="notif-panel" class="v2-notif-panel" hidden>
+        <div style="display:flex; align-items:center; gap:8px; padding-bottom:6px;">
+            <strong style="flex:1;">Notificaciones</strong>
+            <button id="btn-leidas" class="v2-btn secundario" style="min-height:32px; font-size:12px; padding:0 10px;">Marcar leídas</button>
+        </div>
+        <div id="notif-lista"></div>
     </div>
 
-    <!-- Integración con Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2" integrity="sha384-WgXwGL6fUsYJWNaKJgVbrJKGRQwc1vieh2oy4kw9nXqpNDz3tdSsqEYUgeHD/NuF" crossorigin="anonymous"></script>
+    <div id="lightbox" class="v2-lightbox">
+        <img id="lightbox-img" alt="Evidencia">
+        <p>Clic fuera de la imagen para cerrar</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2"
+        integrity="sha384-WgXwGL6fUsYJWNaKJgVbrJKGRQwc1vieh2oy4kw9nXqpNDz3tdSsqEYUgeHD/NuF"
+        crossorigin="anonymous"></script>
     <script src="config.js"></script>
+    <script src="iconos.js"></script>
+    <script src="shared.js"></script>
+    <script src="lumix-chat.js"></script>
     <script>
-        document.getElementById('year').textContent = new Date().getFullYear();
+        (async function () {
+            const esc = Lux.esc;
+            const $ = (id) => document.getElementById(id);
+            const vista = $('vista'), panel = $('panel'), hojaTicket = $('panel-ticket');
+            const esMovil = () => window.matchMedia('(max-width: 1100px)').matches;
+            const { badgeEstado, fmtFecha, fmtFechaCorta, fmtAct, slaDe, nombreDe, iniciales,
+                iconoCategoria, fmtBytes, svgIcono, canalDe } = Lux.ui;
 
-        const loginForm = document.getElementById('login-form');
-        const loginAlert = document.getElementById('login-alert');
-        const loginSection = document.getElementById('login');
-        const studentDashboard = document.getElementById('student-dashboard');
-        const navLinks = document.querySelectorAll('.nav-link');
-
-        // supabase (global del bundle UMD) se reemplaza aqui por el cliente.
-        try {
-            if (window.supabaseConfig && window.supabase) {
-                supabase = window.supabase.createClient(window.supabaseConfig.url, window.supabaseConfig.key);
-            } else {
-                console.warn('Sin config de Supabase o librería sin cargar; modo sin conexión.');
-            }
-        } catch (err) {
-            console.error('Error al inicializar Supabase:', err);
-        }
-
-        // Ref del proyecto Supabase, derivado de config.js.
-        const projectRef = window.supabaseConfig
-            ? new URL(window.supabaseConfig.url).hostname.split('.')[0]
-            : '';
-
-        // Escapa texto del servidor antes de insertarlo en innerHTML (anti-XSS).
-        const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({
-            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-        })[c]);
-
-        // Traduce errores tecnicos a mensajes utiles. Los marcados esMensajeUsuario
-        // (reglas de negocio del servidor) pasan tal cual.
-        const mensajeError = (e, fallback) => {
-            const m = String((e && e.message) || e || '').trim();
-            if (e && e.esMensajeUsuario && m) return m;
-            const t = m.toLowerCase();
-            if (/failed to fetch|networkerror|load failed|network request failed/.test(t))
-                return 'Sin conexión con el servidor. Revisa tu internet e inténtalo de nuevo.';
-            if (t.includes('invalid login credentials')) return 'Correo o contraseña incorrectos.';
-            if (t.includes('email not confirmed')) return 'Tu cuenta aún no está confirmada: abre el enlace que te llegó por correo.';
-            if (/too many requests|rate limit|security purposes/.test(t)) return 'Demasiados intentos. Espera un minuto y vuelve a intentarlo.';
-            if (/row-level security|permission denied|not authorized|forbidden|unauthorized/.test(t)) return 'Tu cuenta no tiene permiso para esta acción.';
-            if (/jwt|invalid token|token expired|sesión no disponible/.test(t)) return 'Tu sesión expiró. Vuelve a iniciar sesión e inténtalo de nuevo.';
-            if (/^http 5\d\d$/.test(t) || t.includes('internal server error')) return 'El servidor tuvo un problema. Inténtalo de nuevo en un momento.';
-            if (/[áéíóúñ¿¡]/.test(m)) return m; // ya viene en español (reglas de la BD)
-            return fallback || 'Algo salió mal. Inténtalo de nuevo en un momento.';
-        };
-
-        // --- Catalogos (Edge Function catalog-service) ---
-        async function loadCatalogs() {
-            try {
-                const { data: { session } } = await supabase.auth.getSession();
-                const token = session?.access_token;
-                const funcUrl = `https://${projectRef}.supabase.co/functions/v1/catalog-service`;
-
-                const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-
-                const resp = await fetch(funcUrl, { headers });
-                if (!resp.ok) throw new Error('Failed to fetch catalogs');
-
-                const data = await resp.json();
-
-                if (data.categorias) {
-                    CATEGORY_MAP = {};
-                    data.categorias.forEach(c => {
-                        const key = c.nombre.toLowerCase().replace(/\s+/g, '_').replace(/[^\w]/g, '');
-                        CATEGORY_MAP[c.codigo || key] = c.catalogo_id; // codigo sembrado = valor del chat
-                    });
-                }
-                if (data.prioridades) {
-                    PRIORITY_MAP = {};
-                    data.prioridades.forEach(p => {
-                        const CODIGO_A_CHAT = {}; // los codigos ya coinciden con los valores del chat
-                        const key = CODIGO_A_CHAT[p.codigo] || p.codigo || p.nombre.toLowerCase();
-                        PRIORITY_MAP[key] = p.catalogo_id;
-                    });
-                }
-
-                if (data.areas && data.areas.length > 0) {
-                    AREA_MAP = {};
-                    data.areas.forEach(a => { if (a.codigo) AREA_MAP[a.codigo] = a.catalogo_id; });
-                    const soporte = data.areas.find(a => a.nombre.toLowerCase().includes('soporte'));
-                    if (soporte) {
-                        DEFAULT_AREA_ID = soporte.catalogo_id;
-                    } else {
-                        DEFAULT_AREA_ID = data.areas[0].catalogo_id;
-                    }
-                }
-
-            } catch (e) {
-                console.warn('catalog-service no disponible; se usan los mapas estáticos:', e);
-                CATEGORY_MAP = STATIC_CATEGORY_MAP;
-                PRIORITY_MAP = STATIC_PRIORITY_MAP;
-            }
-        }
-
-        loadCatalogs();
-
-        function setActiveNav(route) {
-            navLinks.forEach((link) => {
-                const isActive = link.dataset.route === route;
-                link.classList.toggle('active', isActive);
+            document.querySelectorAll('[data-ico]').forEach(el => {
+                el.innerHTML = svgIcono(el.dataset.ico, el.dataset.tam || '');
             });
-        }
 
-        // Roles con permisos de gestión; el backend valida con RLS + es_staff().
-        const STAFF_ROLES = ['Soporte', 'Administrativo', 'Administrador'];
+            const state = {
+                perfil: null, catalogs: null, tickets: [],
+                filtro: { q: '', estado: '', categoria: '', desde: '', hasta: '' },
+                sel: null,          // ticket seleccionado (panel derecho)
+                detalle: null,      // cache del /details del seleccionado
+                panelTab: 'ticket', // pestaña del panel: 'ticket' | 'lumix'
+                // Borrador de la respuesta: sobrevive re-renders; se limpia al enviar o cambiar de ticket.
+                borradorPanel: '', borradorPanelTicket: null,
+            };
+            let cargarNotifs = () => { };
+            let chat = null; // instancia embebida de Lumix (se monta al primer uso)
 
-        function updateProfileChip() {
-            const initialsEl = document.getElementById('profile-initials');
-            const nameEl = document.getElementById('profile-name');
-            const logoutBtn = document.getElementById('logout-btn');
-            const u = chatState.user;
-            if (u && u.fullName) {
-                const initials = u.fullName.trim().split(/\s+/).map(p => p[0]).slice(0, 2).join('').toUpperCase() || 'US';
-                initialsEl.textContent = initials;
-                nameEl.textContent = u.fullName.split(' ')[0];
-                logoutBtn.hidden = false;
-            } else {
-                initialsEl.textContent = 'AT';
-                nameEl.textContent = 'Perfil';
-                logoutBtn.hidden = true;
+            // ---------- Pestañas del panel + Lumix embebido ----------
+            function setPanelTab(tab) {
+                state.panelTab = tab;
+                $('tab-ticket').classList.toggle('on', tab === 'ticket');
+                $('tab-ticket').setAttribute('aria-selected', tab === 'ticket');
+                $('tab-lumix').classList.toggle('on', tab === 'lumix');
+                $('tab-lumix').setAttribute('aria-selected', tab === 'lumix');
+                hojaTicket.hidden = tab !== 'ticket';
+                $('panel-lumix').hidden = tab !== 'lumix';
             }
-        }
-
-        // Carga el perfil extendido y lo deja en chatState.user
-        async function hydrateUser(user) {
-            chatState.user = { id: user.id, email: user.email };
-            const { data: profile } = await supabase
-                .from('usuario')
-                .select('tipo_usuario, nombre, apellido, usuario_id')
-                .eq('auth_uid', user.id)
-                .single();
-
-            chatState.user.role = profile ? profile.tipo_usuario : 'estudiante';
-            chatState.user.profileId = profile ? profile.usuario_id : null;
-            chatState.user.fullName = profile ? `${profile.nombre} ${profile.apellido}` : 'Usuario';
-            updateProfileChip();
-        }
-
-        // Router de vistas: única función que muestra/oculta secciones; sin sesión solo 'login'.
-        function showView(route) {
-            const logged = !!chatState.user;
-            const isStaff = logged && STAFF_ROLES.includes(chatState.user.role);
-            if (!logged && route !== 'login') route = 'login';
-            if (logged && (route === 'login' || route === 'tablero')) route = 'mis-cursos';
-
-            const cursos = document.getElementById('mis-cursos');
-            const support = document.getElementById('support-view');
-
-            if (route === 'login') {
-                loginSection.classList.remove('hidden');
-                loginSection.style.display = '';
-                studentDashboard.setAttribute('hidden', '');
-                if (chatTrigger) chatTrigger.setAttribute('hidden', '');
-                setActiveNav('login');
-                return;
-            }
-
-            loginSection.classList.add('hidden');
-            loginSection.style.display = '';
-            studentDashboard.removeAttribute('hidden');
-            if (chatTrigger) {
-                if (isStaff) chatTrigger.setAttribute('hidden', '');
-                else chatTrigger.removeAttribute('hidden');
-            }
-
-            if (route === 'soporte-luxia') {
-                cursos.style.display = 'none';
-                support.style.display = 'block';
-                setActiveNav('soporte-luxia');
-                loadTickets();
-            } else {
-                cursos.style.display = '';
-                support.style.display = 'none';
-                setActiveNav('mis-cursos');
-            }
-        }
-
-        async function logout() {
-            try { await supabase.auth.signOut(); } catch (e) { console.warn('signOut:', e); }
-            chatState.user = null;
-            STAFF_LIST = [];
-            updateProfileChip();
-            chatWindow.classList.remove('open');
-            chatMessages.innerHTML = '';
-            chatState.step = 'INIT';
-            chatState.ticket = {};
-            if (loginAlert) loginAlert.hidden = true;
-            showView('login');
-        }
-
-        // Restaura la sesión guardada por supabase-js al recargar la página
-        async function restoreSession() {
-            try {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (session && session.user) {
-                    await hydrateUser(session.user);
-                    showView(STAFF_ROLES.includes(chatState.user.role) ? 'soporte-luxia' : 'mis-cursos');
-                }
-            } catch (e) { console.warn('No se pudo restaurar la sesión:', e); }
-        }
-
-        if (loginForm) {
-            loginForm.addEventListener('submit', async (event) => {
-                event.preventDefault();
-                const formData = new FormData(loginForm);
-                const email = formData.get('email');
-                const password = formData.get('password');
-
-                try {
-                    const { data, error } = await supabase.auth.signInWithPassword({
-                        email: email,
-                        password: password
-                    });
-
-                    if (error) throw error;
-
-                    loginAlert.textContent = 'Acceso concedido.';
-                    loginAlert.className = 'login-alert success';
-                    loginAlert.hidden = false;
-
-                    await hydrateUser(data.user);
-
-                    // Si venías de una página V2 (?volver=) con el switch activo, regresa al portal según rol.
-                    const volver = new URL(window.location.href).searchParams.get('volver');
-                    if ((volver === 'v2' || volver === 'lumix') && window.luxV2Enabled && window.luxV2Enabled()) {
-                        window.location.href = volver === 'lumix'
-                            ? 'v2/lumix.html'
-                            : (STAFF_ROLES.includes(chatState.user.role) ? 'v2/admin.html' : 'v2/alumnos.html');
-                        return;
-                    }
-                    showView(STAFF_ROLES.includes(chatState.user.role) ? 'soporte-luxia' : 'mis-cursos');
-
-                } catch (err) {
-                    console.error('Error de acceso:', err.message);
-                    loginAlert.textContent = mensajeError(err, 'No se pudo iniciar sesión. Inténtalo de nuevo.');
-                    loginAlert.className = 'login-alert error';
-                    loginAlert.hidden = false;
-                }
-            });
-        }
-
-        // Lógica del chat Lux-IA
-        const chatTrigger = document.getElementById('chat-trigger');
-        const chatWindow = document.getElementById('chat-window');
-        const chatClose = document.getElementById('chat-close');
-        const chatBack = document.getElementById('chat-back');
-        const chatMessages = document.getElementById('chat-messages');
-        const chatInput = document.getElementById('chat-input');
-        const chatSend = document.getElementById('chat-send');
-        const chatAttach = document.getElementById('chat-attach');
-        const chatFile = document.getElementById('chat-file');
-
-        let chatState = {
-            step: 'INIT',
-            ticket: {},
-            history: [],
-            user: null
-        };
-
-        let CATEGORY_MAP = {};
-        const STATIC_CATEGORY_MAP = {
-            // codigos = valores del chat
-            'acceso': 37, 'plataforma': 34, 'materias': 36, 'servicios_escolares': 42, 'finanzas': 33, 'otros': 35
-        };
-
-        let PRIORITY_MAP = {};
-        const STATIC_PRIORITY_MAP = {
-            'baja': 8, 'media': 7, 'alta': 9 // 9=Alta; 6=Critica (solo staff)
-        };
-
-        let DEFAULT_AREA_ID = 38;
-        let AREA_MAP = { escolares: 39, soporte: 38 }; // fallback estatico
-        const STEPS_FLOW = ['GREETING', 'TITLE', 'CATEGORY', 'DETAILS', 'ATTACHMENTS', 'PRIORITY', 'NOTIFY', 'DONE'];
-
-        function toggleChat() {
-            const isOpen = chatWindow.classList.contains('open');
-            if (isOpen) {
-                chatWindow.classList.remove('open');
-            } else {
-                chatWindow.classList.add('open');
-                if (chatMessages.children.length === 0) {
-                    initChat();
-                }
-            }
-        }
-
-        chatTrigger.addEventListener('click', toggleChat);
-        chatClose.addEventListener('click', toggleChat);
-        chatBack.addEventListener('click', goBack);
-
-        function goBack() {
-            const currentIdx = STEPS_FLOW.indexOf(chatState.step);
-            if (currentIdx > 0) {
-                const prevStep = STEPS_FLOW[currentIdx - 1];
-                chatState.step = prevStep;
-                showStepPrompt(prevStep);
-            }
-        }
-
-        function updateUIForStep(step) {
-            if (step === 'GREETING' || step === 'DONE') {
-                chatBack.style.display = 'none';
-            } else {
-                chatBack.style.display = 'block';
-            }
-        }
-
-        function addMessage(text, sender, options = []) {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `message ${sender}`;
-            msgDiv.textContent = text;
-            chatMessages.appendChild(msgDiv);
-
-            if (options.length > 0) {
-                const optionsDiv = document.createElement('div');
-                optionsDiv.className = 'chat-options';
-                options.forEach(opt => {
-                    const btn = document.createElement('button');
-                    btn.className = 'chat-option-btn';
-                    btn.textContent = opt.label;
-                    btn.onclick = () => handleInput(opt.value);
-                    optionsDiv.appendChild(btn);
+            function montarChat() {
+                if (chat) return;
+                chat = LuxLumixChat.montar({
+                    raiz: $('panel-lumix'), perfil: state.perfil, catalogs: state.catalogs, modo: 'embebido',
+                    // "Ver en mi lista" / tarjetas de consulta: selecciona el ticket
+                    alVerTicket: (id) => { if (id) { location.hash = 'ticket=' + id; } else { setPanelTab('ticket'); } },
+                    // El ticket nuevo aparece en la lista izquierda sin recargar
+                    alCrear: async () => { try { await cargarDatos(); renderLista(); cargarNotifs(); } catch (_) { } },
                 });
-                chatMessages.appendChild(optionsDiv);
+            }
+            // En PC abre la pestaña embebida; en celular, la pantalla completa.
+            function abrirLumix() {
+                if (esMovil()) { window.location.href = 'lumix.html'; return; }
+                if (/^#(ayuda|perfil)/.test(location.hash)) location.hash = '';
+                panel.hidden = false;
+                montarChat();
+                setPanelTab('lumix');
             }
 
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
+            // El reporte de tickets es siempre vía el asistente; no reintroducir formularios.
 
-        function initChat() {
-            chatState.step = 'GREETING';
-            showStepPrompt('GREETING');
-        }
-
-        function showStepPrompt(step) {
-            updateUIForStep(step);
-            chatInput.value = '';
-
-            switch (step) {
-                case 'GREETING':
-                    enableInput(false);
-                    chatState.ticket = {};
-                    addMessage('¡Hola! Soy Lux-IA. ¿En qué puedo ayudarte hoy?', 'bot', [
-                        { label: 'Reportar un problema', value: 'report' },
-                        { label: 'Consultar estado de ticket', value: 'status' }
-                    ]);
-                    break;
-                case 'TITLE':
-                    enableInput(true);
-                    addMessage('Entendido. Para comenzar, por favor escribe un título breve para tu incidencia.', 'bot');
-                    break;
-                case 'CATEGORY':
-                    enableInput(false);
-                    addMessage('Gracias. ¿A qué categoría pertenece el problema?', 'bot', [
-                        { label: 'Acceso y bloqueos', value: 'acceso' },
-                        { label: 'Plataforma virtual', value: 'plataforma' },
-                        { label: 'Materias', value: 'materias' },
-                        { label: 'Servicios escolares', value: 'servicios_escolares' },
-                        { label: 'Finanzas y pagos', value: 'finanzas' },
-                        { label: 'Otros', value: 'otros' }
-                    ]);
-                    break;
-                case 'DETAILS':
-                    enableInput(true);
-                    addMessage('Por favor describe los detalles del problema.', 'bot');
-                    break;
-                case 'ATTACHMENTS':
-                    enableInput(false);
-                    addMessage('¿Deseas adjuntar alguna captura de pantalla o documento?', 'bot', [
-                        { label: 'Sí, adjuntar', value: 'attach_request' },
-                        { label: 'No, continuar', value: 'no_attach' }
-                    ]);
-                    break;
-                case 'PRIORITY':
-                    enableInput(false);
-                    addMessage('Archivo recibido (o omitido). ¿Qué nivel de prioridad consideras que tiene?', 'bot', [
-                        { label: 'Baja', value: 'baja' },
-                        { label: 'Media', value: 'media' },
-                        { label: 'Alta', value: 'alta' }
-                    ]);
-                    break;
-                case 'NOTIFY':
-                    enableInput(false);
-                    addMessage('¿Deseas notificar a algún área específica? (Opcional)', 'bot', [
-                        { label: 'Servicios Escolares', value: 'escolares' },
-                        { label: 'Soporte Técnico', value: 'soporte' },
-                        { label: 'Ninguno', value: 'none' }
-                    ]);
-                    break;
-            }
-        }
-
-        function handleInput(text, isFile = false) {
-            if (!text && !isFile) return;
-
-            if (chatState.step === 'TITLE' && text.length < 5) {
-                addMessage('El título es muy corto (mínimo 5 letras).', 'bot');
-                return;
-            }
-            if (chatState.step === 'DETAILS' && text.length < 15) {
-                addMessage('Por favor danos más detalles (mínimo 15 letras).', 'bot');
-                return;
-            }
-
-            if (isFile) {
-                addMessage(`📎 Archivo adjunto: ${text}`, 'user');
-            } else {
-                addMessage(text, 'user');
-                chatInput.value = '';
-            }
-
-            setTimeout(() => {
-                const nextStep = getNextStep(chatState.step, text, isFile);
-                if (nextStep) {
-                    chatState.step = nextStep;
-                    if (nextStep === 'DONE') {
-                        finishTicket();
-                    } else if (nextStep === 'ATTACH_ACTION') {
-                        chatFile.click();
-                        addMessage('Selecciona tu archivo...', 'bot');
-                        chatState.step = 'ATTACHMENTS';
-                    } else if (nextStep === 'STATUS_CHECK') {
-                        checkTicketStatus();
-                    } else if (nextStep === 'EXIT') {
-                        chatWindow.classList.remove('open');
-                        chatMessages.innerHTML = '';
-                        chatState.step = 'INIT';
-                        chatState.ticket = {};
-                    } else {
-                        showStepPrompt(nextStep);
-                    }
-                }
-            }, 500);
-        }
-
-        function getNextStep(currentStep, input, isFile) {
-            switch (currentStep) {
-                case 'GREETING':
-                    if (input === 'report') return 'TITLE';
-                    if (input === 'status') return 'STATUS_CHECK';
-                    if (input === 'exit') return 'EXIT';
-                    return null;
-                case 'TITLE':
-                    chatState.ticket.title = input;
-                    return 'CATEGORY';
-                case 'CATEGORY':
-                    chatState.ticket.category = input;
-                    return 'DETAILS';
-                case 'DETAILS':
-                    chatState.ticket.details = input;
-                    return 'ATTACHMENTS';
-                case 'ATTACHMENTS':
-                    if (input === 'attach_request') return 'ATTACH_ACTION';
-                    if (input === 'no_attach') return 'PRIORITY';
-                    if (isFile) {
-                        chatState.ticket.evidence = input;
-                        return 'PRIORITY';
-                    }
-                    return 'PRIORITY';
-                case 'PRIORITY':
-                    chatState.ticket.priority = input;
-                    return 'NOTIFY';
-                case 'NOTIFY':
-                    chatState.ticket.notify = input === 'none' ? null : input;
-                    return 'DONE';
-                default:
-                    return null;
-            }
-        }
-
-        function enableInput(enable) {
-            chatInput.disabled = !enable;
-            chatSend.disabled = !enable;
-            chatAttach.disabled = !enable;
-            if (enable) chatInput.focus();
-        }
-
-        async function finishTicket() {
-            addMessage('Procesando tu solicitud...', 'bot');
-            updateUIForStep('DONE');
-
-            try {
-                if (!supabase) throw new Error('Supabase no configurado');
-
-                const { data: { session } } = await supabase.auth.getSession();
-                const token = session?.access_token;
-                const funcUrl = `https://${projectRef}.supabase.co/functions/v1/ticket-manager/create`;
-
-                const load = {
-                    titulo: chatState.ticket.title,
-                    categoria_id: CATEGORY_MAP[chatState.ticket.category] || 35, // 35 = Otros
-                    detalles: chatState.ticket.details,
-                    prioridad_id: PRIORITY_MAP[chatState.ticket.priority] || 8,
-                    area_notificada_id: AREA_MAP[chatState.ticket.notify] || DEFAULT_AREA_ID,
-                    adjunto: chatState.ticket.attachment || null
-                };
-
-                const resp = await fetch(funcUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(load)
+            function filtrados() {
+                const f = state.filtro, q = f.q.trim().toLowerCase();
+                return state.tickets.filter(t => {
+                    if (f.estado && String(t.estado_id) !== f.estado) return false;
+                    if (f.categoria && String(t.categoria_id) !== f.categoria) return false;
+                    if (q && !(('#' + t.ticket_id + ' ' + t.titulo).toLowerCase().includes(q))) return false;
+                    if (f.desde && t.fecha_creacion < f.desde) return false;
+                    if (f.hasta && t.fecha_creacion > f.hasta + 'T23:59:59') return false;
+                    return true;
                 });
-
-                if (!resp.ok) {
-                    const errData = await resp.json().catch(() => ({}));
-                    const errSrv = new Error(errData.error || ('HTTP ' + resp.status));
-                    // 422 = regla de negocio de la DB: mensaje pensado para el usuario.
-                    if (resp.status === 422 && errData.error) errSrv.esMensajeUsuario = true;
-                    throw errSrv;
-                }
-
-                const data = await resp.json();
-                const ticketId = data.ticket_id;
-
-                addMessage(`✅ ¡Ticket creado con éxito!`, 'bot');
-                addMessage(`ID de seguimiento: #${ticketId}`, 'bot');
-                addMessage(`Hemos notificado a soporte y recibirás una actualización pronto.`, 'bot');
-
-            } catch (err) {
-                console.error('Error al crear el ticket:', err);
-                addMessage('❌ ' + mensajeError(err, 'No pude crear el ticket. Revisa tu conexión e inténtalo de nuevo.'), 'bot');
             }
 
-            addMessage('¿Necesitas algo más?', 'bot', [
-                { label: 'Crear otro ticket', value: 'report' },
-                { label: 'Consultar estado', value: 'status' },
-                { label: 'Salir', value: 'exit' }
-            ]);
-            chatState.step = 'GREETING';
-        }
+            // ---------- Lista de tickets ----------
+            function renderLista() {
+                const activos = state.tickets.filter(t => [1, 2, 3].includes(t.estado_id)).length;
+                const esperando = state.tickets.filter(t => t.estado_id === 3).length;
+                const resueltos = state.tickets.filter(t => [4, 5].includes(t.estado_id)).length;
+                const cat = state.catalogs || { estados: [], categorias: [] };
+                const opts = (lista, sel) => lista.map(c =>
+                    '<option value="' + esc(c.catalogo_id) + '"' + (String(c.catalogo_id) === sel ? ' selected' : '') + '>' + esc(c.nombre) + '</option>').join('');
 
-        // Consulta de estado de tickets desde el chat
-        async function checkTicketStatus() {
-            addMessage('Consultando tus tickets...', 'bot');
-            try {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (!session) throw new Error('Sesión no disponible');
+                const tarjetas = filtrados().map(t => {
+                    const esperandoYo = t.estado_id === 3;
+                    return '<article class="tk-card' + (state.sel === t.ticket_id ? ' on' : '') + '" data-id="' + t.ticket_id + '" tabindex="0">' +
+                        '<span class="cat">' + iconoCategoria(t.catalogo ? t.catalogo.nombre : '', 'grande') + '</span>' +
+                        '<div style="min-width:0;">' +
+                        '<div class="linea1"><strong>#' + t.ticket_id + '</strong><span>' + esc(t.titulo) + '</span></div>' +
+                        '<div class="metas">' +
+                        '<span class="meta">' + svgIcono('categoria.materias', 'chica') + esc(t.catalogo ? t.catalogo.nombre : '—') + '</span>' +
+                        '<span class="meta">' + svgIcono('ui.calendario', 'chica') + esc(new Date(t.fecha_creacion).toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' })) + '</span>' +
+                        '<span class="meta">' + svgIcono('ui.persona', 'chica') + esc(t.area ? t.area.nombre : 'Por asignar') + '</span>' +
+                        '</div></div>' +
+                        '<div class="lado">' + badgeEstado(t) + '<span class="act">' + esc(fmtAct(t.actualizado_en)) + '</span></div>' +
+                        '<div class="accion">' + (esperandoYo
+                            ? '<button type="button" class="v2-btn acento" data-abrir="' + t.ticket_id + '" style="width:100%; min-height:40px; font-size:13px;">' + svgIcono('canal.lumix', 'media') + 'Responder</button>'
+                            : '<button type="button" class="v2-btn secundario" data-abrir="' + t.ticket_id + '" style="width:100%; min-height:40px; font-size:13px; color:var(--v2-primary-dark); border-color:#bfd0ee;">Ver detalle' + svgIcono('ui.siguiente', 'media') + '</button>') +
+                        '</div></article>';
+                }).join('');
 
-                const resp = await fetch(`https://${projectRef}.supabase.co/functions/v1/ticket-manager/list`, {
-                    headers: { 'Authorization': `Bearer ${session.access_token}` }
-                });
-                if (!resp.ok) throw new Error('No se pudieron consultar los tickets');
+                vista.innerHTML =
+                    '<div class="mt-top">' +
+                    '<div><h1>Mis Tickets</h1><p>Consulta y da seguimiento a tus solicitudes.</p></div>' +
+                    '<div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">' +
+                    '<button type="button" class="v2-btn" data-lumix style="min-height:46px; font-size:15px;">' + svgIcono('ui.mas', 'media') + 'Reportar nuevo problema</button>' +
+                    '<span style="font-size:12px; color:var(--v2-muted);">Lumix te guía paso a paso</span>' +
+                    '</div></div>' +
+                    '<div class="mt-contadores">' +
+                    '<div class="v2-kpi"><span class="ic" style="background:#e3ecfb; color:#1a4fb0;">' + svgIcono('ui.ticket', 'grande') + '</span><div class="col"><span class="s" style="font-weight:600;">Tickets activos</span><span class="n">' + activos + '</span></div></div>' +
+                    '<div class="v2-kpi warn"><span class="ic" style="background:#fdecd8; color:#9a4a00;">' + svgIcono('ui.reloj', 'grande') + '</span><div class="col"><span class="s" style="font-weight:600;">Esperando tu respuesta</span><span class="n" style="color:#9a4a00;">' + esperando + '</span></div></div>' +
+                    '<div class="v2-kpi"><span class="ic" style="background:#dff3e6; color:#1d6b3a;">' + svgIcono('ui.checkCirculo', 'grande') + '</span><div class="col"><span class="s" style="font-weight:600;">Resueltos y cerrados</span><span class="n">' + resueltos + '</span></div></div>' +
+                    '</div>' +
+                    '<div class="mt-filtros">' +
+                    '<div class="v2-field"><label class="v2-lbl" for="f-q" style="font-size:12px; color:var(--v2-muted);">Buscar</label>' +
+                    '<div class="v2-box compacta">' + svgIcono('ui.buscar', 'media') + '<input id="f-q" type="search" placeholder="Folio o título" value="' + esc(state.filtro.q) + '"></div></div>' +
+                    '<div class="v2-field"><label class="v2-lbl" for="f-estado" style="font-size:12px; color:var(--v2-muted);">Estado</label><select id="f-estado" class="v2-sel compacta"><option value="">Todos</option>' + opts(cat.estados, state.filtro.estado) + '</select></div>' +
+                    '<div class="v2-field"><label class="v2-lbl" for="f-categoria" style="font-size:12px; color:var(--v2-muted);">Categoría</label><select id="f-categoria" class="v2-sel compacta"><option value="">Todas</option>' + opts(cat.categorias, state.filtro.categoria) + '</select></div>' +
+                    '<div class="v2-field"><label class="v2-lbl" for="f-desde" style="font-size:12px; color:var(--v2-muted);">Fecha</label>' +
+                    '<div style="display:flex; gap:6px;"><input type="date" id="f-desde" class="v2-sel compacta" title="Desde" value="' + esc(state.filtro.desde) + '"><input type="date" id="f-hasta" class="v2-sel compacta" title="Hasta" value="' + esc(state.filtro.hasta) + '"></div></div>' +
+                    '</div>' +
+                    '<div style="display:flex; flex-direction:column; gap:10px;">' +
+                    (tarjetas || '<div class="v2-card"><p class="v2-nota" style="margin:0;">Aún no has reportado incidencias. Toca "Reportar nuevo problema" y Lumix te acompaña paso a paso.</p></div>') +
+                    '</div>';
 
-                const tickets = await resp.json();
-                if (tickets.length === 0) {
-                    addMessage('Aún no tienes tickets registrados. ¿Quieres reportar un problema?', 'bot');
-                } else {
-                    addMessage(`Tienes ${tickets.length} ticket(s) registrados:`, 'bot');
-                    tickets.slice(0, 5).forEach(t => {
-                        const estado = t.estado ? t.estado.nombre : 'Desconocido';
-                        const asignado = t.asignado ? `, atendido por ${t.asignado.nombre}` : ', aún sin asignar';
-                        addMessage(`#${t.ticket_id} · "${t.titulo}" → ${estado}${asignado}`, 'bot');
-                    });
-                    if (tickets.length > 5) {
-                        addMessage(`...y ${tickets.length - 5} más. Puedes verlos todos en "Soporte LuxIA".`, 'bot');
-                    }
-                }
-            } catch (err) {
-                console.error('Error al consultar estado:', err);
-                addMessage('No pude consultar tus tickets en este momento. Intenta de nuevo.', 'bot');
-            }
-
-            addMessage('¿Necesitas algo más?', 'bot', [
-                { label: 'Reportar un problema', value: 'report' },
-                { label: 'Consultar estado', value: 'status' },
-                { label: 'Salir', value: 'exit' }
-            ]);
-            chatState.step = 'GREETING';
-        }
-
-        function resetChat() {
-            setTimeout(() => {
-                initChat();
-            }, 2000);
-        }
-
-        chatSend.addEventListener('click', () => handleInput(chatInput.value));
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleInput(chatInput.value);
-        });
-
-        chatAttach.addEventListener('click', () => chatFile.click());
-        chatFile.addEventListener('change', async (e) => {
-            if (e.target.files.length > 0) {
-                const file = e.target.files[0];
-                addMessage(`Subiendo ${file.name}...`, 'bot');
-
-                try {
-                    if (!supabase) throw new Error('Supabase no disponible');
-
-                    const userId = chatState.user ? chatState.user.id : 'anon';
-                    const cleanName = file.name.replace(/[^\w.-]/g, '');
-                    const filePath = `${userId}/${Date.now()}_${cleanName}`;
-
-                    const { data, error } = await supabase.storage
-                        .from('tickets')
-                        .upload(filePath, file);
-
-                    if (error) throw error;
-
-                    // Bucket privado: se guarda la ruta; /details devuelve una URL firmada.
-                    chatState.ticket.attachment = {
-                        nombre_archivo: file.name,
-                        ruta_archivo_url: filePath,
-                        size_bytes: file.size,
-                        mime_type: file.type
+                const aplicar = () => {
+                    state.filtro = {
+                        q: $('f-q').value, estado: $('f-estado').value, categoria: $('f-categoria').value,
+                        desde: $('f-desde').value, hasta: $('f-hasta').value,
                     };
+                    renderListaConFoco();
+                };
+                $('f-q').addEventListener('input', aplicar);
+                ['f-estado', 'f-categoria', 'f-desde', 'f-hasta'].forEach(id => $(id).addEventListener('change', aplicar));
+                vista.querySelectorAll('.tk-card').forEach(el => {
+                    el.addEventListener('click', () => { location.hash = 'ticket=' + el.dataset.id; });
+                    el.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') location.hash = 'ticket=' + el.dataset.id; });
+                });
+                vista.querySelectorAll('[data-abrir]').forEach(b => b.addEventListener('click', (ev) => {
+                    ev.stopPropagation();
+                    location.hash = 'ticket=' + b.dataset.abrir;
+                }));
+                vista.querySelectorAll('[data-lumix]').forEach(b => b.addEventListener('click', abrirLumix));
+            }
+            function renderListaConFoco() {
+                const pos = $('f-q') ? $('f-q').selectionStart : null;
+                renderLista();
+                const q = $('f-q');
+                if (q && pos !== null) { q.focus(); q.setSelectionRange(pos, pos); }
+            }
 
-                    handleInput(`📎 Archivo adjuntado: ${file.name}`, true);
+            // ---------- Panel de detalle ----------
+            function panelVacio() {
+                $('tab-ticket-txt').textContent = 'Detalle';
+                hojaTicket.innerHTML =
+                    '<div class="cuerpo" style="align-items:center; justify-content:center; text-align:center; gap:10px;">' +
+                    '<img src="assets/lumix-avatar.png" alt="" style="width:72px; height:72px; border-radius:50%; background:#ddf1f6;">' +
+                    '<strong style="color:var(--v2-heading);">Selecciona un ticket</strong>' +
+                    '<span class="v2-nota">Aquí verás su seguimiento y los mensajes de soporte. Para reportar algo nuevo, abre la pestaña "Hablar con Lumix".</span>' +
+                    '</div>';
+            }
 
+            async function renderPanel(id) {
+                panel.classList.add('abierta');
+                $('tab-ticket-txt').textContent = 'Ticket #' + id;
+                hojaTicket.innerHTML = '<div class="cuerpo"><p class="v2-nota">Cargando ticket #' + esc(id) + '…</p></div>';
+                let data;
+                try {
+                    data = await Lux.callFn('ticket-manager/details?id=' + encodeURIComponent(id));
                 } catch (err) {
-                    console.error('Error al subir evidencia:', err);
-                    addMessage('No pude subir el archivo. Verifica que sea PNG, JPG o PDF de hasta 5 MB e inténtalo de nuevo.', 'bot');
-                }
-            }
-        });
-
-        if (chatTrigger) chatTrigger.setAttribute('hidden', '');
-        setActiveNav('login');
-        document.getElementById('logout-btn').addEventListener('click', logout);
-        if (supabase) {
-            supabase.auth.onAuthStateChange((event) => {
-                if (event === 'SIGNED_OUT') {
-                    chatState.user = null;
-                    updateProfileChip();
-                    showView('login');
-                }
-            });
-            restoreSession();
-            // Acceso a la experiencia V2; apagada por defecto.
-            const v2Access = document.getElementById("v2-access");
-            if (v2Access && window.luxV2Enabled && window.luxV2Enabled()) {
-                v2Access.removeAttribute("hidden");
-                const v2Qr = document.getElementById("v2-qr");
-                if (v2Qr) v2Qr.removeAttribute("hidden");
-            }
-            // Switch del header: guarda la preferencia del usuario y aplica.
-            const v2Switch = document.getElementById("v2-switch");
-            if (v2Switch && window.luxV2Enabled) {
-                v2Switch.checked = window.luxV2Enabled();
-                v2Switch.addEventListener("change", () => {
-                    if (window.luxV2Set) window.luxV2Set(v2Switch.checked);
-                    if (v2Switch.checked && chatState.user) {
-                        // Con sesión: directo a la experiencia nueva según el rol
-                        window.location.href = STAFF_ROLES.includes(chatState.user.role)
-                            ? "v2/admin.html" : "v2/alumnos.html";
-                    } else {
-                        window.location.reload();
-                    }
-                });
-            }
-        }
-
-        // --- Panel de soporte ---
-
-        async function loadTickets() {
-            const tbody = document.getElementById('ticket-list-body');
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Cargando tickets...</td></tr>';
-
-            try {
-                const { data: { session } } = await supabase.auth.getSession();
-                const token = session?.access_token;
-
-                const resp = await fetch(`https://${projectRef}.supabase.co/functions/v1/ticket-manager/list`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (!resp.ok) throw new Error('Error loading tickets');
-                const tickets = await resp.json();
-
-                tbody.innerHTML = '';
-                if (tickets.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">No hay tickets registrados.</td></tr>';
+                    hojaTicket.innerHTML = '<div class="cuerpo"><p class="v2-feedback error">' + esc(Lux.mensajeError(err, 'No se pudo cargar el ticket. Inténtalo de nuevo.')) + '</p></div>';
                     return;
                 }
+                state.detalle = data;
+                const t = data.ticket;
+                const comentarios = (data.comments || []).slice()
+                    .sort((a, b) => new Date(a.fecha_creacion) - new Date(b.fecha_creacion)); // RLS: solo públicos
+                const historia = (data.history || []).slice()
+                    .sort((a, b) => new Date(a.fecha_cambio) - new Date(b.fecha_cambio));
+                const adjuntos = data.attachments || [];
 
-                tickets.forEach(t => {
-                    const row = document.createElement('tr');
-                    const date = new Date(t.fecha_creacion).toLocaleDateString();
-                    const statusName = t.estado ? t.estado.nombre : 'Desconocido';
-                    const prioName = t.prioridad ? t.prioridad.nombre : '-';
-                    const assignedName = t.asignado ? `${t.asignado.nombre} ${t.asignado.apellido}` : 'Pendiente';
-                    const statusClass = statusName === 'Abierto' ? 'status-open' : (statusName === 'Cerrado' ? 'status-closed' : 'status-badge');
-
-                    row.innerHTML = `
-                        <td>#${t.ticket_id}</td>
-                        <td>${esc(t.titulo)}</td>
-                        <td><span class="status-badge ${statusClass}">${esc(statusName)}</span></td>
-                        <td>${esc(prioName)}</td>
-                        <td>${esc(assignedName)}</td>
-                        <td>${date}</td>
-                    `;
-                    row.onclick = () => openTicketDetail(t.ticket_id);
-                    tbody.appendChild(row);
-                });
-
-            } catch (error) {
-                console.error(error);
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red">Error al cargar tickets (o faltan tablas relacionadas).</td></tr>';
-            }
-        }
-
-        let STAFF_LIST = [];
-        async function loadStaffList() {
-            if (STAFF_LIST.length > 0) return;
-            try {
-                const { data: { session } } = await supabase.auth.getSession();
-                const resp = await fetch(`https://${projectRef}.supabase.co/functions/v1/ticket-manager/staff`, {
-                    headers: { 'Authorization': `Bearer ${session?.access_token}` }
-                });
-                if (resp.ok) STAFF_LIST = await resp.json();
-            } catch (e) { console.error('No se pudo cargar el personal:', e); }
-        }
-
-        async function openTicketDetail(ticketId) {
-            const modal = document.getElementById('ticket-detail-modal');
-            const content = document.getElementById('ticket-detail-content');
-            content.innerHTML = '<p style="color:white;">Cargando detalles...</p>';
-            modal.classList.add('open');
-
-            if (STAFF_ROLES.includes(chatState.user.role)) {
-                await loadStaffList();
-            }
-
-            try {
-                const { data: { session } } = await supabase.auth.getSession();
-                const resp = await fetch(`https://${projectRef}.supabase.co/functions/v1/ticket-manager/details?id=${ticketId}`, {
-                    headers: { 'Authorization': `Bearer ${session?.access_token}` }
-                });
-
-                if (!resp.ok) throw new Error('Error loading details');
-                const data = await resp.json();
-                const ticket = data.ticket;
-                const history = data.history || [];
-                const attachments = data.attachments || [];
-
-                const statusName = esc(ticket.estado ? ticket.estado.nombre : 'Unknown');
-                const prioName = esc(ticket.prioridad ? ticket.prioridad.nombre : 'Unknown');
-                const areaName = esc(ticket.area ? ticket.area.nombre : 'General');
-                const reporterName = esc(ticket.reportador ? `${ticket.reportador.nombre} ${ticket.reportador.apellido} (${ticket.reportador.tipo_usuario})` : 'Unknown');
-                const assignedName = esc(ticket.asignado ? `${ticket.asignado.nombre} ${ticket.asignado.apellido}` : 'Sin Asignar');
-
-                let actionHTML = '';
-                const canManage = STAFF_ROLES.includes(chatState.user.role);
-
-                if (canManage) {
-                    let staffOptions = '<option value="">-- Sin Asignar --</option>';
-                    STAFF_LIST.forEach(s => {
-                        const selected = (ticket.maestro_notificado_id === s.usuario_id) ? 'selected' : '';
-                        staffOptions += `<option value="${esc(s.usuario_id)}" ${selected}>${esc(s.nombre)} ${esc(s.apellido)} (${esc(s.tipo_usuario)})</option>`;
+                // Línea de tiempo con los 5 estados; fechas reales del historial
+                const NOMBRES = { 2: 'En proceso', 3: 'Esperando respuesta', 4: 'Resuelto', 5: 'Cerrado' };
+                const fechas = { 1: t.fecha_creacion };
+                historia.forEach(h => {
+                    if (h.campo_modificado !== 'estado') return;
+                    Object.keys(NOMBRES).forEach(idEstado => {
+                        if (h.valor_nuevo === NOMBRES[idEstado] && !fechas[idEstado]) fechas[idEstado] = h.fecha_cambio;
                     });
+                });
+                if (!fechas[5] && t.estado_id === 5) fechas[5] = t.fecha_cierre;
+                const ORDEN = [1, 2, 3, 4, 5];
+                const idx = ORDEN.indexOf(t.estado_id);
+                const pasos = ORDEN.map((idEstado, i) => {
+                    const nombre = idEstado === 1 ? 'Abierto' : NOMBRES[idEstado];
+                    const fecha = fechas[idEstado];
+                    const clase = i === idx ? 'actual' : (fecha && i < idx ? 'hecho' : '');
+                    const cuando = fecha ? fmtFecha(fecha) : (i < idx ? '—' : 'Pendiente');
+                    return '<li class="' + clase + '">' +
+                        '<div class="via"><span class="nodo">' + (clase === 'hecho' ? svgIcono('ui.check', 'chica') : '') + '</span><span class="linea"></span></div>' +
+                        '<div class="datos"><span class="paso">' + esc(nombre) + '</span><span class="cuando">' + esc(cuando) + '</span></div></li>';
+                }).join('');
 
-                    actionHTML = `
-                        <div style="margin-bottom: 20px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
-                            <label style="color: var(--gold); display:block; margin-bottom:5px;">Asignar Ticket a:</label>
-                            <div style="display:flex; gap:10px;">
-                                <select id="assign-select" style="flex:1; padding:8px; border-radius:4px; border:1px solid #444; background:#222; color:white;">
-                                    ${staffOptions}
-                                </select>
-                                <button onclick="assignTicketFromSelect(${ticket.ticket_id})" style="background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">Actualizar</button>
-                            </div>
-                        </div>
-                    `;
+                const msgs = comentarios.map(c => {
+                    const autorStaff = c.autor && Lux.STAFF_ROLES.includes(c.autor.tipo_usuario);
+                    const quien = nombreDe(c.autor) || 'Usuario';
+                    const propio = state.perfil && c.autor && quien === state.perfil.nombreCompleto;
+                    return '<div class="panel-msg' + (autorStaff ? ' staff' : '') + '">' +
+                        '<span class="v2-ava' + (autorStaff ? '' : ' navy') + '" style="width:32px; height:32px; font-size:12px;">' + esc(iniciales(quien)) + '</span>' +
+                        '<div class="burb"><div class="meta"><strong>' + esc(quien) + (propio ? ' (tú)' : (autorStaff ? ' · Soporte' : '')) + '</strong>' +
+                        '<span>' + esc(fmtFechaCorta(c.fecha_creacion)) + '</span></div>' +
+                        '<span class="txt">' + esc(c.contenido) + '</span></div></div>';
+                }).join('');
+
+                const ultimoStaff = comentarios.filter(c => c.autor && Lux.STAFF_ROLES.includes(c.autor.tipo_usuario)).pop();
+                const cerrado = [4, 5].includes(t.estado_id);
+
+                const evid = adjuntos.length
+                    ? '<section style="display:flex; flex-direction:column; gap:10px;"><h3>Evidencias (' + adjuntos.length + ')</h3><div class="v2-adj" id="p-adjuntos" style="grid-template-columns:repeat(2, minmax(0,1fr));"></div></section>'
+                    : '';
+
+                hojaTicket.innerHTML =
+                    '<div class="cabeza">' +
+                    '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">' +
+                    '<h2>Ticket #' + t.ticket_id + '</h2>' + badgeEstado(t) + '</div>' +
+                    '<span style="font-size:15px; font-weight:600;">' + esc(t.titulo) + '</span>' +
+                    '<div style="display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px; margin-top:6px;">' +
+                    '<div style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:var(--v2-muted); font-weight:600;">Categoría</span><span style="font-size:13px; font-weight:600;">' + esc(t.catalogo ? t.catalogo.nombre : '—') + '</span></div>' +
+                    '<div style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:var(--v2-muted); font-weight:600;">Área responsable</span><span style="font-size:13px; font-weight:600;">' + esc(t.area ? t.area.nombre : 'Por asignar') + '</span></div>' +
+                    '<div style="display:flex; flex-direction:column; gap:2px;"><span style="font-size:11px; color:var(--v2-muted); font-weight:600;">Creado</span><span style="font-size:13px; font-weight:600;">' + esc(fmtFechaCorta(t.fecha_creacion)) + '</span></div>' +
+                    '</div></div>' +
+
+                    '<div class="cuerpo">' +
+                    '<section style="display:flex; flex-direction:column; gap:10px;">' +
+                    '<h3>Seguimiento</h3><ol class="v2-tl">' + pasos + '</ol>' +
+                    // SLA mostrado al alumno como "Tiempo de atención", sin jerga.
+                    (t.eta_estimada && !cerrado
+                        ? (function () {
+                            const s = slaDe(t);
+                            const tarde = s.nivel === 'danger';
+                            const color = tarde ? '#b23a12' : (s.nivel === 'warn' ? '#9a4a00' : '#1d6b3a');
+                            const txt = tarde ? 'Nos estamos tardando más de lo previsto'
+                                : esc(Lux.ui.fmtRestante(s.rest));
+                            const pie = tarde
+                                ? 'Tu reporte sigue en atención; una disculpa por la espera.'
+                                : 'Te atenderemos antes del ' + esc(fmtFecha(t.eta_estimada)) + '.';
+                            return '<div>' +
+                                '<div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px; flex-wrap:wrap;">' +
+                                '<span style="font-size:12px; font-weight:700; color:var(--v2-heading);">Tiempo de atención</span>' +
+                                '<span style="font-size:12px; font-weight:700; color:' + color + ';">' + txt + '</span></div>' +
+                                '<div class="v2-sla ' + (s.nivel || '') + '" style="margin-top:4px;"><div class="barra"><div class="fill" style="width:' + (tarde ? 100 : s.pct) + '%;"></div></div></div>' +
+                                '<span style="font-size:11px; color:var(--v2-muted);">' + pie + '</span></div>';
+                        })()
+                        : '') +
+                    '</section>' +
+                    '<section style="display:flex; flex-direction:column; gap:8px;">' +
+                    '<h3>Tu descripción</h3>' +
+                    '<div class="v2-suave" style="font-size:13px; line-height:1.5; white-space:pre-wrap; overflow-wrap:anywhere;">' + esc(t.detalles || '—') + '</div>' +
+                    '</section>' +
+                    evid +
+                    '<section style="display:flex; flex-direction:column; gap:10px;">' +
+                    '<h3>Conversación con soporte</h3>' +
+                    '<span style="font-size:12px; color:var(--v2-muted); margin-top:-6px;">' +
+                    (t.asignado
+                        ? 'Atiende: <strong>' + esc(nombreDe(t.asignado)) + '</strong>' + (t.area ? ' · ' + esc(t.area.nombre) : '')
+                        : 'Por asignar · el equipo lo revisará pronto') + '</span>' +
+                    (msgs || '<p class="v2-nota" style="margin:0;">Aún no hay mensajes. Soporte te escribirá por aquí.</p>') +
+                    '</section>' +
+                    (t.resumen_solucion
+                        ? '<section class="v2-verde" style="display:flex; flex-direction:column; gap:4px;">' +
+                        '<strong style="display:flex; align-items:center; gap:6px;">' + svgIcono('ui.checkCirculo', 'media') + 'Solución registrada</strong>' +
+                        '<span style="font-size:13px;">' + esc(t.resumen_solucion) + '</span></section>'
+                        : '') +
+                    (cerrado
+                        ? '<section style="display:flex; flex-direction:column; gap:6px;">' +
+                        '<h3>Califica la atención</h3>' +
+                        (t.calificacion
+                            ? '<p style="margin:0; font-size:15px;">' + '★'.repeat(t.calificacion) + '<span style="color:#cbd5e1;">' + '★'.repeat(5 - t.calificacion) + '</span> <strong>' + esc(t.calificacion) + '/5</strong></p><p class="v2-nota" style="margin:0;">¡Gracias por tu opinión!</p>'
+                            : '<p class="v2-nota" style="margin:0;">¿Cómo fue la atención de soporte?</p>' +
+                            '<div class="estrellas" id="csat">' + [1, 2, 3, 4, 5].map(v =>
+                                '<button type="button" data-v="' + v + '" title="' + v + ' de 5" aria-label="' + v + ' de 5">★</button>').join('') + '</div>' +
+                            '<span id="csat-msg" class="v2-feedback"></span>') +
+                        '</section>'
+                        : '') +
+                    '</div>' +
+
+                    '<div class="pie">' +
+                    (cerrado
+                        ? '<p class="v2-nota" style="margin:0;">Este ticket ya fue atendido. Si necesitas algo más, <button type="button" data-lumix style="background:none; border:none; padding:0; font:inherit; color:var(--v2-primary); font-weight:700; cursor:pointer; text-decoration:underline;">cuéntale a Lumix</button> y levantamos uno nuevo.</p>'
+                        : (t.estado_id === 3 && ultimoStaff
+                            ? '<div class="v2-aviso-naranja"><strong style="display:flex; align-items:center; gap:6px; margin-bottom:2px;">' + svgIcono('ui.alerta', 'chica') + 'Soporte necesita tu respuesta</strong>' + esc(ultimoStaff.contenido) + '</div>'
+                            : '<label for="p-texto" style="font-size:12px; font-weight:600; color:var(--v2-muted);">Mensaje para ' + esc(t.asignado ? nombreDe(t.asignado) : 'el equipo de soporte') + '</label>') +
+                    (cerrado ? '' :
+                        '<textarea id="p-texto" class="v2-area" rows="2" maxlength="2000" placeholder="Escribe a ' + esc(t.asignado ? (t.asignado.nombre || 'soporte') : 'soporte') + '…"></textarea>' +
+                        '<div style="display:flex; align-items:center; gap:6px;">' +
+                        '<button type="button" class="v2-ib" id="p-adjuntar" aria-label="Adjuntar archivo" style="width:40px; height:40px;">' + svgIcono('ui.clip', 'media') + '</button>' +
+                        '<input type="file" id="p-archivo" accept="image/png,image/jpeg,application/pdf" hidden>' +
+                        '<span style="font-size:11px; color:var(--v2-muted);">PNG, JPG o PDF</span>' +
+                        '<button type="button" class="v2-btn" id="p-enviar" style="margin-left:auto;">' + svgIcono('ui.enviar', 'media') + 'Enviar</button>' +
+                        '</div><span id="p-msg" class="v2-feedback"></span>')) +
+                    '</div>';
+
+                // Evidencias
+                const adjCont = $('p-adjuntos');
+                if (adjCont) adjuntos.forEach(att => {
+                    let url = '';
+                    try { const u = new URL(att.ruta_archivo_url); if (u.protocol === 'https:' || u.protocol === 'http:') url = u.href; } catch (_) { }
+                    const name = att.nombre_archivo || 'archivo';
+                    const item = document.createElement('div');
+                    item.className = 'ev-item';
+                    const esImg = url && att.mime_type && att.mime_type.startsWith('image/');
+                    const mini = document.createElement(esImg ? 'button' : (url ? 'a' : 'div'));
+                    mini.className = 'mini';
+                    if (esImg) {
+                        mini.type = 'button';
+                        const img = document.createElement('img');
+                        img.src = url; img.alt = name;
+                        mini.appendChild(img);
+                        mini.addEventListener('click', () => { $('lightbox-img').src = url; $('lightbox').classList.add('abierta'); });
+                    } else {
+                        if (url) { mini.href = url; mini.target = '_blank'; mini.rel = 'noopener'; }
+                        mini.innerHTML = '<span class="doc">' + (att.mime_type === 'application/pdf' ? 'PDF' : 'DOC') + '</span>';
+                    }
+                    item.appendChild(mini);
+                    const datos = document.createElement('div');
+                    datos.className = 'datos';
+                    datos.innerHTML = '<div class="col"><strong></strong><small></small></div>';
+                    datos.querySelector('strong').textContent = name;
+                    datos.querySelector('small').textContent = [fmtBytes(att.size_bytes), fmtFecha(att.fecha_subida)].filter(Boolean).join(' · ');
+                    item.appendChild(datos);
+                    adjCont.appendChild(item);
+                });
+
+                // Abrir Lumix desde el pie de tickets cerrados
+                hojaTicket.querySelectorAll('[data-lumix]').forEach(b => b.addEventListener('click', abrirLumix));
+
+                // CSAT
+                hojaTicket.querySelectorAll('#csat button').forEach(b => b.addEventListener('click', async () => {
+                    try {
+                        const { error } = await Lux.sb().rpc('calificar_ticket', {
+                            p_ticket_id: t.ticket_id,
+                            p_calificacion: Number(b.dataset.v),
+                        });
+                        if (error) {
+                            const e2 = new Error(error.message);
+                            e2.esMensajeUsuario = error.code === 'P0001'; // regla de negocio: mensaje para el usuario
+                            throw e2;
+                        }
+                        await cargarDatos();
+                        renderLista();
+                        renderPanel(id);
+                    } catch (err) {
+                        const m = $('csat-msg');
+                        if (m) { m.className = 'v2-feedback error'; m.textContent = Lux.mensajeError(err, 'No se pudo guardar tu calificación. Inténtalo de nuevo.'); }
+                    }
+                }));
+
+                // Adjuntar + responder (con borrador persistente)
+                const cajaTexto = $('p-texto');
+                if (cajaTexto) {
+                    if (state.borradorPanelTicket !== t.ticket_id) { state.borradorPanel = ''; state.borradorPanelTicket = t.ticket_id; }
+                    cajaTexto.value = state.borradorPanel;
+                    cajaTexto.addEventListener('input', () => { state.borradorPanel = cajaTexto.value; });
                 }
-
-                // Adjuntos: se construyen con DOM (sin innerHTML) despues de armar la plantilla.
-
-                content.innerHTML = `
-                    <h2 style="color:var(--gold); border-bottom:1px solid #333; padding-bottom:10px; margin-top:0;">
-                        Ticket #${ticket.ticket_id}: ${esc(ticket.titulo)}
-                    </h2>
-                    
-                    ${actionHTML}
-
-                    <div class="detail-grid">
-                        <div class="detail-item"><label>Estado</label><span>${statusName}</span></div>
-                        <div class="detail-item"><label>Prioridad</label><span>${prioName}</span></div>
-                        <div class="detail-item"><label>Área</label><span>${areaName}</span></div>
-                        <div class="detail-item"><label>Estimado (ETA)</label><span>Pendiente</span></div>
-                        <div class="detail-item"><label>Creado Por</label><span>${reporterName}</span></div>
-                        <div class="detail-item"><label>Asignado A</label><span>${assignedName}</span></div>
-                        
-                        <div class="detail-item" style="grid-column: 1 / -1;">
-                            <label>Detalles del Problema</label>
-                            <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:8px; color:#ddd;">
-                                ${esc(ticket.detalles)}
-                            </div>
-                        </div>
-                        <div class="detail-item" style="grid-column: 1 / -1; margin-top: 10px;" data-att-slot hidden><label>Evidencias Adjuntas</label><div data-att-list style="display:flex; gap:10px; flex-wrap:wrap; margin-top:5px;"></div></div>
-                    </div>
-
-                    <h3 style="color:var(--primary);">Historial de Cambios</h3>
-                    <div class="timeline">
-                        ${history.map(h => `
-                            <div class="timeline-item">
-                                <div class="timeline-date">${new Date(h.fecha_cambio).toLocaleString()}</div>
-                                <div class="timeline-content">
-                                    <strong>${esc(h.autor ? h.autor.nombre : 'Sistema')}:</strong> ${esc(h.cambio || h.campo_modificado)}
-                                    ${h.valor_nuevo && h.valor_nuevo !== '-' ? `<br>➔ ${esc(h.valor_nuevo)}` : ''}
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-
-                // Render seguro de evidencias: src/href como propiedades, nunca como HTML.
-                const attSlot = content.querySelector('[data-att-slot]');
-                if (attSlot && attachments.length > 0) {
-                    attSlot.hidden = false;
-                    const attList = attSlot.querySelector('[data-att-list]');
-                    attachments.forEach(att => {
-                        let url = '';
+                const btnAdj = $('p-adjuntar');
+                if (btnAdj) {
+                    btnAdj.addEventListener('click', () => $('p-archivo').click());
+                    $('p-archivo').addEventListener('change', async () => {
+                        const f = $('p-archivo').files[0];
+                        $('p-archivo').value = '';
+                        if (!f) return;
                         try {
-                            const u = new URL(att.ruta_archivo_url);
-                            if (u.protocol === 'https:' || u.protocol === 'http:') url = u.href;
-                        } catch (_) { /* ruta sin firmar o invalida: se muestra solo el nombre */ }
-                        const name = att.nombre_archivo || 'archivo';
-                        if (url && att.mime_type && att.mime_type.startsWith('image/')) {
-                            const wrap = document.createElement('div');
-                            wrap.style.cursor = 'pointer';
-                            const img = document.createElement('img');
-                            img.src = url;
-                            img.alt = name;
-                            img.style.cssText = 'width:100px; height:100px; object-fit:cover; border-radius:8px; border:1px solid #555;';
-                            wrap.appendChild(img);
-                            wrap.addEventListener('click', () => openImageViewer(url));
-                            attList.appendChild(wrap);
-                        } else {
-                            const a = document.createElement('a');
-                            if (url) { a.href = url; a.target = '_blank'; a.rel = 'noopener'; }
-                            a.textContent = '📄 ' + name;
-                            a.style.cssText = 'color: var(--gold); text-decoration: underline;';
-                            attList.appendChild(a);
+                            await Lux.subirEvidencia(state.perfil.usuario_id, t.ticket_id, f);
+                            renderPanel(id);
+                        } catch (err) {
+                            const m = $('p-msg'); m.className = 'v2-feedback error'; m.textContent = Lux.mensajeError(err, 'No se pudo subir el archivo. Inténtalo de nuevo.');
                         }
                     });
                 }
-
-            } catch (err) {
-                console.error(err);
-                content.innerHTML = '<p style="color:red">Error al cargar detalles del ticket.</p>';
-            }
-        }
-
-        function closeTicketModal() {
-            document.getElementById('ticket-detail-modal').classList.remove('open');
-        }
-
-        async function assignTicketFromSelect(ticketId) {
-            const select = document.getElementById('assign-select');
-            const newAssigneeId = select.value;
-
-            if (!newAssigneeId) {
-                alert('Por favor selecciona un usuario.');
-                return;
+                const btnEnviar = $('p-enviar');
+                if (btnEnviar) btnEnviar.addEventListener('click', async () => {
+                    try {
+                        await Lux.callFn('ticket-manager/comments', {
+                            method: 'POST',
+                            body: { ticket_id: t.ticket_id, contenido: $('p-texto').value, tipo: 'externo' }
+                        });
+                        state.borradorPanel = ''; // enviado
+                        await cargarDatos();
+                        cargarNotifs();
+                        renderLista();
+                        renderPanel(id); // si estaba "Esperando respuesta", la DB ya lo regresó a "En proceso"
+                    } catch (err) {
+                        const m = $('p-msg'); m.className = 'v2-feedback error'; m.textContent = Lux.mensajeError(err, 'No se pudo enviar tu respuesta. Revisa tu conexión e inténtalo de nuevo.');
+                    }
+                });
             }
 
-            if (!confirm('¿Confirmas reasignar este ticket?')) return;
+            // ---------- Ayuda y Mi perfil ----------
+            function renderAyuda() {
+                vista.innerHTML =
+                    '<div class="mt-top"><div><h1>Ayuda</h1><p>Lumix es el canal para reportar y consultar incidencias.</p></div></div>' +
+                    '<div class="v2-card" style="display:flex; gap:18px; align-items:center; flex-wrap:wrap;">' +
+                    '<img src="assets/lumix.png" alt="Lumix" style="width:140px; height:auto;">' +
+                    '<div style="flex:1; min-width:220px; display:flex; flex-direction:column; gap:10px;">' +
+                    '<h3 class="v2-h3" style="font-size:18px;">¿Necesitas reportar un problema?</h3>' +
+                    '<p class="v2-nota" style="margin:0;">Cuéntale a Lumix qué pasó: te pregunta lo necesario, adjuntas evidencia y te da tu folio con el tiempo estimado de atención. También puedes consultar el estado de tus tickets.</p>' +
+                    '<div style="display:flex; gap:10px; flex-wrap:wrap;">' +
+                    '<button type="button" class="v2-btn" data-lumix>Hablar con Lumix</button>' +
+                    '<a class="v2-btn secundario" href="#">Ver mis tickets</a>' +
+                    '</div></div></div>';
+                vista.querySelectorAll('[data-lumix]').forEach(b => b.addEventListener('click', abrirLumix));
+            }
+            function renderPerfil() {
+                const p = state.perfil;
+                vista.innerHTML =
+                    '<div class="mt-top"><div><h1>Mi perfil</h1><p>Datos de tu sesión en el portal.</p></div></div>' +
+                    '<div class="v2-card" style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">' +
+                    '<span class="v2-ava navy" style="width:56px; height:56px; font-size:18px;">' + esc(iniciales(p.nombreCompleto)) + '</span>' +
+                    '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; flex:1;">' +
+                    '<div><span style="font-size:11px; color:var(--v2-muted); font-weight:700; text-transform:uppercase;">Nombre</span><p style="margin:2px 0 0; font-weight:600;">' + esc(p.nombreCompleto) + '</p></div>' +
+                    (p.matricula ? '<div><span style="font-size:11px; color:var(--v2-muted); font-weight:700; text-transform:uppercase;">Matrícula</span><p style="margin:2px 0 0; font-weight:600;">' + esc(p.matricula) + '</p></div>' : '') +
+                    '<div><span style="font-size:11px; color:var(--v2-muted); font-weight:700; text-transform:uppercase;">Correo institucional</span><p style="margin:2px 0 0; font-weight:600;">' + esc(p.email || '—') + '</p></div>' +
+                    '<div><span style="font-size:11px; color:var(--v2-muted); font-weight:700; text-transform:uppercase;">Tipo de usuario</span><p style="margin:2px 0 0; font-weight:600;">' + esc(p.esInvitado ? 'Invitado (demo)' : p.tipo_usuario) + '</p></div>' +
+                    '</div></div>' +
+                    '<p class="v2-nota">Para actualizar tus datos acude a Servicios Escolares; este portal toma la información de tu cuenta institucional.</p>';
+            }
+
+            $('lightbox').addEventListener('click', (ev) => {
+                if (ev.target.id === 'lightbox') { $('lightbox').classList.remove('abierta'); $('lightbox-img').src = ''; }
+            });
+
+            // ---------- Datos + rutas ----------
+            async function cargarDatos() {
+                state.tickets = await Lux.callFn('ticket-manager/list');
+            }
+            function marcarNav(id) {
+                ['nav-tickets', 'nav-ayuda', 'nav-perfil'].forEach(n => {
+                    const el = $(n);
+                    if (n === id) { el.classList.add('on'); el.setAttribute('aria-current', 'page'); }
+                    else { el.classList.remove('on'); el.removeAttribute('aria-current'); }
+                });
+            }
+            function route() {
+                const m = location.hash.match(/ticket=(\d+)/);
+                if (location.hash === '#ayuda') { document.title = 'Ayuda | Portal del Estudiante'; marcarNav('nav-ayuda'); panel.hidden = true; return renderAyuda(); }
+                if (location.hash === '#perfil') { document.title = 'Mi perfil | Portal del Estudiante'; marcarNav('nav-perfil'); panel.hidden = true; return renderPerfil(); }
+                marcarNav('nav-tickets');
+                panel.hidden = false;
+                if (m) {
+                    state.sel = Number(m[1]);
+                    document.title = 'Ticket #' + state.sel + ' | Portal del Estudiante';
+                    setPanelTab('ticket');
+                    renderLista();
+                    renderPanel(state.sel);
+                } else {
+                    state.sel = null;
+                    document.title = 'Mis Tickets | Portal del Estudiante';
+                    if (state.panelTab !== 'lumix') panel.classList.remove('abierta');
+                    renderLista();
+                    panelVacio();
+                }
+            }
+
+            // ---------- Vista de acceso ----------
+            function mostrarLogin() {
+                $('auth').hidden = false;
+                $('shell').hidden = true;
+                $('l-ojo').addEventListener('click', () => {
+                    const p = $('l-pwd');
+                    p.type = p.type === 'password' ? 'text' : 'password';
+                    $('l-ojo').setAttribute('aria-label', p.type === 'password' ? 'Mostrar contraseña' : 'Ocultar contraseña');
+                });
+                $('auth-form').addEventListener('submit', async (ev) => {
+                    ev.preventDefault();
+                    $('auth-error').classList.remove('abierta');
+                    const btn = $('l-entrar');
+                    btn.disabled = true;
+                    try {
+                        const r = await Lux.sb().auth.signInWithPassword({
+                            email: $('l-usr').value.trim(),
+                            password: $('l-pwd').value,
+                        });
+                        if (r.error) throw r.error;
+                        const perfil = await Lux.getProfile();
+                        // El personal entra por su propio portal (redirección por rol).
+                        window.location.href = (perfil && perfil.esStaff) ? 'admin.html' : location.pathname + location.search;
+                    } catch (_) {
+                        btn.disabled = false;
+                        $('auth-error').classList.add('abierta');
+                    }
+                });
+            }
+
+            // ---------- Arranque ----------
+            const perfil = await Lux.getProfile();
+            if (!perfil) { mostrarLogin(); return; }
+            state.perfil = perfil;
+            $('auth').hidden = true;
+            $('shell').hidden = false;
+            // Altura real del header -> --hdr (el panel pegajoso mide 100vh - header)
+            const fijarAltoHeader = () => {
+                const h = document.querySelector('#shell .v2-header');
+                if (h) document.documentElement.style.setProperty('--hdr', h.offsetHeight + 'px');
+            };
+            fijarAltoHeader();
+            window.addEventListener('resize', fijarAltoHeader);
+            $('chip-ava').textContent = iniciales(perfil.nombreCompleto);
+            $('chip-nombre').textContent = perfil.nombreCompleto;
+            $('chip-sub').textContent = perfil.esInvitado
+                ? 'Invitado (demo)' + (perfil.matricula ? ' · Matrícula ' + perfil.matricula : '')
+                : perfil.tipo_usuario + (perfil.email ? ' · ' + perfil.email : '');
+            $('btn-salir').addEventListener('click', Lux.logout);
+            $('nav-tickets').addEventListener('click', (e) => { e.preventDefault(); location.hash = ''; });
+            // En PC estos CTA abren la pestaña embebida; en celular, lumix.html
+            $('nav-nuevo').addEventListener('click', (e) => { if (!esMovil()) { e.preventDefault(); abrirLumix(); } });
+            $('card-lumix').addEventListener('click', (e) => { if (!esMovil()) { e.preventDefault(); abrirLumix(); } });
+            $('tab-ticket').addEventListener('click', () => setPanelTab('ticket'));
+            $('tab-lumix').addEventListener('click', abrirLumix);
+            $('p-cerrar-tabs').addEventListener('click', () => {
+                panel.classList.remove('abierta');
+                state.sel = null;
+                setPanelTab('ticket');
+                history.replaceState(null, '', location.pathname + location.search);
+                renderLista();
+                panelVacio();
+            });
+
+            cargarNotifs = Lux.montarNotificaciones({
+                bell: $('btn-notifs'), punto: $('notif-punto'), panel: $('notif-panel'),
+                lista: $('notif-lista'), btnLeidas: $('btn-leidas'),
+                alAbrirTicket: (tid) => { location.hash = 'ticket=' + tid; },
+            }).recargar;
 
             try {
-                const { data: { session } } = await supabase.auth.getSession();
-                const funcUrl = `https://${projectRef}.supabase.co/functions/v1/ticket-manager/update`;
+                state.catalogs = await Lux.getCatalogs();
+                await cargarDatos();
+                cargarNotifs();
+                window.addEventListener('hashchange', route);
+                route();
 
-                const resp = await fetch(funcUrl, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${session?.access_token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        ticket_id: ticketId,
-                        maestro_notificado_id: newAssigneeId
-                    })
+                // Refresco en vivo (Supabase Realtime; RLS filtra los eventos)
+                let rtTimer = null;
+                Lux.montarRealtime(['ticket', 'comentario', 'notificacion'], () => {
+                    clearTimeout(rtTimer);
+                    rtTimer = setTimeout(async () => {
+                        await cargarDatos();
+                        cargarNotifs();
+                        if (!location.hash.match(/ticket=|ayuda|perfil/)) { renderLista(); }
+                        else if (location.hash.match(/ticket=/)) { renderLista(); }
+                    }, 600);
                 });
-
-                if (!resp.ok) {
-                    const d = await resp.json().catch(() => ({}));
-                    const eSrv = new Error(d.error || ('HTTP ' + resp.status));
-                    if (resp.status === 422 && d.error) eSrv.esMensajeUsuario = true;
-                    throw eSrv;
-                }
-
-                alert('✅ Ticket actualizado.');
-                openTicketDetail(ticketId);
-
-            } catch (e) {
-                alert(mensajeError(e, 'No se pudo reasignar el ticket. Inténtalo de nuevo.'));
+            } catch (err) {
+                console.error(err);
+                vista.innerHTML = '<div class="v2-card"><h2 style="margin:0 0 6px;">No se pudo cargar el portal</h2><p class="v2-nota">' + esc(Lux.mensajeError(err, 'Revisa tu conexión a internet y recarga la página.')) + '</p></div>';
             }
-        }
-
-        // Navegación
-        navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                showView(link.dataset.route);
-            });
-        });
-
-        // --- Visor de imágenes ---
-        function openImageViewer(url) {
-            const modal = document.getElementById('image-viewer-modal');
-            const img = document.getElementById('image-viewer-img');
-            img.src = url;
-            modal.style.display = 'flex';
-        }
-
-        function closeImageViewer() {
-            const modal = document.getElementById('image-viewer-modal');
-            modal.style.display = 'none';
-            document.getElementById('image-viewer-img').src = '';
-        }
-
-        document.getElementById('image-viewer-modal').addEventListener('click', (e) => {
-            if (e.target.id === 'image-viewer-modal') closeImageViewer();
-        });
+        })();
     </script>
 </body>
 
