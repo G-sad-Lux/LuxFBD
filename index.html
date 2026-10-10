@@ -1293,6 +1293,24 @@
             '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
         })[c]);
 
+        // Traduce errores tecnicos a mensajes utiles. Los marcados esMensajeUsuario
+        // (reglas de negocio del servidor) pasan tal cual.
+        const mensajeError = (e, fallback) => {
+            const m = String((e && e.message) || e || '').trim();
+            if (e && e.esMensajeUsuario && m) return m;
+            const t = m.toLowerCase();
+            if (/failed to fetch|networkerror|load failed|network request failed/.test(t))
+                return 'Sin conexión con el servidor. Revisa tu internet e inténtalo de nuevo.';
+            if (t.includes('invalid login credentials')) return 'Correo o contraseña incorrectos.';
+            if (t.includes('email not confirmed')) return 'Tu cuenta aún no está confirmada: abre el enlace que te llegó por correo.';
+            if (/too many requests|rate limit|security purposes/.test(t)) return 'Demasiados intentos. Espera un minuto y vuelve a intentarlo.';
+            if (/row-level security|permission denied|not authorized|forbidden|unauthorized/.test(t)) return 'Tu cuenta no tiene permiso para esta acción.';
+            if (/jwt|invalid token|token expired|sesión no disponible/.test(t)) return 'Tu sesión expiró. Vuelve a iniciar sesión e inténtalo de nuevo.';
+            if (/^http 5\d\d$/.test(t) || t.includes('internal server error')) return 'El servidor tuvo un problema. Inténtalo de nuevo en un momento.';
+            if (/[áéíóúñ¿¡]/.test(m)) return m; // ya viene en español (reglas de la BD)
+            return fallback || 'Algo salió mal. Inténtalo de nuevo en un momento.';
+        };
+
         // --- Catalogos (Edge Function catalog-service) ---
         async function loadCatalogs() {
             try {
@@ -1481,7 +1499,7 @@
 
                 } catch (err) {
                     console.error('Error de acceso:', err.message);
-                    loginAlert.textContent = 'Error: ' + (err.message === 'Invalid login credentials' ? 'Credenciales incorrectas.' : err.message);
+                    loginAlert.textContent = mensajeError(err, 'No se pudo iniciar sesión. Inténtalo de nuevo.');
                     loginAlert.className = 'login-alert error';
                     loginAlert.hidden = false;
                 }
@@ -1755,7 +1773,10 @@
 
                 if (!resp.ok) {
                     const errData = await resp.json().catch(() => ({}));
-                    throw new Error(errData.error || 'Error al crear ticket en servidor');
+                    const errSrv = new Error(errData.error || ('HTTP ' + resp.status));
+                    // 422 = regla de negocio de la DB: mensaje pensado para el usuario.
+                    if (resp.status === 422 && errData.error) errSrv.esMensajeUsuario = true;
+                    throw errSrv;
                 }
 
                 const data = await resp.json();
@@ -1767,8 +1788,7 @@
 
             } catch (err) {
                 console.error('Error al crear el ticket:', err);
-                addMessage(`❌ Error al conectar.`, 'bot');
-                addMessage(`Detalle: ${err.message}`, 'bot');
+                addMessage('❌ ' + mensajeError(err, 'No pude crear el ticket. Revisa tu conexión e inténtalo de nuevo.'), 'bot');
             }
 
             addMessage('¿Necesitas algo más?', 'bot', [
@@ -1860,7 +1880,7 @@
 
                 } catch (err) {
                     console.error('Error al subir evidencia:', err);
-                    addMessage('Error al subir archivo. Intenta de nuevo.', 'bot');
+                    addMessage('No pude subir el archivo. Verifica que sea PNG, JPG o PDF de hasta 5 MB e inténtalo de nuevo.', 'bot');
                 }
             }
         });
@@ -2122,13 +2142,18 @@
                     })
                 });
 
-                if (!resp.ok) throw new Error('Error al asignar');
+                if (!resp.ok) {
+                    const d = await resp.json().catch(() => ({}));
+                    const eSrv = new Error(d.error || ('HTTP ' + resp.status));
+                    if (resp.status === 422 && d.error) eSrv.esMensajeUsuario = true;
+                    throw eSrv;
+                }
 
                 alert('✅ Ticket actualizado.');
                 openTicketDetail(ticketId);
 
             } catch (e) {
-                alert('Error: ' + e.message);
+                alert(mensajeError(e, 'No se pudo reasignar el ticket. Inténtalo de nuevo.'));
             }
         }
 

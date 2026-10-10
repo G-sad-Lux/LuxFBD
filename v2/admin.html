@@ -390,7 +390,7 @@
                 try {
                     data = await LuxV2.callFn('ticket-manager/details?id=' + encodeURIComponent(id));
                 } catch (err) {
-                    vista.innerHTML = '<div class="v2-card"><h2 style="margin:0 0 6px;">No se pudo abrir el ticket</h2><p class="v2-nota">' + esc(err.message) + '</p>' +
+                    vista.innerHTML = '<div class="v2-card"><h2 style="margin:0 0 6px;">No se pudo abrir el ticket</h2><p class="v2-nota">' + esc(LuxV2.mensajeError(err, 'Inténtalo de nuevo en un momento.')) + '</p>' +
                         '<p style="margin-bottom:0;"><a class="v2-btn secundario" href="#">← Volver al panel</a></p></div>';
                     return;
                 }
@@ -636,7 +636,7 @@
                         if (tras) tras();
                         await Promise.all([cargarDatos(), cargarNotifs()]);
                         renderDetalle(id);
-                    } catch (err) { feedback(msgId, err.message, false); }
+                    } catch (err) { feedback(msgId, LuxV2.mensajeError(err, 'No se pudo aplicar el cambio. Inténtalo de nuevo.'), false); }
                 }
 
                 // ---- Gestión: los selects aplican al cambiar ----
@@ -698,7 +698,7 @@
                         try {
                             await LuxV2.subirEvidencia(state.perfil.usuario_id, t.ticket_id, f);
                             renderDetalle(id);
-                        } catch (err) { feedback('comentario-msg', err.message, false); }
+                        } catch (err) { feedback('comentario-msg', LuxV2.mensajeError(err, 'No se pudo subir el archivo. Inténtalo de nuevo.'), false); }
                     });
                     composer.addEventListener('submit', async (ev) => {
                         ev.preventDefault();
@@ -714,7 +714,7 @@
                             state.borrador = ''; // enviado: el borrador ya no aplica
                             await Promise.all([cargarDatos(), cargarNotifs()]);
                             renderDetalle(id);
-                        } catch (err) { feedback('comentario-msg', err.message, false); }
+                        } catch (err) { feedback('comentario-msg', LuxV2.mensajeError(err, 'No se pudo enviar el comentario. Revisa tu conexión e inténtalo de nuevo.'), false); }
                     });
                 }
             }
@@ -752,7 +752,7 @@
                     } catch (err) {
                         confirmar.disabled = false;
                         $('mr-obligatorio').hidden = false;
-                        $('mr-obligatorio').textContent = err.message;
+                        $('mr-obligatorio').textContent = LuxV2.mensajeError(err, 'No se pudo resolver el ticket. Inténtalo de nuevo.');
                     }
                 });
             })();
@@ -807,7 +807,7 @@
                         '</div>';
                 } catch (err) {
                     console.error(err);
-                    vista.innerHTML = '<div class="v2-card"><h2 style="margin:0 0 6px;">No se pudieron generar los reportes</h2><p class="v2-nota">' + esc(err.message) + '</p></div>';
+                    vista.innerHTML = '<div class="v2-card"><h2 style="margin:0 0 6px;">No se pudieron generar los reportes</h2><p class="v2-nota">' + esc(LuxV2.mensajeError(err, 'Revisa tu conexión e inténtalo de nuevo.')) + '</p></div>';
                 }
             }
 
@@ -905,7 +905,7 @@
                 });
             } catch (err) {
                 console.error(err);
-                vista.innerHTML = '<div class="v2-card"><h2 style="margin:0 0 6px;">No se pudo cargar el panel</h2><p class="v2-nota">' + esc(err.message) + '</p></div>';
+                vista.innerHTML = '<div class="v2-card"><h2 style="margin:0 0 6px;">No se pudo cargar el panel</h2><p class="v2-nota">' + esc(LuxV2.mensajeError(err, 'Revisa tu conexión a internet y recarga la página.')) + '</p></div>';
             }
         })();
     </script>

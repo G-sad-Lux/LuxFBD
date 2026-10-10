@@ -381,7 +381,7 @@
                 ]);
             } catch (err) {
                 console.error(err);
-                burbujaBot('No pude registrar el ticket: ' + err.message);
+                burbujaBot(window.LuxV2.mensajeError(err, 'No pude registrar el ticket. Revisa tu conexión e inténtalo de nuevo.'));
                 state.step = 'RESUMEN';
                 chips([
                     { label: 'Reintentar', value: 'confirmar', principal: true },

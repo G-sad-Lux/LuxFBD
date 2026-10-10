@@ -478,7 +478,7 @@
                 try {
                     data = await LuxV2.callFn('ticket-manager/details?id=' + encodeURIComponent(id));
                 } catch (err) {
-                    hojaTicket.innerHTML = '<div class="cuerpo"><p class="v2-feedback error">' + esc(err.message) + '</p></div>';
+                    hojaTicket.innerHTML = '<div class="cuerpo"><p class="v2-feedback error">' + esc(LuxV2.mensajeError(err, 'No se pudo cargar el ticket. Inténtalo de nuevo.')) + '</p></div>';
                     return;
                 }
                 state.detalle = data;
@@ -651,13 +651,17 @@
                             p_ticket_id: t.ticket_id,
                             p_calificacion: Number(b.dataset.v),
                         });
-                        if (error) throw new Error(error.message);
+                        if (error) {
+                            const e2 = new Error(error.message);
+                            e2.esMensajeUsuario = error.code === 'P0001'; // regla de negocio: mensaje para el usuario
+                            throw e2;
+                        }
                         await cargarDatos();
                         renderLista();
                         renderPanel(id);
                     } catch (err) {
                         const m = $('csat-msg');
-                        if (m) { m.className = 'v2-feedback error'; m.textContent = err.message; }
+                        if (m) { m.className = 'v2-feedback error'; m.textContent = LuxV2.mensajeError(err, 'No se pudo guardar tu calificación. Inténtalo de nuevo.'); }
                     }
                 }));
 
@@ -679,7 +683,7 @@
                             await LuxV2.subirEvidencia(state.perfil.usuario_id, t.ticket_id, f);
                             renderPanel(id);
                         } catch (err) {
-                            const m = $('p-msg'); m.className = 'v2-feedback error'; m.textContent = err.message;
+                            const m = $('p-msg'); m.className = 'v2-feedback error'; m.textContent = LuxV2.mensajeError(err, 'No se pudo subir el archivo. Inténtalo de nuevo.');
                         }
                     });
                 }
@@ -696,7 +700,7 @@
                         renderLista();
                         renderPanel(id); // si estaba "Esperando respuesta", la DB ya lo regresó a "En proceso"
                     } catch (err) {
-                        const m = $('p-msg'); m.className = 'v2-feedback error'; m.textContent = err.message;
+                        const m = $('p-msg'); m.className = 'v2-feedback error'; m.textContent = LuxV2.mensajeError(err, 'No se pudo enviar tu respuesta. Revisa tu conexión e inténtalo de nuevo.');
                     }
                 });
             }
@@ -865,7 +869,7 @@
                 });
             } catch (err) {
                 console.error(err);
-                vista.innerHTML = '<div class="v2-card"><h2 style="margin:0 0 6px;">No se pudo cargar el portal</h2><p class="v2-nota">' + esc(err.message) + '</p></div>';
+                vista.innerHTML = '<div class="v2-card"><h2 style="margin:0 0 6px;">No se pudo cargar el portal</h2><p class="v2-nota">' + esc(LuxV2.mensajeError(err, 'Revisa tu conexión a internet y recarga la página.')) + '</p></div>';
             }
         })();
     </script>

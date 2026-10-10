@@ -39,6 +39,27 @@
         });
     }
 
+    // Traduce errores tecnicos a mensajes utiles. Los marcados esMensajeUsuario
+    // (reglas de negocio del servidor y validaciones propias) pasan tal cual.
+    function mensajeError(e, fallback) {
+        var m = String((e && e.message) || e || '').trim();
+        if (e && e.esMensajeUsuario && m) return m;
+        var t = m.toLowerCase();
+        if (/failed to fetch|networkerror|load failed|network request failed/.test(t))
+            return 'Sin conexión con el servidor. Revisa tu internet e inténtalo de nuevo.';
+        if (t.indexOf('invalid login credentials') !== -1) return 'Correo o contraseña incorrectos.';
+        if (t.indexOf('email not confirmed') !== -1) return 'Tu cuenta aún no está confirmada: abre el enlace que te llegó por correo.';
+        if (/too many requests|rate limit|security purposes/.test(t)) return 'Demasiados intentos. Espera un minuto y vuelve a intentarlo.';
+        if (/payload too large|maximum allowed size/.test(t)) return 'El archivo es demasiado grande (máximo 5 MB).';
+        if (/row-level security|permission denied|not authorized|forbidden|unauthorized/.test(t)) return 'Tu cuenta no tiene permiso para esta acción.';
+        if (/jwt|invalid token|token expired|sesión no disponible/.test(t)) return 'Tu sesión expiró. Vuelve a iniciar sesión e inténtalo de nuevo.';
+        if (/^http 5\d\d$/.test(t) || t.indexOf('internal server error') !== -1) return 'El servidor tuvo un problema. Inténtalo de nuevo en un momento.';
+        if (/[áéíóúñ¿¡]/.test(m)) return m; // ya viene en español (reglas de la BD)
+        return fallback || 'Algo salió mal. Inténtalo de nuevo en un momento.';
+    }
+    // Error cuyo mensaje esta escrito PARA el usuario (no se traduce).
+    function errUsuario(msg) { var e = new Error(msg); e.esMensajeUsuario = true; return e; }
+
     var STAFF_ROLES = ['Soporte', 'Administrativo', 'Administrador'];
 
     // --- Sesion --------------------------------------------------------
@@ -74,7 +95,7 @@
     async function callFn(path, opts) {
         opts = opts || {};
         var session = await getSession();
-        if (!session) throw new Error('Sesión no disponible');
+        if (!session) throw errUsuario('Tu sesión expiró. Vuelve a iniciar sesión e inténtalo de nuevo.');
         var headers = { 'Authorization': 'Bearer ' + session.access_token };
         if (opts.body) headers['Content-Type'] = 'application/json';
         var resp = await fetch('https://' + projectRef + '.supabase.co/functions/v1/' + path, {
@@ -83,7 +104,12 @@
             body: opts.body ? JSON.stringify(opts.body) : undefined
         });
         var data = await resp.json().catch(function () { return {}; });
-        if (!resp.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+        if (!resp.ok) {
+            var err = new Error(data.error || ('HTTP ' + resp.status));
+            // 422 = regla de negocio de la DB: mensaje pensado para el usuario.
+            if (resp.status === 422 && data.error) err.esMensajeUsuario = true;
+            throw err;
+        }
         return data;
     }
 
@@ -129,7 +155,9 @@
         logout: logout,
         callFn: callFn,
         getCatalogs: getCatalogs,
-        comprimirImagen: comprimirImagen
+        comprimirImagen: comprimirImagen,
+        mensajeError: mensajeError,
+        errUsuario: errUsuario
     };
 })();
 
@@ -272,16 +300,16 @@
     window.LuxV2.subirEvidencia = async function (usuarioId, ticketId, file) {
         file = await window.LuxV2.comprimirImagen(file);
         var tipos = ['image/png', 'image/jpeg', 'application/pdf'];
-        if (tipos.indexOf(file.type) === -1) throw new Error('Formato no permitido: usa PNG, JPG o PDF.');
-        if (file.size > 5 * 1024 * 1024) throw new Error('El archivo excede 5 MB.');
+        if (tipos.indexOf(file.type) === -1) throw window.LuxV2.errUsuario('Formato no permitido: usa PNG, JPG o PDF.');
+        if (file.size > 5 * 1024 * 1024) throw window.LuxV2.errUsuario('El archivo pesa más de 5 MB. Comprime la imagen o recorta el PDF.');
         var r = await window.LuxV2.sb().auth.getSession();
         var session = r.data.session;
-        if (!session) throw new Error('Sesión no disponible');
+        if (!session) throw window.LuxV2.errUsuario('Tu sesión expiró. Vuelve a iniciar sesión e inténtalo de nuevo.');
         // Leer a memoria antes de enviar: un archivo en la nube (Drive/OneDrive)
         // falla al leerse a mitad del fetch con un "Failed to fetch" criptico.
         var bytes;
         try { bytes = await file.arrayBuffer(); }
-        catch (e) { throw new Error('No pude leer el archivo. Si está en la nube (Drive/OneDrive), descárgalo al dispositivo e inténtalo de nuevo.'); }
+        catch (e) { throw window.LuxV2.errUsuario('No pude leer el archivo. Si está en la nube (Drive/OneDrive), descárgalo al dispositivo e inténtalo de nuevo.'); }
         var ruta = session.user.id + '/' + Date.now() + '_' + file.name.replace(/[^\w.-]/g, '');
         var up = await window.LuxV2.sb().storage.from('tickets').upload(ruta, new Blob([bytes], { type: file.type }), { contentType: file.type });
         if (up.error) throw up.error;
