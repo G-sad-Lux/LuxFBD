@@ -6,9 +6,8 @@ project_id = "LuxFBD"
 verify_jwt = true
 
 [functions.catalog-service]
-# Se llama antes del login sin token: la plataforma responde 401 y el frontend
-# cae a los mapas estaticos (IDs sembrados en 0002). Mismo comportamiento que la v1.
-# Cuando la fase 2 mueva loadCatalogs() a despues del login, funcionara con token.
+# Siempre se llama con sesion (callFn exige token); si falla, el chat usa los
+# mapas estaticos de respaldo (IDs sembrados en 0002).
 verify_jwt = true
 
 [auth]

@@ -5,11 +5,12 @@ Thumbs.db
 
 
 supabase/.temp/
-.claude/settings.local.json
-.claude/skills/
 
-# Contexto interno: la documentacion vive FUERA del repo (../LuxFBD-docs). El repo es solo codigo.
+# Contexto interno y tooling: la documentacion y el design-handoff viven FUERA
+# del repo (../LuxFBD-docs). El repo es SOLO el codigo de la app.
 docs/
+design-handoff/
 .agents/
-design-handoff/README.md
-design-handoff/specs.md
+.claude/
+.mcp.json
+skills-lock.json
