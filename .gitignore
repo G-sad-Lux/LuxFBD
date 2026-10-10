@@ -7,3 +7,9 @@ Thumbs.db
 supabase/.temp/
 .claude/settings.local.json
 .claude/skills/
+
+# Contexto interno: la documentacion vive FUERA del repo (../LuxFBD-docs). El repo es solo codigo.
+docs/
+.agents/
+design-handoff/README.md
+design-handoff/specs.md
