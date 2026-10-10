@@ -1,17 +1,9 @@
--- ============================================================
--- LuxFBD - 0022: Prioridad inicial POR CATEGORIA + reparacion de ETAs
--- (decision de equipo 2026-10-02)
--- El alumno nunca elige prioridad (§10); antes TODO lo de Lumix nacia
--- en Baja/72h. Ahora, si el canal no manda prioridad, la DB la asigna
--- segun la categoria con una TABLA editable (lista para la futura
--- pantalla de Configuracion del admin):
---   Acceso y bloqueos -> Alta (8h)
---   Plataforma virtual, Finanzas y pagos -> Media (24h)
---   Materias, Servicios escolares, Otros -> Baja (72h)
--- v1 sigue mandando la percibida y se respeta; soporte ajusta siempre.
--- Ademas: repara ETAs corruptas (eta anterior a la creacion, p.ej. el
--- ticket #1 con epoch 1970 que inflaba "vencidos" para siempre).
--- ============================================================
+-- 0022: Prioridad inicial POR CATEGORIA (acuerdo 2026-10-02) + reparacion de ETAs.
+-- El alumno nunca elige prioridad; si el canal no la manda (Lumix/invitado) la
+-- resuelve la tabla editable categoria_prioridad_default: acceso->Alta(8h),
+-- plataforma/finanzas->Media(24h), materias/servicios_escolares/otros->Baja(72h).
+-- La percibida de v1 se respeta; soporte reclasifica. Tambien repara ETAs
+-- anteriores a la creacion (inflaban "vencidos" para siempre).
 
 -- ---------- Reparacion de datos: ETA anterior a la creacion ----------
 update public.ticket

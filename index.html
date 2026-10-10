@@ -1214,7 +1214,7 @@
                     </table>
                 </div>
 
-                <!-- Detail Modal -->
+                <!-- Modal de detalle -->
                 <div id="ticket-detail-modal" class="modal">
                     <div class="modal-content">
                         <button onclick="closeTicketModal()"
@@ -1230,7 +1230,7 @@
         © <span id="year"></span> Universidad Lux. Todos los derechos reservados.
     </footer>
 
-    <!-- Chatbot Widget -->
+    <!-- Widget del chat Lux-IA -->
     <button id="chat-trigger" class="chat-widget-btn" aria-label="Abrir chat de soporte" hidden>
         💬
     </button>
@@ -1250,7 +1250,7 @@
         </div>
     </div>
 
-    <!-- Image Viewer Modal (Lightbox) -->
+    <!-- Visor de imágenes -->
     <div id="image-viewer-modal"
         style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10000; align-items:center; justify-content:center; flex-direction:column;">
         <button onclick="closeImageViewer()"
@@ -1260,7 +1260,7 @@
         <p style="color:#aaa; margin-top:10px;">Clic fuera de la imagen para cerrar</p>
     </div>
 
-    <!-- Supabase Integration -->
+    <!-- Integración con Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2" integrity="sha384-WgXwGL6fUsYJWNaKJgVbrJKGRQwc1vieh2oy4kw9nXqpNDz3tdSsqEYUgeHD/NuF" crossorigin="anonymous"></script>
     <script src="config.js"></script>
     <script>
@@ -1276,12 +1276,11 @@
         try {
             if (window.supabaseConfig && window.supabase) {
                 supabase = window.supabase.createClient(window.supabaseConfig.url, window.supabaseConfig.key);
-                console.log('Supabase initialized successfully');
             } else {
-                console.warn('Supabase config missing or library not loaded. Running in offline mode.');
+                console.warn('Sin config de Supabase o librería sin cargar; modo sin conexión.');
             }
         } catch (err) {
-            console.error('Critical error initializing Supabase:', err);
+            console.error('Error al inicializar Supabase:', err);
         }
 
         // Ref del proyecto Supabase, derivado de config.js.
@@ -1307,7 +1306,6 @@
                 if (!resp.ok) throw new Error('Failed to fetch catalogs');
 
                 const data = await resp.json();
-                console.log('Catalogs loaded via Edge Function:', data);
 
                 if (data.categorias) {
                     CATEGORY_MAP = {};
@@ -1337,7 +1335,7 @@
                 }
 
             } catch (e) {
-                console.warn('Catalog Service unavailable, using static fallbacks:', e);
+                console.warn('catalog-service no disponible; se usan los mapas estáticos:', e);
                 CATEGORY_MAP = STATIC_CATEGORY_MAP;
                 PRIORITY_MAP = STATIC_PRIORITY_MAP;
             }
@@ -1480,10 +1478,9 @@
                         return;
                     }
                     showView(STAFF_ROLES.includes(chatState.user.role) ? 'soporte-luxia' : 'mis-cursos');
-                    console.log('User Logged In:', chatState.user.email, chatState.user.role);
 
                 } catch (err) {
-                    console.error('Login Error:', err.message);
+                    console.error('Error de acceso:', err.message);
                     loginAlert.textContent = 'Error: ' + (err.message === 'Invalid login credentials' ? 'Credenciales incorrectas.' : err.message);
                     loginAlert.className = 'login-alert error';
                     loginAlert.hidden = false;
@@ -1491,7 +1488,7 @@
             });
         }
 
-        // Chatbot Logic
+        // Lógica del chat Lux-IA
         const chatTrigger = document.getElementById('chat-trigger');
         const chatWindow = document.getElementById('chat-window');
         const chatClose = document.getElementById('chat-close');
@@ -1769,7 +1766,7 @@
                 addMessage(`Hemos notificado a soporte y recibirás una actualización pronto.`, 'bot');
 
             } catch (err) {
-                console.error('Error creating ticket:', err);
+                console.error('Error al crear el ticket:', err);
                 addMessage(`❌ Error al conectar.`, 'bot');
                 addMessage(`Detalle: ${err.message}`, 'bot');
             }
@@ -1809,7 +1806,7 @@
                     }
                 }
             } catch (err) {
-                console.error('Status check error:', err);
+                console.error('Error al consultar estado:', err);
                 addMessage('No pude consultar tus tickets en este momento. Intenta de nuevo.', 'bot');
             }
 
@@ -1862,7 +1859,7 @@
                     handleInput(`📎 Archivo adjuntado: ${file.name}`, true);
 
                 } catch (err) {
-                    console.error('Upload error:', err);
+                    console.error('Error al subir evidencia:', err);
                     addMessage('Error al subir archivo. Intenta de nuevo.', 'bot');
                 }
             }
@@ -1962,7 +1959,7 @@
                     headers: { 'Authorization': `Bearer ${session?.access_token}` }
                 });
                 if (resp.ok) STAFF_LIST = await resp.json();
-            } catch (e) { console.error('Failed to load staff list', e); }
+            } catch (e) { console.error('No se pudo cargar el personal:', e); }
         }
 
         async function openTicketDetail(ticketId) {
